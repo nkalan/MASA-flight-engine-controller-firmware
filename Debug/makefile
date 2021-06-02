@@ -1,5 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
+# Toolchain: GNU Tools for STM32 (9-2020-q2-update)
 ################################################################################
 
 -include ../makefile.init
@@ -11,7 +12,6 @@ RM := rm -rf
 -include Drivers/STM32F4xx_HAL_Driver/Src/subdir.mk
 -include Core/firmware-libraries/W25N01GV/src/subdir.mk
 -include Core/firmware-libraries/SerialComms/src/subdir.mk
--include Core/firmware-libraries/L6470/src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
 -include subdir.mk
@@ -30,6 +30,12 @@ endif
 endif
 
 -include ../makefile.defs
+
+OPTIONAL_TOOL_DEPS := \
+$(wildcard ../makefile.defs) \
+$(wildcard ../makefile.init) \
+$(wildcard ../makefile.targets) \
+
 
 BUILD_ARTIFACT_NAME := tsm-flight-ec-firmware
 BUILD_ARTIFACT_EXTENSION := elf
@@ -57,22 +63,22 @@ all: main-build
 main-build: tsm-flight-ec-firmware.elf secondary-outputs
 
 # Tool invocations
-tsm-flight-ec-firmware.elf: $(OBJS) $(USER_OBJS) C:\Users\natha\Desktop\UMich\MASA\Firmware\tsm-flight-ec-firmware\STM32F446VETX_FLASH.ld
+tsm-flight-ec-firmware.elf: $(OBJS) $(USER_OBJS) C:\Users\natha\Desktop\UMich\MASA\Firmware\tsm-flight-ec-firmware\STM32F446VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	arm-none-eabi-gcc -o "tsm-flight-ec-firmware.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\natha\Desktop\UMich\MASA\Firmware\tsm-flight-ec-firmware\STM32F446VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="tsm-flight-ec-firmware.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
-default.size.stdout: $(EXECUTABLES)
+default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	arm-none-eabi-size  $(EXECUTABLES)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-tsm-flight-ec-firmware.list: $(EXECUTABLES)
+tsm-flight-ec-firmware.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "tsm-flight-ec-firmware.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-tsm-flight-ec-firmware.bin: $(EXECUTABLES)
+tsm-flight-ec-firmware.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "tsm-flight-ec-firmware.bin"
 	@echo 'Finished building: $@'
 	@echo ' '

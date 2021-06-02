@@ -8,7 +8,7 @@
 #ifndef INC_CAN_H_
 #define INC_CAN_H_
 
-#include "stm32f4xx_hal_can.h"
+#include "stm32f4xx_hal.h"
 
 
 void init_CAN(CAN_HandleTypeDef* hcan);
