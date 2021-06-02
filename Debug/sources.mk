@@ -1,5 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
+# Toolchain: GNU Tools for STM32 (9-2020-q2-update)
 ################################################################################
 
 ELF_SRCS := 
@@ -21,7 +22,6 @@ OBJCOPY_BIN :=
 SUBDIRS := \
 Core/Src \
 Core/Startup \
-Core/firmware-libraries/L6470/src \
 Core/firmware-libraries/SerialComms/src \
 Core/firmware-libraries/W25N01GV/src \
 Drivers/STM32F4xx_HAL_Driver/Src \
