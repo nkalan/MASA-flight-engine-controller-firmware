@@ -12,6 +12,7 @@ RM := rm -rf
 -include Drivers/STM32F4xx_HAL_Driver/Src/subdir.mk
 -include Core/firmware-libraries/W25N01GV/src/subdir.mk
 -include Core/firmware-libraries/SerialComms/src/subdir.mk
+-include Core/firmware-libraries/L6470/src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
 -include subdir.mk
