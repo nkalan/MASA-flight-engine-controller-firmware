@@ -1,5 +1,6 @@
 "Core/Src/autosequence.o"
 "Core/Src/can.o"
+"Core/Src/channel_cal_constants.o"
 "Core/Src/globals.o"
 "Core/Src/main.o"
 "Core/Src/motors.o"

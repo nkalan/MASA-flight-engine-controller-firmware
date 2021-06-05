@@ -7,6 +7,7 @@
 C_SRCS += \
 ../Core/Src/autosequence.c \
 ../Core/Src/can.c \
+../Core/Src/channel_cal_constants.c \
 ../Core/Src/globals.c \
 ../Core/Src/main.c \
 ../Core/Src/motors.c \
@@ -24,6 +25,7 @@ C_SRCS += \
 OBJS += \
 ./Core/Src/autosequence.o \
 ./Core/Src/can.o \
+./Core/Src/channel_cal_constants.o \
 ./Core/Src/globals.o \
 ./Core/Src/main.o \
 ./Core/Src/motors.o \
@@ -41,6 +43,7 @@ OBJS += \
 C_DEPS += \
 ./Core/Src/autosequence.d \
 ./Core/Src/can.d \
+./Core/Src/channel_cal_constants.d \
 ./Core/Src/globals.d \
 ./Core/Src/main.d \
 ./Core/Src/motors.d \
@@ -61,6 +64,8 @@ Core/Src/autosequence.o: ../Core/Src/autosequence.c Core/Src/subdir.mk
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F446xx -DDEBUG -c -I../Core/Inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/L6470/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/autosequence.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/can.o: ../Core/Src/can.c Core/Src/subdir.mk
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F446xx -DDEBUG -c -I../Core/Inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/L6470/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/can.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
+Core/Src/channel_cal_constants.o: ../Core/Src/channel_cal_constants.c Core/Src/subdir.mk
+	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F446xx -DDEBUG -c -I../Core/Inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/L6470/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/channel_cal_constants.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/globals.o: ../Core/Src/globals.c Core/Src/subdir.mk
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F446xx -DDEBUG -c -I../Core/Inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/L6470/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/globals.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/main.o: ../Core/Src/main.c Core/Src/subdir.mk

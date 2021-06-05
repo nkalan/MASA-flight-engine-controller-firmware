@@ -175,6 +175,39 @@ Discarded input sections
  .comment       0x0000000000000000       0x54 Core/Src/can.o
  .ARM.attributes
                 0x0000000000000000       0x39 Core/Src/can.o
+ .group         0x0000000000000000        0xc Core/Src/channel_cal_constants.o
+ .group         0x0000000000000000        0xc Core/Src/channel_cal_constants.o
+ .group         0x0000000000000000        0xc Core/Src/channel_cal_constants.o
+ .group         0x0000000000000000        0xc Core/Src/channel_cal_constants.o
+ .group         0x0000000000000000        0xc Core/Src/channel_cal_constants.o
+ .group         0x0000000000000000        0xc Core/Src/channel_cal_constants.o
+ .group         0x0000000000000000        0xc Core/Src/channel_cal_constants.o
+ .group         0x0000000000000000        0xc Core/Src/channel_cal_constants.o
+ .text          0x0000000000000000        0x0 Core/Src/channel_cal_constants.o
+ .data          0x0000000000000000        0x0 Core/Src/channel_cal_constants.o
+ .bss           0x0000000000000000        0x0 Core/Src/channel_cal_constants.o
+ .text.adc_counts_to_volts
+                0x0000000000000000       0x26 Core/Src/channel_cal_constants.o
+ .debug_info    0x0000000000000000       0xef Core/Src/channel_cal_constants.o
+ .debug_abbrev  0x0000000000000000       0x6b Core/Src/channel_cal_constants.o
+ .debug_aranges
+                0x0000000000000000       0x20 Core/Src/channel_cal_constants.o
+ .debug_ranges  0x0000000000000000       0x10 Core/Src/channel_cal_constants.o
+ .debug_macro   0x0000000000000000       0x8a Core/Src/channel_cal_constants.o
+ .debug_macro   0x0000000000000000      0xaa8 Core/Src/channel_cal_constants.o
+ .debug_macro   0x0000000000000000       0x22 Core/Src/channel_cal_constants.o
+ .debug_macro   0x0000000000000000       0x8e Core/Src/channel_cal_constants.o
+ .debug_macro   0x0000000000000000       0x51 Core/Src/channel_cal_constants.o
+ .debug_macro   0x0000000000000000      0x103 Core/Src/channel_cal_constants.o
+ .debug_macro   0x0000000000000000       0x6a Core/Src/channel_cal_constants.o
+ .debug_macro   0x0000000000000000      0x1df Core/Src/channel_cal_constants.o
+ .debug_macro   0x0000000000000000      0x2eb Core/Src/channel_cal_constants.o
+ .debug_line    0x0000000000000000      0x3c1 Core/Src/channel_cal_constants.o
+ .debug_str     0x0000000000000000     0x4621 Core/Src/channel_cal_constants.o
+ .comment       0x0000000000000000       0x54 Core/Src/channel_cal_constants.o
+ .debug_frame   0x0000000000000000       0x38 Core/Src/channel_cal_constants.o
+ .ARM.attributes
+                0x0000000000000000       0x34 Core/Src/channel_cal_constants.o
  .group         0x0000000000000000        0xc Core/Src/globals.o
  .group         0x0000000000000000        0xc Core/Src/globals.o
  .group         0x0000000000000000        0xc Core/Src/globals.o
@@ -4066,6 +4099,7 @@ LOAD c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
 LOAD c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/crt0.o
 LOAD Core/Src/autosequence.o
 LOAD Core/Src/can.o
+LOAD Core/Src/channel_cal_constants.o
 LOAD Core/Src/globals.o
 LOAD Core/Src/main.o
 LOAD Core/Src/motors.o
