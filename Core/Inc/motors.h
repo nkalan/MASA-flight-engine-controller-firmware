@@ -10,11 +10,13 @@
 
 #include "L6470.h"  // stepper motor IC
 
+#define NUM_STEPPER_MOTORS (2)
 
-void init_mtr(uint8_t mtr_id);
+void init_motor(uint8_t mtr_id);
 
-void set_mtr_pos(uint8_t mtr_id, uint16_t mtr_pos);
+void set_motor_pos(uint8_t motor_num, float deg);
 
-void set_mtr_spd(uint8_t mtr_id, uint16_t mtr_spd);
+// Also see set_stepper_direction(), move_stepper_degrees(), set_stepper_pos(),
+// set_stepper_zero(), and set_stepper_speed() in telem.c
 
 #endif /* INC_MOTORS_H_ */

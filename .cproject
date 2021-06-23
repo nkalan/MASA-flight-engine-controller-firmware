@@ -149,16 +149,6 @@
                         					
                     </folderInfo>
                     					
-                    <fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.182310236.653484604" name="stm32f10x_it.h" rcbsApplicability="disable" resourcePath="Core/firmware-libraries/L6470/dspin/inc/stm32f10x_it.h" toolsToInvoke=""/>
-                    					
-                    <fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.182310236.1246938951" name="stm32f10x_conf.h" rcbsApplicability="disable" resourcePath="Core/firmware-libraries/L6470/dspin/inc/stm32f10x_conf.h" toolsToInvoke=""/>
-                    					
-                    <fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.182310236.1419637642" name="pre_include.h" rcbsApplicability="disable" resourcePath="Core/firmware-libraries/L6470/dspin/inc/pre_include.h" toolsToInvoke=""/>
-                    					
-                    <fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.182310236.943391582" name="clock.h" rcbsApplicability="disable" resourcePath="Core/firmware-libraries/L6470/dspin/inc/clock.h" toolsToInvoke=""/>
-                    					
-                    <fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.182310236.684170903" name="main.h" rcbsApplicability="disable" resourcePath="Core/firmware-libraries/L6470/dspin/inc/main.h" toolsToInvoke=""/>
-                    					
                     <sourceEntries>
                         						
                         <entry excluding="firmware-libraries/L6470/dspin|firmware-libraries/L6470/dspin/inc/main.h|firmware-libraries/L6470/dspin/src/main.c|firmware-libraries/L6470/dspin/inc/clock.h|firmware-libraries/L6470/dspin/src/clock.c|firmware-libraries/L6470/dspin/src/stm32f10x_it.c|firmware-libraries/L6470/dspin/inc/pre_include.h|firmware-libraries/L6470/dspin/inc/stm32f10x_it.h|firmware-libraries/L6470/dspin/inc/stm32f10x_conf.h|firmware-libraries/MAX31855|firmware-libraries/MAX11131" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>

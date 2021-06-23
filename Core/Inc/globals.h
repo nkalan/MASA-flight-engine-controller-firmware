@@ -52,6 +52,7 @@ enum States {
     Abort               = 6,
     Post                = 7,
     Safe                = 8,
+	IgnitionFail        = 9,
     Continue            = 255
 };
 

@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 // USER CODE BEGIN - MODIFICATIONS OUTSIDE THIS SECTION WILL BE DELETED
+#include "autosequence.h"  // for set_state()
 
 // USER CODE END - MODIFICATIONS OUTSIDE THIS SECTION WILL BE DELETED
 
@@ -23,7 +24,7 @@ void set_stepper_direction(uint8_t* data, uint8_t* status){
 	int8_t direction = (data[1])/1.0;
 	
 	// USER CODE BEGIN - MODIFICATIONS OUTSIDE THIS SECTION WILL BE DELETED
-
+	// TODO: delete this function
 	// USER CODE END - MODIFICATIONS OUTSIDE THIS SECTION WILL BE DELETED
 
 }
@@ -76,7 +77,7 @@ void set_state(uint8_t* data, uint8_t* status){
 	uint8_t next_state = (data[0])/1;
 	
 	// USER CODE BEGIN - MODIFICATIONS OUTSIDE THIS SECTION WILL BE DELETED
-
+	manual_state_transition(next_state);
 	// USER CODE END - MODIFICATIONS OUTSIDE THIS SECTION WILL BE DELETED
 
 }
@@ -87,7 +88,7 @@ void move_stepper_degrees(uint8_t* data, uint8_t* status){
 	uint16_t deg = (data[2]<<8|data[1])/1;
 	
 	// USER CODE BEGIN - MODIFICATIONS OUTSIDE THIS SECTION WILL BE DELETED
-
+	// TODO: delete this function
 	// USER CODE END - MODIFICATIONS OUTSIDE THIS SECTION WILL BE DELETED
 
 }
@@ -134,7 +135,7 @@ void set_stepper_pos(uint8_t* data, uint8_t* status){
 	float position = (data[4]<<24|data[3]<<16|data[2]<<8|data[1])/100.0;
 	
 	// USER CODE BEGIN - MODIFICATIONS OUTSIDE THIS SECTION WILL BE DELETED
-
+	set_motor_pos(motor_num, position);  // position is in degrees
 	// USER CODE END - MODIFICATIONS OUTSIDE THIS SECTION WILL BE DELETED
 
 }

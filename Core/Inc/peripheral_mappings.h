@@ -26,4 +26,6 @@
 #define TIM_200Hz
 #define TIM_MICROS
 
+// TODO: Should sensor/actuators also be mapped here?
+
 #endif /* INC_PERIPHERAL_MAPPINGS_H_ */
