@@ -45,7 +45,7 @@ uint16_t VALVE_GPIO_PINS[NUM_VALVES] = {
 		en_vlv13_Pin
 };
 
-void set_valve(uint32_t vlv_num, uint8_t vlv_state) {
+void set_valve_channel(uint32_t vlv_num, uint8_t vlv_state) {
 	// Error checking
 	if (vlv_num >= NUM_VALVES) {
 		return;

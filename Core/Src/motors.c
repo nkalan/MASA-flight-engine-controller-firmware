@@ -9,7 +9,7 @@
 
 void set_motor_pos(uint8_t motor_num, float deg) {
 	// Error checking
-	if (motor_num >= NUM_STEPPER_MOTORS) {
+	if (motor_num >= NUM_MOTORS) {
 		return;
 	}
 

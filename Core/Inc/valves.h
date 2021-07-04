@@ -29,6 +29,6 @@
  * @param vlv_num A valve channel index to be set, from 0 to 13 inclusive
  * @param vlv_state The state to set the specified valve channel, either high or low (1 or 0)
  */
-void set_valve(uint32_t vlv_num, uint8_t vlv_state);
+void set_valve_channel(uint32_t vlv_num, uint8_t vlv_state);
 
 #endif /* INC_VALVES_H_ */

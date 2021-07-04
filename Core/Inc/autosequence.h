@@ -12,13 +12,17 @@
 #define INC_AUTOSEQUENCE_H_
 
 #include <stdint.h>
+#include "constants.h"  // sensor/actuator mappings
+
 
 #define BIGBERTHA
 //#define PT163
 
-typedef struct {
-
-} Flight_EC_Autosequence;
+/**
+ * Sets valve and test timings to their default values
+ * All numbers are in milliseconds
+ */
+void init_autosequence_timings();
 
 /**
  * Called by set_state in telem.c

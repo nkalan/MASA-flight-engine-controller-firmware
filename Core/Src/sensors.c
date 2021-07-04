@@ -7,6 +7,7 @@
 
 
 #include "sensors.h"
+#include "main.h"  // for GPIO mappings
 
 /* ADC0 */
 #define IVLV0_ADC_NUM       (0U)
@@ -139,5 +140,60 @@
 #define PT20_ADC_CH        (13U)
 #define POT0_ADC_CH        (14U)
 #define POT1_ADC_CH        (15U)
+
+/**
+ * Function passed to the TC Array library as the chip select.
+ * Sets 4 GPIO pins to get the correct MUX CS output.
+ */
+void tc_mux_chip_select(uint8_t tc_index) {
+
+	// Extract bits
+	// TODO: not sure if it's necessary to convert it to 1's
+	uint8_t tc_mux_0 = tc_index & 0x01 >> 0;
+	uint8_t tc_mux_0 = tc_index & 0x02 >> 1;
+	uint8_t tc_mux_0 = tc_index & 0x04 >> 2;
+	uint8_t tc_mux_0 = tc_index & 0x08 >> 3;
+
+	// Set mux select bits
+	HAL_GPIO_WritePin(TC_MUX_A0_GPIO_Port, TC_MUX_A0_Pin, tc_mux_0);
+	HAL_GPIO_WritePin(TC_MUX_A1_GPIO_Port, TC_MUX_A1_Pin, tc_mux_1);
+	HAL_GPIO_WritePin(TC_MUX_A2_GPIO_Port, TC_MUX_A2_Pin, tc_mux_2);
+	HAL_GPIO_WritePin(TC_MUX_A3_GPIO_Port, TC_MUX_A3_Pin, tc_mux_3);
+
+	// Active low mux enable
+	HAL_GPIO_WritePin(TC_MUX_EN_GPIO_Port, TC_MUX_EN_Pin, 0);
+}
+
+/**
+ * Function passed to the TC Array library as the chip release.
+ */
+void tc_mux_chip_release() {
+	// Active low, will set all mux outputs to 1
+	HAL_GPIO_WritePin(TC_MUX_EN_GPIO_Port, TC_MUX_EN_Pin, 1);
+}
+
+void init_thermocouples() {
+
+}
+
+
+void read_thermocouples() {
+
+}
+
+
+void init_adcs() {
+
+}
+
+
+void read_adc_counts() {
+
+}
+
+
+void convert_adc_counts() {
+
+}
 
 
