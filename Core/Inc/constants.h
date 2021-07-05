@@ -8,10 +8,9 @@
 #ifndef INC_CONSTANTS_H_
 #define INC_CONSTANTS_H_
 
-#include "stm32f4xx.h"
+#include "stm32f4xx.h"  // for _HandleTypeDef definitions
 
 // Extern declarations from main.c
-
 extern SPI_HandleTypeDef hspi1;
 extern SPI_HandleTypeDef hspi2;
 extern SPI_HandleTypeDef hspi3;
@@ -41,10 +40,10 @@ extern TIM_HandleTypeDef htim13;
 #define COM_UART          huart1
 #define CAN_BUS           hcan1
 
-// Timer mappings  TODO: not correct
-#define TIM_TELEM         htim11
-#define TIM_SAMPLING      htim13
-#define TIM_TPC_CALC      htim10
+// Timer mappings
+#define TIM_5MS           htim13
+#define TIM_50MS          htim10
+#define TIM_100MS         htim11
 #define TIM_MICROS        htim5
 
 // Microseconds since board reset
@@ -76,11 +75,11 @@ extern TIM_HandleTypeDef htim13;
 #define FUEL_PNEU_CAV_PRES_CH         (17)
 #define CHAMBER_2_PRES_CH             (18)
 #define NOZZLE_FILM_PRES_CH           (19)
-#define POT_A_CH                      (20)  // TODO: A/B or 0/1 or 1/2?
-#define POT_B_CH                      (21)
+#define POT_0_CH                      (20)  // TODO: A/B or 0/1 or 1/2?
+#define POT_1_CH                      (21)
 
 // Thermocouples
-// Again, most of these are not needed, except maybe tank/copv temp
+// TODO: fix these
 #define FIN_TEMP_CH                    (0)
 #define AV_BAY_TEMP_CH                 (1)
 #define RACEWAY_A_TEMP_CH              (2)

@@ -68,10 +68,10 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 
 // Timer interrupt flags
-uint8_t send_telem_flag;
-uint8_t save_flash_flag;
-uint8_t sample_sensors_flag;
-uint8_t tpc_calc_flag;
+
+uint8_t periodic_flag_5ms;
+uint8_t periodic_flag_50ms;
+uint8_t periodic_flag_100ms;
 
 /* USER CODE END PV */
 
@@ -100,15 +100,14 @@ static void MX_TIM13_Init(void);
  * Timer interrupt flag handling
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
-	if (htim == &TIM_TELEM) {
-		send_telem_flag = 1;
+	if (htim == &TIM_5MS) {
+		periodic_flag_5ms = 1;
 	}
-	else if (htim == &TIM_SAMPLING) {
-		sample_sensors_flag = 1;
+	else if (htim == &TIM_50MS) {
+		periodic_flag_50ms = 1;
 	}
-	else if (htim == &TIM_TPC_CALC) {
-		tpc_calc_flag = 1;
-		// TODO: more motor calc timer stuff
+	else if (htim == &TIM_100MS) {
+		periodic_flag_100ms = 1;
 	}
 }
 
@@ -169,9 +168,9 @@ int main(void)
   /* Initialize HAL stuff */
   // Timers
   HAL_TIM_Base_Start(&TIM_MICROS);
-  HAL_TIM_Base_Start_IT(&TIM_SAMPLING);
-  HAL_TIM_Base_Start_IT(&TIM_TPC_CALC);
-  HAL_TIM_Base_Start_IT(&TIM_TELEM);
+  HAL_TIM_Base_Start_IT(&TIM_5MS);
+  HAL_TIM_Base_Start_IT(&TIM_50MS);
+  HAL_TIM_Base_Start_IT(&TIM_100MS);
 
   // UART DMA
 
@@ -180,11 +179,12 @@ int main(void)
 
 
   // Board-specific hardware
+  init_spi_peripherals();  // Set chip selects high and initialize
   init_adcs();
   init_thermocouples();
   init_flash(&flash, &SPI_MEM, FLASH_CS_GPIO_Port, FLASH_CS_Pin);
   init_valve_states();  // Powers some valves
-  init_autosequence_timings();
+  init_autosequence_timings();  // is this really needed?
 
   /* USER CODE END 2 */
 
@@ -192,16 +192,14 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  if (periodic_flag_50ms) {
+		  periodic_flag_50ms = 0;
 
-	  // Check periodic interrupt flags and call appropriate functions if needed
-	  if (send_telem_flag) {
-		  if (!disable_telem) {
-			  send_telem_packet(SERVER_ADDR);
-		  }
-		  send_telem_flag = 0;
 	  }
 
-	  if (sample_sensors_flag) {
+	  if (periodic_flag_5ms) {
+		  periodic_flag_5ms = 0;
+
 		  // sample adcs and thermocouples
 		  read_thermocouples();
 		  read_adc_counts();
@@ -211,17 +209,16 @@ int main(void)
 		  if (LOGGING_ACTIVE) {
 			  save_flash_packet();
 		  }
-
-		  sample_sensors_flag = 0;
 	  }
 
-	  if (tpc_calc_flag) {
-		  // Do motor calculations here if it's the right state?
-		  // TODO
-		  tpc_calc_flag = 0;
+	  // Check periodic interrupt flags and call appropriate functions if needed
+	  if (periodic_flag_100ms) {
+		  periodic_flag_100ms = 0;
+
+		  if (!disable_telem) {
+			  send_telem_packet(SERVER_ADDR);
+		  }
 	  }
-
-
 
 
     /* USER CODE END WHILE */
@@ -561,7 +558,7 @@ static void MX_TIM10_Init(void)
 
   /* USER CODE END TIM10_Init 1 */
   htim10.Instance = TIM10;
-  htim10.Init.Prescaler = 45 - 1;
+  htim10.Init.Prescaler = 45000 - 1;
   htim10.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim10.Init.Period = 50 - 1;
   htim10.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -592,7 +589,7 @@ static void MX_TIM11_Init(void)
 
   /* USER CODE END TIM11_Init 1 */
   htim11.Instance = TIM11;
-  htim11.Init.Prescaler = 45 - 1;
+  htim11.Init.Prescaler = 45000 - 1;
   htim11.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim11.Init.Period = 100 - 1;
   htim11.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -623,7 +620,7 @@ static void MX_TIM13_Init(void)
 
   /* USER CODE END TIM13_Init 1 */
   htim13.Instance = TIM13;
-  htim13.Init.Prescaler = 45 - 1;
+  htim13.Init.Prescaler = 45000 - 1;
   htim13.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim13.Init.Period = 5 - 1;
   htim13.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
