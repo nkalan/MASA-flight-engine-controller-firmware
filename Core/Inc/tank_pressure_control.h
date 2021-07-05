@@ -14,20 +14,13 @@
 //#include valves library
 
 
-/**
- * Water, LN2 for press tests
- * Ethanol for PT163
- * RP1 for BB
- * LOX for both engines
- *
- * TODO: not sure all of these options are needed
- */
+// TODO: not sure all of these options are needed
 typedef enum {
-	Water,
-	LN2,
-	Ethanol,
-	RP1,
-	LOX
+	Water,    // Press tests, coldflows
+	LN2,      // Press tests, coldflows
+	Ethanol,  // PT163 hotfires
+	RP1,      // BB hotfires
+	LOX       // PT163/BB hotfires
 } Fluid_Type;
 
 /**
@@ -35,14 +28,14 @@ typedef enum {
  * It contains active control variables and configuration parameters.
  */
 typedef struct {
-	uint8_t tank_enable;
+	uint8_t tank_enable;  // Enables motor/control valve actuation
 
-	Fluid_Type fluid;
+	uint8_t is_cryogenic;  // Affects initial motor position calculation
 
-	// Control valve struct pointer
-	// L6470_Motor_IC pointer
+	// TODO: Control valve struct pointer
+	// TODO: L6470_Motor_IC pointer
 
-	// This is a pointer, to detach control algs from sensor voting algs
+	// This is a pointer to detach PID from sensor reading/voting algs
 	float* control_pres;  // tank pressure
 
 	// Setpoint
@@ -58,23 +51,25 @@ typedef struct {
 	// in addition to the needle valve when control pressure goes
 	// outside a certain range.
 	// Not technically part of the PID calculation, but used in parallel
-	float PID_ctrl_vlv_low_pres_thrsh;
-	float PID_ctrl_vlv_high_pres_thrsh;
+	float PID_ctrl_vlv_low_pres_thrshd;
+	float PID_ctrl_vlv_high_pres_thrshd;
 
-	uint32_t PID_start_time;  // Used in I calculations
+	uint32_t PID_start_time;  // Used in I calculations TODO: not sure if needed?
 	uint32_t PID_ctrl_loop_period;  // Used in I/D calculations
 
-	float K_p, K_i, K_d;
+	float K_p, K_i, K_d;  // Gains
+	float PID_error_sum;  // Integral for I term
+	float PID_prev_step_error;  // step n-1 for D term
+	// ^ TODO: init these as 0
 
-	// PID control loop variables
 
-
-
+	// TODO: figure out if a timer needs to be used here, or if
+	// hardcoding dt is good enough
 
 
 	//---------------------------------------------------------------------------------------------
 	//PID variables
-	double errSum[NUM_TANKS] = {0};
+	//double errSum[NUM_TANKS] = {0};
 	volatile double last_error[NUM_TANKS];
 	//double kp_term, ki_term, kd_term;  local, doesn't need to be in struct
 	double /*timeChange,*/ error;
@@ -86,7 +81,7 @@ typedef struct {
  * Resets control loop variables and parameters. Call this during
  * program initialization, and before each time you enter the control loop.
  */
-void tank_reset_control_loop(TPC_Info* tank);
+void tank_init_control_loop(TPC_Info* tank);
 
 
 /**

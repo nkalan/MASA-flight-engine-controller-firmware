@@ -142,8 +142,9 @@ void reset_control_variables(int32_t test_start_time, uint8_t tank_num) {
 }
 
 
-void tank_reset_control_loop(TPC_Info* tank) {
-
+void tank_init_control_loop(TPC_Info* tank) {
+	tank->PID_error_sum = 0;
+	tank->PID_prev_step_error = 0;
 }
 
 
@@ -159,7 +160,44 @@ void tank_autopress_bang_bang(TPC_Info* tank) {
 
 
 void tank_PID_pressure_control(TPC_Info* tank) {
+	float dt = tank->PID_ctrl_loop_period;
 
+	// The missile knows where it is
+	float error = tank->target_pres - *(tank->control_pres);  // P
+	float next_error_sum = tank->PID_error_sum + error*dt;    // I
+	float slope = (error - tank->PID_prev_step_error) / dt;   // D
+	tank->PID_prev_step_error = error;  // store for next D calculation
+
+	// Apply gains
+	float Kp_term = tank->K_p * error;
+	float Ki_term = tank->K_i * tank->PID_error_sum;
+	float Kd_term = tank->K_d * slope;
+	float PID_total_output = Kp_term + Ki_term + Kd_term;
+
+	// Limit output
+	float motor_delta;
+	// TODO: define these 2 motor variables somewhere, probably motor struct
+	// TODO: change all these variable names when they get decided
+	float motor_pos;
+	float max_motor_delta = max_motor_pos - motor_pos;
+	if (PID_total_output < -motor_pos) {  // Lower bound
+		motor_delta = -motor_pos;
+	}
+	else if (PID_total_output > max_motor_delta) {  // Upper bound
+		motor_delta = max_motor_delta;
+	}
+	else {
+		motor_delta = PID_total_output;
+		tank->PID_error_sum = next_error_sum;  // Update sum IFF output doesn't saturate
+		// TODO: figure out why ^
+	}
+
+	// Actuate motor to new position
+	actuate_tank_motor_pos(tank, motor_pos + motor_delta);
+
+	// Log data
+	// TODO: should this go here, or in a different function?
+	// Maybe just update some struct variables and log them later
 }
 
 
@@ -177,19 +215,19 @@ void tank_check_control_valve_threshold(TPC_Info* tank) {
 
 void tank_startup_init_motor_position(TPC_Info* tank, float COPV_pres,
 		float COPV_temp) {
-	/*
+	// TODO: should these all be floats instead?
 	static double gamma  = 1.66;
 	static double sg     = 0.137;
-	static double c1    = 2834;
-	static double c2    = 6140;
-	static double c3    = 5360;
-	static double c4    = 769.8;
+	static double c1     = 2834;
+	static double c2     = 6140;
+	static double c3     = 5360;
+	static double c4     = 769.8;
 
 	double crit_pr, t_r, valve_cv, t_f, p_rat, t_rat, q_acf, q_scf, vdot;
 	double deg = 0;
 
-	double p_i    = pressure[COPVDucerA];       // cng pressure
-	double p_o    = *controlPres[tank_num];     // tank pressure
+	double p_i    = (double)(COPV_pres);       // cng pressure
+	double p_o    = (double)(*(tank->control_pres));     // tank pressure
 
 	// Avoid divide by zero error
 	if (p_i == 0) {
@@ -200,27 +238,30 @@ void tank_startup_init_motor_position(TPC_Info* tank, float COPV_pres,
 	}
 
 	//double temp_cng     = tc[COPVTC];           // cng temperature
-	double temp_cng       = 290; // Hardcoded because tcs are buggy
-	// double temp_tank    = tc[tank_num];         // tank temperature
-	t_f = 300; // K
+	//double temp_cng       = 290; // Hardcoded because tcs are buggy
+	// double temp_tank    = tc[tank_num];         // tank temperature, unused
+	t_f = 300; // K  TODO: what are these, and why aren't they also static?
 	double t_std = 288; // K
 	double p_std = 14.7; // psi
 
-	double deg_correction_factor    = 1;      // %degrees to move motor past the calculated deg
+	// No longer needed
+	//double deg_correction_factor = 1;      // %degrees to move motor past the calculated deg
 
-	if (tank_num == 0) {
+	if (tank->is_cryogenic) {
 		vdot   = 0.00317;
 	}
 	else {
 		vdot   = 0.00361;
 	}
 
+
 	// Calculations
 	crit_pr = pow(2.0 / (gamma + 1), gamma / (gamma - 1));
 	t_r     = temp_cng * (9.0/5);
 	q_acf = vdot*2118.88; // cfm
+	// TODO: what units is meant by _acf? cf/m or cf?
 
-	if (tank_num == 0) { // cryogenic liquid case
+	if (tank->is_cryogenic) { // cryogenic liquid case
 		q_scf = q_acf*p_o/(p_std)*1.3;
 	}
 	else {
@@ -233,19 +274,23 @@ void tank_startup_init_motor_position(TPC_Info* tank, float COPV_pres,
 		valve_cv = q_scf/16.05/sqrt((pow(p_i,2)-pow(p_o,2))/sg/t_r);
 	}
 
-	deg = deg_correction_factor * (c1*pow(valve_cv, 4) +
+	deg = /*deg_correction_factor * No longer needed */ (c1*pow(valve_cv, 4) +
 		  c2*pow(valve_cv, 3) +
 		  c3*pow(valve_cv, 2) +
 		  c4*valve_cv);
+
+	// Output limiting
 	if (deg < 0) { deg = 0; }
 	if (deg > 2460) { deg = 2460; }
+	// TODO: where does 2460 come from?
 
+	// TODO: Why is the direction manually set here?
+	// can it just be the shortest path?
 	if (is_tank_enabled[tank_num]) {
 		manual_stepper_pos_override[tank_num] = 1;
 		targetPos[tank_num] = deg; // position given in deg
 		curDir[tank_num] = (curPos[tank_num] < targetPos[tank_num]) ? 1 : -1; // CCW facing the motor
 		mtr_set[tank_num] = deg; // save new motor position setpoint
 	}
-	*/
 }
 
