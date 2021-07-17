@@ -7,6 +7,9 @@
 
 
 #include "sensors.h"
+#include "sensor_voting.h"
+#include "constants.h"
+#include "globals.h"
 #include "main.h"  // for GPIO mappings
 
 /* ADC0 */
@@ -150,9 +153,9 @@ void tc_mux_chip_select(uint8_t tc_index) {
 	// Extract bits
 	// TODO: not sure if it's necessary to convert it to 1's
 	uint8_t tc_mux_0 = tc_index & 0x01 >> 0;
-	uint8_t tc_mux_0 = tc_index & 0x02 >> 1;
-	uint8_t tc_mux_0 = tc_index & 0x04 >> 2;
-	uint8_t tc_mux_0 = tc_index & 0x08 >> 3;
+	uint8_t tc_mux_1 = tc_index & 0x02 >> 1;
+	uint8_t tc_mux_2 = tc_index & 0x04 >> 2;
+	uint8_t tc_mux_3 = tc_index & 0x08 >> 3;
 
 	// Set mux select bits
 	HAL_GPIO_WritePin(TC_MUX_A0_GPIO_Port, TC_MUX_A0_Pin, tc_mux_0);
@@ -196,4 +199,21 @@ void convert_adc_counts() {
 
 }
 
+
+void resolve_redundant_sensors() {
+	// TODO: fill out configs when they're ready
+	Voting_Alg_Config lox_voting_config;
+	Voting_Alg_Config fuel_voting_config;
+	Voting_Alg_Config copv_voting_config;
+
+	lox_control_pressure = sensor_voting_algorithm(pressure[LOX_TANK_A_PRES_CH],
+			pressure[LOX_TANK_B_PRES_CH], pressure[LOX_TANK_C_PRES_CH],
+			&lox_voting_config);
+	fuel_control_pressure = sensor_voting_algorithm(pressure[FUEL_TANK_A_PRES_CH],
+			pressure[FUEL_TANK_B_PRES_CH], pressure[FUEL_TANK_C_PRES_CH],
+			&fuel_voting_config);
+	copv_control_pressure = sensor_voting_algorithm(pressure[COPV_A_PRES_CH],
+			pressure[COPV_B_PRES_CH], pressure[COPV_C_PRES_CH],
+			&copv_voting_config);
+}
 

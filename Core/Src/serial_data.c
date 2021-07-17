@@ -7,15 +7,19 @@
 
 
 #include <serial_data.h>
+#include "main.h"
 #include "comms.h"
-#include "W25N01GV.h"
 #include "constants.h"
 
 
 W25N01GV_Flash flash;
 uint8_t telem_disabled = 0;
 
-//uint8_t telem_packet[255];
+
+void init_serial_data() {
+	init_flash(&flash, &SPI_MEM, FLASH_CS_GPIO_Port, FLASH_CS_Pin);
+}
+
 
 /**
  * Some info doesn't change between telem and flash packet headers
@@ -59,7 +63,7 @@ void save_flash_packet() {
     write_to_flash(&flash, buffer, buffer_sz);
 }
 
-// Copied from press board, but without passing in a flash struct pointer
+// Mostly copied from press board
 void transmit_flash_data() {
 
 	// Ensure flash is flushed

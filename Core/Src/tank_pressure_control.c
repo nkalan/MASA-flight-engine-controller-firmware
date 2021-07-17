@@ -7,6 +7,11 @@
 
 
 #include "tank_pressure_control.h"
+#include "constants.h"
+#include "math.h"
+
+
+TPC_Info tanks[NUM_TANKS];
 
 
 /**
@@ -38,12 +43,12 @@ void actuate_tank_control_valve(TPC_Info* tank, uint8_t state) {
 
 
 // copied from press board
+/*
 void doCalculations(uint8_t motor_num) {
     static float next_errSum        = 0;
     static float pid_change         = 0;
     static float maxDiff            = 0;
 
-    /*
     if (do_calculations[motor_num]) { //for timer
         //-----------------------//
         //Control Loop
@@ -83,9 +88,10 @@ void doCalculations(uint8_t motor_num) {
 
         do_calculations[motor_num] = 0; //reset timer
     }
-	*/
 }
+*/
 
+/*
 void init_control_variables() {
     for (uint8_t i = 0 ; i < NUM_TANKS; ++i) {
         last_error[i] = Setpoint[i];
@@ -105,21 +111,23 @@ void init_control_variables() {
     }
 
     // init stepper ramping variables
-    stepper.SPS = 1000; // start motor 1000 steps per second
-    stepper.SPS_target = 2000; // target steps/sec
-    stepper.tim_osc = 1000000; // tim6 update speed
-    stepper.SPS_tim_reg = (uint16_t)(stepper.tim_osc / stepper.SPS);
-    stepper.acc_res = 2; // increments SPS by step res
-    stepper.acc_step = 0;
 
-    control_loop_period = ( 1.0/1000 ) * (__HAL_TIM_GET_AUTORELOAD(&htim10)+1);
+    //stepper.SPS = 1000; // start motor 1000 steps per second
+    //stepper.SPS_target = 2000; // target steps/sec
+    //stepper.tim_osc = 1000000; // tim6 update speed
+    //stepper.SPS_tim_reg = (uint16_t)(stepper.tim_osc / stepper.SPS);
+    //stepper.acc_res = 2; // increments SPS by step res
+    //stepper.acc_step = 0;
 
-    autopress_duration = 30000 /*5000*/; // default autopress duration is 30 seconds
+    // ^ These should be configured by the motor library
 
-    test_duration = 4000; // test duration four seconds
+    //control_loop_period = ( 1.0/1000 ) * (__HAL_TIM_GET_AUTORELOAD(&htim10)+1);
+
+    //test_duration = 4000; // test duration four seconds
 }
+*/
 
-
+/*
 // Note this function should be called automatically right before the test
 void reset_control_variables(int32_t test_start_time, uint8_t tank_num) {
     // PID variables reset
@@ -140,11 +148,13 @@ void reset_control_variables(int32_t test_start_time, uint8_t tank_num) {
     mtr_ki_err[tank_num] = ki_term;
     mtr_kd_err[tank_num] = kd_term;
 }
-
+*/
 
 void tank_init_control_loop(TPC_Info* tank) {
 	tank->PID_error_sum = 0;
 	tank->PID_prev_step_error = 0;
+
+	// TODO:
 }
 
 
@@ -178,7 +188,7 @@ void tank_PID_pressure_control(TPC_Info* tank) {
 	float motor_delta;
 	// TODO: define these 2 motor variables somewhere, probably motor struct
 	// TODO: change all these variable names when they get decided
-	float motor_pos;
+	float motor_pos, max_motor_pos;
 	float max_motor_delta = max_motor_pos - motor_pos;
 	if (PID_total_output < -motor_pos) {  // Lower bound
 		motor_delta = -motor_pos;
@@ -188,8 +198,8 @@ void tank_PID_pressure_control(TPC_Info* tank) {
 	}
 	else {
 		motor_delta = PID_total_output;
-		tank->PID_error_sum = next_error_sum;  // Update sum IFF output doesn't saturate
-		// TODO: figure out why ^
+		// Update sum IFF output doesn't saturate, to prevent integrator windup
+		tank->PID_error_sum = next_error_sum;
 	}
 
 	// Actuate motor to new position
@@ -204,18 +214,18 @@ void tank_PID_pressure_control(TPC_Info* tank) {
 // Almost identical to autopress bang bang but it runs in parallel
 // with the PID control loop and has different thresholds.
 void tank_check_control_valve_threshold(TPC_Info* tank) {
-    if (*(tank->control_pres) < tank->PID_ctrl_vlv_low_pres_thrsh) {
+    if (*(tank->control_pres) < tank->PID_ctrl_vlv_low_pres_thrshd) {
     	actuate_tank_control_valve(tank, 1);
     }
-    else if (*(tank->control_pres) > tank->PID_ctrl_vlv_high_pres_thrsh) {
+    else if (*(tank->control_pres) > tank->PID_ctrl_vlv_high_pres_thrshd) {
     	actuate_tank_control_valve(tank, 0);
     }
 }
 
 
-void tank_startup_init_motor_position(TPC_Info* tank, float COPV_pres,
-		float COPV_temp) {
-	// TODO: should these all be floats instead?
+// TODO: refactor this bigly
+void tank_startup_init_motor_position(TPC_Info* tank) {
+	// These variables are all doubles because they need very high precision
 	static double gamma  = 1.66;
 	static double sg     = 0.137;
 	static double c1     = 2834;
@@ -226,7 +236,7 @@ void tank_startup_init_motor_position(TPC_Info* tank, float COPV_pres,
 	double crit_pr, t_r, valve_cv, t_f, p_rat, t_rat, q_acf, q_scf, vdot;
 	double deg = 0;
 
-	double p_i    = (double)(COPV_pres);       // cng pressure
+	double p_i    = (double)(*(tank->COPV_pres));       // cng pressure
 	double p_o    = (double)(*(tank->control_pres));     // tank pressure
 
 	// Avoid divide by zero error
@@ -257,7 +267,7 @@ void tank_startup_init_motor_position(TPC_Info* tank, float COPV_pres,
 
 	// Calculations
 	crit_pr = pow(2.0 / (gamma + 1), gamma / (gamma - 1));
-	t_r     = temp_cng * (9.0/5);
+	t_r     = (double)(*(tank->COPV_temp)) * (9.0/5);
 	q_acf = vdot*2118.88; // cfm
 	// TODO: what units is meant by _acf? cf/m or cf?
 
@@ -286,11 +296,13 @@ void tank_startup_init_motor_position(TPC_Info* tank, float COPV_pres,
 
 	// TODO: Why is the direction manually set here?
 	// can it just be the shortest path?
+	/*
 	if (is_tank_enabled[tank_num]) {
 		manual_stepper_pos_override[tank_num] = 1;
 		targetPos[tank_num] = deg; // position given in deg
 		curDir[tank_num] = (curPos[tank_num] < targetPos[tank_num]) ? 1 : -1; // CCW facing the motor
 		mtr_set[tank_num] = deg; // save new motor position setpoint
 	}
+	*/
 }
 

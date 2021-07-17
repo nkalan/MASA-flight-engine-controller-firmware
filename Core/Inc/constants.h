@@ -8,7 +8,8 @@
 #ifndef INC_CONSTANTS_H_
 #define INC_CONSTANTS_H_
 
-#include "stm32f4xx.h"  // for _HandleTypeDef definitions
+#include "stm32f4xx.h"  // _HandleTypeDef definitions
+#include "main.h"  // gpio pin mappings
 
 // Extern declarations from main.c
 extern SPI_HandleTypeDef hspi1;
@@ -33,7 +34,7 @@ extern TIM_HandleTypeDef htim13;
 // SPI bus mappings
 #define SPI_TC            hspi1
 #define SPI_ADC           hspi2
-#define SPI_MTR           hspi3
+#define SPI_MOTOR         hspi3
 #define SPI_MEM           hspi4
 
 // Communication mappings
@@ -45,6 +46,12 @@ extern TIM_HandleTypeDef htim13;
 #define TIM_50MS          htim10
 #define TIM_100MS         htim11
 #define TIM_MICROS        htim5
+
+// LED mappings
+#define LED_TELEM_PORT              LED_0_GPIO_Port
+#define LED_TELEM_PIN               LED_0_Pin
+#define LED_FLASH_LOGGING_PORT      LED_1_GPIO_Port
+#define LED_FLASH_LOGGING_PIN       LED_1_GPIO_Pin
 
 // Microseconds since board reset
 #define SYS_MICROS        ((uint32_t)(__HAL_TIM_GET_COUNTER(&TIM_MICROS)))
@@ -93,6 +100,16 @@ extern TIM_HandleTypeDef htim13;
 #define FUEL_ULLAGE_TEMP_CH           (10)
 #define FUEL_TEMP_CH                  (11)
 
+/**
+ * Misc definitions of system parameters
+ */
+#define NUM_TANKS                      (2)
+#define NUM_VALVES                    (14)
+#define NUM_TCS                       (12)
+#define NUM_PTS                       (20)
+#define NUM_POTS                       (2)
 
+#define LOX_TANK                       (0)
+#define FUEL_TANK                      (1)
 
 #endif /* INC_CONSTANTS_H_ */

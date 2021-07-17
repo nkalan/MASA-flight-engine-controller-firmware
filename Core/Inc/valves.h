@@ -12,10 +12,8 @@
 #ifndef INC_VALVES_H_
 #define INC_VALVES_H_
 
-#include "stdint.h"
-
-// TODO: should this be defined somewhere else?
-#define NUM_VALVES 14
+#include <stdint.h>
+#include "constants.h"
 
 /**
  * Sets the GPIO pin corresponding to the valve channel index specified

@@ -11,9 +11,15 @@
 
 #include <stdint.h>
 #include "W25N01GV.h"
+#include "stm32f4xx.h"
 
 W25N01GV_Flash flash;
 uint8_t disable_telem;  // Toggled on during flash dump
+
+/**
+ * Inits telemetry stuff and flash.
+ */
+void init_serial_data();
 
 /**
  * Sends a telemetry packet to an address in blocking mode

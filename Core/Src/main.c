@@ -31,6 +31,7 @@
 #include "sensors.h"
 #include "globals.h"  // included for STATE
 #include "serial_data.h"
+#include "tank_pressure_control.h"
 
 /* USER CODE END Includes */
 
@@ -68,7 +69,6 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 
 // Timer interrupt flags
-
 uint8_t periodic_flag_5ms;
 uint8_t periodic_flag_50ms;
 uint8_t periodic_flag_100ms;
@@ -163,6 +163,9 @@ int main(void)
   MX_TIM13_Init();
   /* USER CODE BEGIN 2 */
 
+  //TPC_Info tanks[NUM_TANKS];
+  // TODO: define num tanks in constants.h
+
   // Initialize everything
 
   /* Initialize HAL stuff */
@@ -179,12 +182,12 @@ int main(void)
 
 
   // Board-specific hardware
-  init_spi_peripherals();  // Set chip selects high and initialize
+  //init_spi_peripherals();  // Set chip selects high and initialize
   init_adcs();
   init_thermocouples();
-  init_flash(&flash, &SPI_MEM, FLASH_CS_GPIO_Port, FLASH_CS_Pin);
+  init_serial_data();
   init_valve_states();  // Powers some valves
-  init_autosequence_timings();  // is this really needed?
+  init_autosequence_timings();  // TODO: is this really needed?
 
   /* USER CODE END 2 */
 
@@ -192,9 +195,24 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  // Handle autosequence first in every loop
+	  // most important, time sensitive operation
+	  // TODO: call autosequence functions
+
+
 	  if (periodic_flag_50ms) {
 		  periodic_flag_50ms = 0;
 
+		  // Active tank pressure PID control
+		  // tank enable flags get set during the autosequence
+		  if (STATE == Hotfire) {
+			  if (autosequence.lox_tank_enable_PID_control) {
+				  tank_PID_pressure_control(&tanks[LOX_TANK]);
+			  }
+			  if (autosequence.fuel_tank_enable_PID_control) {
+				  tank_PID_pressure_control(&tanks[FUEL_TANK]);
+			  }
+		  }
 	  }
 
 	  if (periodic_flag_5ms) {
@@ -204,6 +222,26 @@ int main(void)
 		  read_thermocouples();
 		  read_adc_counts();
 		  convert_adc_counts();
+
+		  // handle redundant sensor voting algorithms
+		  resolve_redundant_sensors();
+
+		  // Autopress bang bang
+		  if (STATE == AutoPress) {
+			  tank_autopress_bang_bang(&tanks[LOX_TANK]);
+			  tank_autopress_bang_bang(&tanks[FUEL_TANK]);
+		  }
+
+		  // Active tank pressure control valve bang bang
+		  // tank enable flags get set during the autosequence
+		  if (STATE == Hotfire) {
+			  if (autosequence.lox_tank_enable_PID_control) {
+				  tank_check_control_valve_threshold(&tanks[LOX_TANK]);
+			  }
+			  if (autosequence.fuel_tank_enable_PID_control) {
+				  tank_check_control_valve_threshold(&tanks[FUEL_TANK]);
+			  }
+		  }
 
 		  // log flash data
 		  if (LOGGING_ACTIVE) {
@@ -217,6 +255,7 @@ int main(void)
 
 		  if (!disable_telem) {
 			  send_telem_packet(SERVER_ADDR);
+			  HAL_GPIO_TogglePin(LED_TELEM_PORT, LED_TELEM_PIN);
 		  }
 	  }
 
