@@ -18,10 +18,13 @@
  * It contains active control variables and configuration parameters.
  */
 typedef struct {
+
+	/**
+	 * Inputs: user must set all these variables on initialization
+	 */
 	uint8_t tank_enable;  // Enable motor/valve actuations
 
 	uint8_t is_cryogenic;  // Affects initial motor position calculation
-	//Fluid_Type fluid;
 
 	// TODO: Control valve struct pointer
 	// TODO: L6470_Motor_IC pointer
@@ -36,22 +39,28 @@ typedef struct {
 	float target_pres;
 
 	// Thresholds used in Autopress bang bang
-	// Absolute pressure below which to trigger control valve
-	// Note: this is an absolute pressure, unlike the press board code.
-	float bang_bang_low_pres_thrshd;
-	float bang_bang_high_pres_thrshd;
+	// Pressure above target pressure which to trigger control valve
+	// Note: this is a pressure difference, not an absolute pressure
+	float bang_bang_low_pres_diff;
+	float bang_bang_high_pres_diff;
 
 	// Thresholds used during PID loop. Actuate the tank control valve
-	// in addition to the needle valve when control pressure goes
-	// outside a certain range.
-	// Not technically part of the PID calculation, but used in parallel
-	float PID_ctrl_vlv_low_pres_thrshd;
-	float PID_ctrl_vlv_high_pres_thrshd;
+	// in addition to the needle valve when control pressure goes a
+	// certain range, defined as a percent of the target pressure.
+	// Not technically part of the PID calculation, but used in parallel.
+	float PID_ctrl_vlv_low_pres_percent;
+	float PID_ctrl_vlv_high_pres_percent;
 
 	//uint32_t PID_prev_step_time_ms;  // TODO: not sure if needed?
 	uint32_t PID_ctrl_loop_period;  // Used in I/D calculations
 
 	float K_p, K_i, K_d;  // Gains
+
+
+	/*
+	 * Outputs: do not directly modify the following variables
+	 */
+	float Kp_error, Ki_error, Kd_error;  // Error terms for logging
 	float PID_error_sum;  // Integral for I term
 	float PID_prev_step_error;  // step n-1 for D term
 	// ^ TODO: init these as 0

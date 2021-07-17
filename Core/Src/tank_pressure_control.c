@@ -151,19 +151,22 @@ void reset_control_variables(int32_t test_start_time, uint8_t tank_num) {
 */
 
 void tank_init_control_loop(TPC_Info* tank) {
+	tank->Kp_error = 0,
+	tank->Ki_error = 0;
+	tank->Kd_error = 0;
 	tank->PID_error_sum = 0;
 	tank->PID_prev_step_error = 0;
-
-	// TODO:
 }
 
 
 void tank_autopress_bang_bang(TPC_Info* tank) {
-	if (*(tank->control_pres) < tank->bang_bang_low_pres_thrshd) {
+	if (*(tank->control_pres) < (tank->target_pres
+			+ tank->bang_bang_low_pres_diff)) {
 		actuate_tank_control_valve(tank, 1);
 		// TODO: double check normally open normally closed
 	}
-	else if (*(tank->control_pres) > tank->bang_bang_high_pres_thrshd) {
+	else if (*(tank->control_pres) > (tank->target_pres
+			+ tank->bang_bang_high_pres_diff)) {
 		actuate_tank_control_valve(tank, 0);
 	}
 }
@@ -214,10 +217,12 @@ void tank_PID_pressure_control(TPC_Info* tank) {
 // Almost identical to autopress bang bang but it runs in parallel
 // with the PID control loop and has different thresholds.
 void tank_check_control_valve_threshold(TPC_Info* tank) {
-    if (*(tank->control_pres) < tank->PID_ctrl_vlv_low_pres_thrshd) {
+    if (*(tank->control_pres) < (tank->target_pres
+    		* tank->PID_ctrl_vlv_low_pres_percent)) {
     	actuate_tank_control_valve(tank, 1);
     }
-    else if (*(tank->control_pres) > tank->PID_ctrl_vlv_high_pres_thrshd) {
+    else if (*(tank->control_pres) > (tank->target_pres
+    		* tank->PID_ctrl_vlv_high_pres_percent)) {
     	actuate_tank_control_valve(tank, 0);
     }
 }
