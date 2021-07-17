@@ -2,7 +2,7 @@
  * abort_cases.h
  *
  *  Created on: Jul 5, 2021
- *      Author: natha
+ *      Author: natha + ananthas
  */
 
 #ifndef INC_THRESHOLD_DETECTION_H_
@@ -17,7 +17,10 @@ typedef struct {
 
 	// Set start time and enable at the same time
 	uint32_t tracking_start_time_ms;
-	uint8_t enable_tracking;
+
+	// Set a toggle for time (before or after) and wether threshold is upper/lower bound
+	uint8_t is_upper_timelimit;
+	uint8_t is_upper_threshold;
 
 	// TODO: figure out EXACTLY what it means for a variable to
 	// "pass/not pass the threshold within the time limit"
@@ -33,7 +36,7 @@ typedef struct {
  * This function will probably end up being called in the 5ms loop
  * after every time sensors get sampled
  */
-uint8_t check_variable_threshold(Threshold_Detection_Config* config);
+uint8_t check_variable_threshold(Threshold_Detection_Config* config, uint32_t current_time_ms);
 
 
 #endif /* INC_THRESHOLD_DETECTION_H_ */
