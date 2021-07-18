@@ -32,7 +32,7 @@
  * called in ms.
  * 
  * 
- * This program has been tested thuroughly through all cases. It was tested on an STM Nucleo Board (F446RE)
+ * This program has been tested thoroughly through all cases. It was tested on an STM Nucleo Board (F446RE)
  * 
  * 
  */
