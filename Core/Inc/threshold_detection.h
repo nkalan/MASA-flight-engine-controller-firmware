@@ -21,6 +21,9 @@
  * 		Range:	0 -> Upper Bound
  * 		Range:  Lower Bound -> Infinity
  * 
+ * The function additionally has a "latching variable" that sets to 1 whenever an abort case is triggered. This variable is
+ * stored in the struct and allows it to be accessed after the fact.
+ *  
  * FUNCTION INPUT PARAMETERS:
  * The function has two input parameters, the first is a struct "Threshold_Detection_Config" which is passed in as a pointer
  * and contains several variables. These include a pointer to the variable that is being observed, "observed_var", or in
@@ -28,7 +31,8 @@
  * threshold that you are comparing your observed variable to. "time_limit_ms" defines the threshold time value that defines
  * your time range. "tracking_start_time_ms" is the time since the uber-program has started running, this needs to be passed
  * in by the user. "is_upper_timelimit" and "is_upper_threshold" are binary ints used to toggle wether each of the ranges are
- * defined by lower or upper bounds. The second parameter passed into the program is the current time when the function is 
+ * defined by lower or upper bounds. "latching_var" is a variable that sets to 1 when an abort case is triggered; this should
+ * be consecutively passed through. The second parameter passed into the program is the current time when the function is 
  * called in ms.
  * 
  * 
@@ -53,6 +57,9 @@ typedef struct {
 	// Set a toggle for time (before or after) and wether threshold is upper/lower bound
 	uint8_t is_upper_timelimit;
 	uint8_t is_upper_threshold;
+
+	// Hold a latching variable inside the struct that basically tells us if an abort case was triggered
+	uint8_t latching_var;
 
 	// TODO: figure out EXACTLY what it means for a variable to
 	// "pass/not pass the threshold within the time limit"

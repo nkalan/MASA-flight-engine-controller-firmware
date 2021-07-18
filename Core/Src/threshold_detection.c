@@ -16,12 +16,14 @@ uint8_t check_variable_threshold(Threshold_Detection_Config* config, uint32_t cu
 	if(config->is_upper_threshold && config->is_upper_timelimit){
 
 		if(*config->observed_var > config->threshold && (config->tracking_start_time_ms - current_time_ms) < config->time_limit_ms){
+			if(config->latching_var == 0){config->latching_var = 1;}
 			return 1;
 		}
 	}
 
 	if(!config->is_upper_threshold && config->is_upper_timelimit){
 		if(*config->observed_var < config->threshold && (config->tracking_start_time_ms - current_time_ms) < config->time_limit_ms){
+			if(config->latching_var == 0){config->latching_var = 1;}
 			return 1;
 		}
 	}
@@ -29,12 +31,14 @@ uint8_t check_variable_threshold(Threshold_Detection_Config* config, uint32_t cu
 
 	if(config->is_upper_threshold && !config->is_upper_timelimit){
 		if(*config->observed_var > config->threshold && (config->tracking_start_time_ms - current_time_ms) > config->time_limit_ms){
+			if(config->latching_var == 0){config->latching_var = 1;}
 			return 1;
 		}
 	}
 
 	if(!config->is_upper_threshold && !config->is_upper_timelimit){
 		if(*config->observed_var < config->threshold && (config->tracking_start_time_ms - current_time_ms) > config->time_limit_ms){
+			if(config->latching_var == 0){config->latching_var = 1;}
 			return 1;
 		}
 	}
