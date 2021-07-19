@@ -1,3 +1,0 @@
-autosequence.c:15:6:init_autosequence_timings	4	static
-autosequence.c:19:6:manual_state_transition	16	static
-autosequence.c:66:6:execute_autosequence	4	static

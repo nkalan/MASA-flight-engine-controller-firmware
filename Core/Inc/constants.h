@@ -18,7 +18,6 @@ extern SPI_HandleTypeDef hspi3;
 extern SPI_HandleTypeDef hspi4;
 
 extern UART_HandleTypeDef huart1;
-extern CAN_HandleTypeDef hcan1;
 
 extern TIM_HandleTypeDef htim5;
 extern TIM_HandleTypeDef htim10;
@@ -51,7 +50,7 @@ extern TIM_HandleTypeDef htim13;
 #define LED_TELEM_PORT              LED_0_GPIO_Port
 #define LED_TELEM_PIN               LED_0_Pin
 #define LED_FLASH_LOGGING_PORT      LED_1_GPIO_Port
-#define LED_FLASH_LOGGING_PIN       LED_1_GPIO_Pin
+#define LED_FLASH_LOGGING_PIN       LED_1_Pin
 
 // Microseconds since board reset
 #define SYS_MICROS        ((uint32_t)(__HAL_TIM_GET_COUNTER(&TIM_MICROS)))

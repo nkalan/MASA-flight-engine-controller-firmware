@@ -13,6 +13,13 @@
 //#include "L6740.h"
 //#include valves library
 
+
+typedef struct {
+	uint8_t setpoint;
+	uint8_t pos;
+	uint8_t vel;
+} MotorStruct;
+
 /**
  * Each struct instance corresponds to a single propellant tank.
  * It contains active control variables and configuration parameters.
@@ -27,7 +34,7 @@ typedef struct {
 	uint8_t is_cryogenic;  // Affects initial motor position calculation
 
 	// TODO: Control valve struct pointer
-	// TODO: L6470_Motor_IC pointer
+	MotorStruct motor;
 
 	// These are pointers to detach control algs from
 	// sensor reading/voting algs
