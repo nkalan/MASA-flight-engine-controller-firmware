@@ -8,10 +8,8 @@
 
 #include "tank_pressure_control.h"
 #include "constants.h"
+#include "valves.h"
 #include "math.h"
-
-
-TPC_Info tanks[NUM_TANKS];
 
 
 /**
@@ -32,12 +30,7 @@ void actuate_tank_motor_pos(TPC_Info* tank, float motor_pos) {
  */
 void actuate_tank_control_valve(TPC_Info* tank, uint8_t state) {
 	if (tank->tank_enable) {
-		if (state) {
-			// power valve
-		}
-		else {
-			// depower valve
-		}
+		set_valve_channel(tank->control_valve_channel, state);
 	}
 }
 
@@ -155,7 +148,7 @@ void tank_init_control_loop(TPC_Info* tank) {
 	tank->Ki_error = 0;
 	tank->Kd_error = 0;
 	tank->PID_error_sum = 0;
-	tank->PID_prev_step_error = 0;
+	tank->PID_prev_step_error = tank->target_pres - *(tank->control_pres);
 }
 
 
@@ -173,7 +166,7 @@ void tank_autopress_bang_bang(TPC_Info* tank) {
 
 
 void tank_PID_pressure_control(TPC_Info* tank) {
-	float dt = tank->PID_ctrl_loop_period;
+	float dt = (tank->PID_ctrl_loop_period_ms)/1000.0;
 
 	// The missile knows where it is
 	float error = tank->target_pres - *(tank->control_pres);  // P
@@ -252,15 +245,11 @@ void tank_startup_init_motor_position(TPC_Info* tank) {
 		p_o = 0.0000001;
 	}
 
-	//double temp_cng     = tc[COPVTC];           // cng temperature
-	//double temp_cng       = 290; // Hardcoded because tcs are buggy
-	// double temp_tank    = tc[tank_num];         // tank temperature, unused
 	t_f = 300; // K  TODO: what are these, and why aren't they also static?
 	double t_std = 288; // K
 	double p_std = 14.7; // psi
 
-	// No longer needed
-	//double deg_correction_factor = 1;      // %degrees to move motor past the calculated deg
+	double deg_correction_factor = 0.25;  // %degrees to move motor past the calculated deg
 
 	if (tank->is_cryogenic) {
 		vdot   = 0.00317;

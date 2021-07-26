@@ -1,0 +1,4 @@
+MAX31856.c:36:6:MAX31856_Read_Register	32	static,ignoring_inline_asm
+MAX31856.c:56:6:MAX31856_Write_Register	24	static,ignoring_inline_asm
+MAX31856.c:75:6:MAX31856_init_thermocouples	40	static
+MAX31856.c:130:7:MAX31856_read_thermocouple	40	static

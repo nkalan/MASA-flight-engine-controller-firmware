@@ -85,6 +85,12 @@
                                     									
                                     <listOptionValue builtIn="false" value="../Core/Inc"/>
                                     									
+                                    <listOptionValue builtIn="false" value="../Core/firmware-libraries/MAX31856/inc"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="../Core/firmware-libraries/ValveLibs/inc"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="../Core/firmware-libraries/MAX11128/inc"/>
+                                    									
                                     <listOptionValue builtIn="false" value="../Core/firmware-libraries/SerialComms/inc"/>
                                     									
                                     <listOptionValue builtIn="false" value="../Core/firmware-libraries/L6470/inc"/>

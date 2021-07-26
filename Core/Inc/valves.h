@@ -13,7 +13,7 @@
 #define INC_VALVES_H_
 
 #include <stdint.h>
-#include "constants.h"
+#include <constants.h>
 
 /**
  * Sets the GPIO pin corresponding to the valve channel index specified

@@ -1,0 +1,5 @@
+autosequence.c:32:6:init_tank_pressure_control_configuration	8	static
+autosequence.c:69:6:handle_abort_case_actuations	8	static
+autosequence.c:106:6:handle_safe_disarm_actuations	8	static
+autosequence.c:115:6:manual_state_transition	16	static
+autosequence.c:168:6:execute_autosequence	16	static

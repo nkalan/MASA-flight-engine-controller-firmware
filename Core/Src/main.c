@@ -33,6 +33,10 @@
 #include "serial_data.h"
 #include "tank_pressure_control.h"
 
+
+
+#include "L6470.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,6 +65,7 @@ TIM_HandleTypeDef htim11;
 TIM_HandleTypeDef htim13;
 
 UART_HandleTypeDef huart1;
+DMA_HandleTypeDef hdma_usart1_rx;
 
 /* USER CODE BEGIN PV */
 
@@ -69,11 +74,23 @@ volatile uint8_t periodic_flag_5ms;
 volatile uint8_t periodic_flag_50ms;
 volatile uint8_t periodic_flag_100ms;
 
+// Serial data
+extern W25N01GV_Flash flash;
+extern uint8_t telem_disabled;
+extern DmaBufferInfo buffer_info;
+
+// Autosequence control info and timings
+extern Autosequence_Timings autosequence;
+
+L6470_Motor_IC motor;
+uint16_t motor_config_reg = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_SPI4_Init(void);
 static void MX_SPI2_Init(void);
@@ -106,13 +123,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
 }
 
 /**
- * Default valve power state when board turns on.
- * Some valves are normally closed and should be held open,
- * which this function controls.
+ * DMA rx handling
  */
-void init_valve_states() {
-
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+	handle_uart_dma_rx(huart, &buffer_info);
 }
+
+
+
 
 /* USER CODE END 0 */
 
@@ -144,6 +162,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_SPI1_Init();
   MX_SPI4_Init();
   MX_SPI2_Init();
@@ -154,9 +173,6 @@ int main(void)
   MX_TIM11_Init();
   MX_TIM13_Init();
   /* USER CODE BEGIN 2 */
-
-  //TPC_Info tanks[NUM_TANKS];
-  // TODO: define num tanks in constants.h
 
   // Initialize everything
 
@@ -175,13 +191,63 @@ int main(void)
 
   // Board-specific hardware
   //init_spi_peripherals();  // Set chip selects high and initialize
-  /*
-  init_adcs();
-  init_thermocouples();
-  init_serial_data();
-  init_valve_states();  // Powers some valves
-  init_autosequence_timings();  // TODO: is this really needed?
-  */
+
+  //init_adcs();
+  //init_thermocouples();
+  //init_serial_data();
+  //init_autosequence_timings();  // TODO: is this really needed?
+  //init_flash(&flash, &SPI_MEM, FLASH_CS_GPIO_Port, FLASH_CS_Pin);
+
+
+  // Motor stress test
+  motor.hspi = &SPI_MOTOR;
+  motor.cs_base = MTR0_CS_GPIO_Port;
+  motor.cs_pin = MTR0_CS_Pin;
+  motor.busy_base = MTR0_BUSY_GPIO_Port;
+  motor.busy_pin = MTR0_BUSY_Pin;
+
+  L6470_init_motor(&motor, L6470_FULL_STEP_MODE, 1.8);
+  //motor_config_reg = L6470_read_register(&motor, L6470_PARAM_CONFIG_ADDR);
+
+  L6470_hard_stop(&motor);
+
+  uint8_t delay_code = 0;
+
+  if (delay_code) {
+	  HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, 0);
+	  HAL_GPIO_WritePin(LED_1_GPIO_Port, LED_1_Pin, 0);
+	  HAL_GPIO_WritePin(LED_2_GPIO_Port, LED_2_Pin, 0);
+	  HAL_GPIO_WritePin(LED_3_GPIO_Port, LED_3_Pin, 0);
+	  HAL_Delay(7000);
+
+	  HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, 1);
+	  HAL_GPIO_WritePin(LED_1_GPIO_Port, LED_1_Pin, 0);
+	  HAL_GPIO_WritePin(LED_2_GPIO_Port, LED_2_Pin, 0);
+	  HAL_GPIO_WritePin(LED_3_GPIO_Port, LED_3_Pin, 0);
+	  HAL_Delay(7000);
+
+	  HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, 1);
+	  HAL_GPIO_WritePin(LED_1_GPIO_Port, LED_1_Pin, 1);
+	  HAL_GPIO_WritePin(LED_2_GPIO_Port, LED_2_Pin, 0);
+	  HAL_GPIO_WritePin(LED_3_GPIO_Port, LED_3_Pin, 0);
+	  HAL_Delay(7000);
+
+	  HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, 1);
+	  HAL_GPIO_WritePin(LED_1_GPIO_Port, LED_1_Pin, 1);
+	  HAL_GPIO_WritePin(LED_2_GPIO_Port, LED_2_Pin, 1);
+	  HAL_GPIO_WritePin(LED_3_GPIO_Port, LED_3_Pin, 0);
+	  HAL_Delay(7000);
+
+	  HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, 1);
+	  HAL_GPIO_WritePin(LED_1_GPIO_Port, LED_1_Pin, 1);
+	  HAL_GPIO_WritePin(LED_2_GPIO_Port, LED_2_Pin, 1);
+	  HAL_GPIO_WritePin(LED_3_GPIO_Port, LED_3_Pin, 1);
+  }
+
+  // Move the motor
+  L6470_run(&motor, 1, 720);
+  //L6470_hard_stop(&motor);
+
 
   /* USER CODE END 2 */
 
@@ -192,8 +258,10 @@ int main(void)
 	  // Handle autosequence first in every loop
 	  // most important, time sensitive operation
 	  // TODO: call autosequence functions
+	  L6470_get_status(&motor);
+	  HAL_Delay(10);
 
-
+	  /*
 	  if (periodic_flag_50ms) {
 		  periodic_flag_50ms = 0;
 
@@ -201,39 +269,41 @@ int main(void)
 		  // tank enable flags get set during the autosequence
 		  if (STATE == Hotfire) {
 			  if (autosequence.lox_tank_enable_PID_control) {
-				  tank_PID_pressure_control(&tanks[LOX_TANK]);
+				  tank_PID_pressure_control(&tanks[LOX_TANK_NUM]);
 			  }
 			  if (autosequence.fuel_tank_enable_PID_control) {
-				  tank_PID_pressure_control(&tanks[FUEL_TANK]);
+				  tank_PID_pressure_control(&tanks[FUEL_TANK_NUM]);
 			  }
 		  }
 	  }
+	  */
 
+	  /*
 	  if (periodic_flag_5ms) {
 		  periodic_flag_5ms = 0;
 
 		  // sample adcs and thermocouples
-		  read_thermocouples();
-		  read_adc_counts();
-		  convert_adc_counts();
+		  //read_thermocouples();
+		  //read_adc_counts();
+		  //convert_adc_counts();
 
 		  // handle redundant sensor voting algorithms
-		  resolve_redundant_sensors();
+		  //resolve_redundant_sensors();
 
 		  // Autopress bang bang
 		  if (STATE == AutoPress) {
-			  tank_autopress_bang_bang(&tanks[LOX_TANK]);
-			  tank_autopress_bang_bang(&tanks[FUEL_TANK]);
+			  tank_autopress_bang_bang(&tanks[LOX_TANK_NUM]);
+			  tank_autopress_bang_bang(&tanks[FUEL_TANK_NUM]);
 		  }
 
 		  // Active tank pressure control valve bang bang
 		  // tank enable flags get set during the autosequence
 		  if (STATE == Hotfire) {
-			  if (autosequence.lox_tank_enable_PID_control) {
-				  tank_check_control_valve_threshold(&tanks[LOX_TANK]);
+			  if (autosequence.hotfire_lox_tank_enable_PID_control) {
+				  tank_check_control_valve_threshold(&tanks[LOX_TANK_NUM]);
 			  }
-			  if (autosequence.fuel_tank_enable_PID_control) {
-				  tank_check_control_valve_threshold(&tanks[FUEL_TANK]);
+			  if (autosequence.hotfire_fuel_tank_enable_PID_control) {
+				  tank_check_control_valve_threshold(&tanks[FUEL_TANK_NUM]);
 			  }
 		  }
 
@@ -243,20 +313,24 @@ int main(void)
 		  }
 
 	  }
+	  */
 
+
+	  /*
 	  // Check periodic interrupt flags and call appropriate functions if needed
 	  if (periodic_flag_100ms) {
 		  periodic_flag_100ms = 0;
 		  HAL_GPIO_TogglePin(LED_TELEM_PORT, LED_TELEM_PIN);
 
 
-		  if (!disable_telem) {
+		  if (!telem_disabled) {
 			  send_telem_packet(SERVER_ADDR);
 			  HAL_GPIO_TogglePin(LED_TELEM_PORT, LED_TELEM_PIN);
 		  }
 
 	  }
 
+	*/
 
     /* USER CODE END WHILE */
 
@@ -371,7 +445,7 @@ static void MX_SPI2_Init(void)
   hspi2.Init.CLKPolarity = SPI_POLARITY_HIGH;
   hspi2.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -630,6 +704,22 @@ static void MX_USART1_UART_Init(void)
   /* USER CODE BEGIN USART1_Init 2 */
 
   /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA2_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA2_Stream2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
 
 }
 

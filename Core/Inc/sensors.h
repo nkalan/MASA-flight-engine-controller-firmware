@@ -8,6 +8,14 @@
 #ifndef INC_SENSORS_H_
 #define INC_SENSORS_H_
 
+#include "MAX31856.h"
+
+
+extern MAX31856_TC_Array thermocouples;
+
+void tc_mux_chip_select(uint8_t tc_index);
+
+void tc_mux_chip_release();
 
 /**
  * Initialize all thermocouples

@@ -10,7 +10,11 @@
 #include "sensor_voting.h"
 #include "constants.h"
 #include "globals.h"
+#include "MAX11128.h"
 #include "main.h"  // for GPIO mappings
+
+#define NUM_ADCS            (4U)
+#define CHANNELS_PER_ADC   (16U)
 
 /* ADC0 */
 #define IVLV0_ADC_NUM       (0U)
@@ -144,6 +148,19 @@
 #define POT0_ADC_CH        (14U)
 #define POT1_ADC_CH        (15U)
 
+
+/**
+ * Defining thermocouple interface struct
+ */
+MAX31856_TC_Array thermocouples;
+
+/**
+ * Defining ADC interface struct and rx arrays
+ */
+GPIO_MAX11128_Pinfo ADC_structs[NUM_ADCS];
+uint16_t adc_values[NUM_ADCS][CHANNELS_PER_ADC] = {0};
+
+
 /**
  * Function passed to the TC Array library as the chip select.
  * Sets 4 GPIO pins to get the correct MUX CS output.
@@ -151,11 +168,10 @@
 void tc_mux_chip_select(uint8_t tc_index) {
 
 	// Extract bits
-	// TODO: not sure if it's necessary to convert it to 1's
-	uint8_t tc_mux_0 = tc_index & 0x01 >> 0;
-	uint8_t tc_mux_1 = tc_index & 0x02 >> 1;
-	uint8_t tc_mux_2 = tc_index & 0x04 >> 2;
-	uint8_t tc_mux_3 = tc_index & 0x08 >> 3;
+	uint8_t tc_mux_0 = tc_index & 0x01;
+	uint8_t tc_mux_1 = tc_index & 0x02;
+	uint8_t tc_mux_2 = tc_index & 0x04;
+	uint8_t tc_mux_3 = tc_index & 0x08;
 
 	// Set mux select bits
 	HAL_GPIO_WritePin(TC_MUX_A0_GPIO_Port, TC_MUX_A0_Pin, tc_mux_0);
@@ -175,23 +191,65 @@ void tc_mux_chip_release() {
 	HAL_GPIO_WritePin(TC_MUX_EN_GPIO_Port, TC_MUX_EN_Pin, 1);
 }
 
+/**
+ * Set thermocouple array according to MAX31856 library
+ */
 void init_thermocouples() {
+	thermocouples.num_tcs = NUM_TCS;
+	thermocouples.SPI_bus = &SPI_TC;
+	thermocouples.chip_select = tc_mux_chip_select;
+	thermocouples.chip_release = tc_mux_chip_release;
 
+	MAX31856_init_thermocouples(&thermocouples);
 }
 
 
 void read_thermocouples() {
-
+	for (uint8_t i = 0; i < NUM_TCS; i++) {
+		tc[i] = MAX31856_read_thermocouple(&thermocouples, i);
+	}
 }
 
 
 void init_adcs() {
+	// Pin configurations
+	ADC_structs[0].MAX11128_CS_PORT = ADC0_CS_GPIO_Port;
+	ADC_structs[0].MAX11128_EOC_PORT = ADC0_EOC_GPIO_Port;
+	ADC_structs[0].MAX11128_CS_PORT = ADC0_CS_Pin;
+	ADC_structs[0].MAX11128_EOC_PORT = ADC0_EOC_Pin;
+	ADC_structs[0].HARDWARE_CONFIGURATION = EOC_ONLY;
 
+	ADC_structs[1].MAX11128_CS_PORT = ADC1_CS_GPIO_Port;
+	ADC_structs[1].MAX11128_EOC_PORT = ADC1_EOC_GPIO_Port;
+	ADC_structs[1].MAX11128_CS_PORT = ADC1_CS_Pin;
+	ADC_structs[1].MAX11128_EOC_PORT = ADC1_EOC_Pin;
+	ADC_structs[1].HARDWARE_CONFIGURATION = EOC_ONLY;
+
+	ADC_structs[2].MAX11128_CS_PORT = ADC2_CS_GPIO_Port;
+	ADC_structs[2].MAX11128_EOC_PORT = ADC2_EOC_GPIO_Port;
+	ADC_structs[2].MAX11128_CS_PORT = ADC2_CS_Pin;
+	ADC_structs[2].MAX11128_EOC_PORT = ADC2_EOC_Pin;
+	ADC_structs[2].HARDWARE_CONFIGURATION = EOC_ONLY;
+
+	ADC_structs[3].MAX11128_CS_PORT = ADC3_CS_GPIO_Port;
+	ADC_structs[3].MAX11128_EOC_PORT = ADC3_EOC_GPIO_Port;
+	ADC_structs[3].MAX11128_CS_PORT = ADC3_CS_Pin;
+	ADC_structs[3].MAX11128_EOC_PORT = ADC3_EOC_Pin;
+	ADC_structs[3].HARDWARE_CONFIGURATION = EOC_ONLY;
+
+	// Initialization commands
+	init_adc(&SPI_ADC, &ADC_structs[0]);
+	init_adc(&SPI_ADC, &ADC_structs[1]);
+	init_adc(&SPI_ADC, &ADC_structs[2]);
+	init_adc(&SPI_ADC, &ADC_structs[3]);
 }
 
 
 void read_adc_counts() {
-
+	read_adc(&SPI_ADC, &ADC_structs[0], adc_values[0]);
+	read_adc(&SPI_ADC, &ADC_structs[1], adc_values[1]);
+	read_adc(&SPI_ADC, &ADC_structs[2], adc_values[2]);
+	read_adc(&SPI_ADC, &ADC_structs[3], adc_values[3]);
 }
 
 

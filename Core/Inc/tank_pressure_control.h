@@ -10,15 +10,9 @@
 
 #include <stdint.h>
 #include "constants.h"
-//#include "L6740.h"
-//#include valves library
+#include "L6470.h"
+//#include "valvelib.h"
 
-
-typedef struct {
-	uint8_t setpoint;
-	uint8_t pos;
-	uint8_t vel;
-} MotorStruct;
 
 /**
  * Each struct instance corresponds to a single propellant tank.
@@ -29,18 +23,18 @@ typedef struct {
 	/**
 	 * Inputs: user must set all these variables on initialization
 	 */
-	uint8_t tank_enable;  // Enable motor/valve actuations
+	uint8_t tank_enable;   // Enable motor/valve actuations
 
 	uint8_t is_cryogenic;  // Affects initial motor position calculation
 
-	// TODO: Control valve struct pointer
-	MotorStruct motor;
+	uint8_t control_valve_channel;  // Helium in
+	L6470_Motor_IC motor;  // Needle valve
 
 	// These are pointers to detach control algs from
 	// sensor reading/voting algs
 	float* control_pres;  // tank pressure
-	float* COPV_pres;  // for initial motor position
-	float* COPV_temp;  // for initial motor position
+	float* COPV_pres;     // for initial motor position
+	float* COPV_temp;     // for initial motor position
 
 	// Setpoint
 	float target_pres;
@@ -58,8 +52,7 @@ typedef struct {
 	float PID_ctrl_vlv_low_pres_percent;
 	float PID_ctrl_vlv_high_pres_percent;
 
-	//uint32_t PID_prev_step_time_ms;  // TODO: not sure if needed?
-	uint32_t PID_ctrl_loop_period;  // Used in I/D calculations
+	uint32_t PID_ctrl_loop_period_ms;  // Used in I/D calculations
 
 	float K_p, K_i, K_d;  // Gains
 
@@ -72,21 +65,19 @@ typedef struct {
 	float PID_prev_step_error;  // step n-1 for D term
 	// ^ TODO: init these as 0
 
-	// TODO: figure out if a timer needs to be used here, or if
-	// hardcoding dt is good enough
 
 	// TODO: is this needed?
 	//volatile double last_error[NUM_TANKS];
 
+	// Updated by tank_PID_pressure_control()
+	float motor_setpoint_deg;
+
+	// Updated by check_motor_state()
+	float motor_pos_deg;
+	float motor_vel_steps_sec;
+
 } TPC_Info;
 
-
-
-/*
- * Tanks array declared in this file for organization,
- * other functions access and pass them into the control loops.
- */
-extern TPC_Info tanks[NUM_TANKS];
 
 /**
  * Resets control loop variables and parameters.
@@ -94,16 +85,14 @@ extern TPC_Info tanks[NUM_TANKS];
  */
 void tank_init_control_loop(TPC_Info* tank);
 
+/**
+ * Call this right when you end the control loop for any reason.
+ */
+void tank_end_control_loop(TPC_Info* tank);
 
 /**
  * Runs a bang bang control loop on the given tank.
  * Should be called at periodic intervals during the AutoPress state.
- *
- * Required tank variables to be configured beforehand:
- * bang_bang_low_pres_thrshd
- * bang_bang_high_pres_thrshd
- * control_pres
- * Control Valve
  */
 void tank_autopress_bang_bang(TPC_Info* tank);
 
@@ -132,5 +121,12 @@ void tank_check_control_valve_threshold(TPC_Info* tank);
  * motor position to minimize pressure transients (?).
  */
 void tank_startup_init_motor_position(TPC_Info* tank);
+
+
+/**
+ * Reads the absolute position and speed from the motor IC,
+ * and updates the variables
+ */
+void check_motor_state(TPC_Info* tank);
 
 #endif /* INC_TANK_PRESSURE_CONTROL_H_ */

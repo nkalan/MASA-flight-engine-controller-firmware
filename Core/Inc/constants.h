@@ -47,14 +47,32 @@ extern TIM_HandleTypeDef htim13;
 #define TIM_MICROS        htim5
 
 // LED mappings
-#define LED_TELEM_PORT              LED_0_GPIO_Port
-#define LED_TELEM_PIN               LED_0_Pin
-#define LED_FLASH_LOGGING_PORT      LED_1_GPIO_Port
-#define LED_FLASH_LOGGING_PIN       LED_1_Pin
+#define LED_TELEM_PORT              (LED_0_GPIO_Port)
+#define LED_TELEM_PIN               (LED_0_Pin)
+#define LED_FLASH_LOGGING_PORT      (LED_1_GPIO_Port)
+#define LED_FLASH_LOGGING_PIN       (LED_1_Pin)
 
 // Microseconds since board reset
 #define SYS_MICROS        ((uint32_t)(__HAL_TIM_GET_COUNTER(&TIM_MICROS)))
 #define SYS_MILLIS        ((uint32_t)(SYS_MICROS/1000))  // Not really needed
+
+/**
+ * Valve channel mappings
+ * TODO: fix these
+ */
+#define LOX_CONTROL_VALVE_CH           (0)
+#define FUEL_CONTROL_VALVE_CH          (1)
+#define LOX_TANK_VENT_VALVE_CH         (2)
+#define FUEL_TANK_VENT_VALVE_CH        (3)
+#define COPV_VENT_VALVE_CH             (4)
+#define MPV_PURGE_VALVE_CH             (5)
+#define FUEL_MPV_VENT_VALVE_CH         (6)
+#define LOX_MPV_VENT_VALVE_CH          (7)
+#define MPV_PRESS_VALVE_CH             (8)
+#define NOZZLE_FILM_COOLING_VALVE_CH   (9)
+#define IGNITOR_CH                    (10)
+//#define EMERGENCY_MPV_CLOSE_VALVE_CH
+//#define ACTUATE_MPV_CLOSE_VALVE_CH
 
 /*
  * Sensor channel mappings
@@ -107,8 +125,9 @@ extern TIM_HandleTypeDef htim13;
 #define NUM_TCS                       (12)
 #define NUM_PTS                       (20)
 #define NUM_POTS                       (2)
+#define NUM_MOTORS                     (2)
 
-#define LOX_TANK                       (0)
-#define FUEL_TANK                      (1)
+#define LOX_TANK_NUM                   (0)
+#define FUEL_TANK_NUM                  (1)
 
 #endif /* INC_CONSTANTS_H_ */
