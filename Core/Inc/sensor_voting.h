@@ -10,7 +10,12 @@
 
 #include "status_flags.h"
 
+#define MEOP_LOX (340)
+#define MEOP_COPV (1400)
+#define MEOP_FUEL (340)
+
 typedef struct {
+
 	// Voting algorithm parameters are left as a struct because
 	// of unclear requirements
 } Voting_Alg_Config;
@@ -25,6 +30,9 @@ typedef struct {
  * combine the valid sensor readings to output a more accurate measurement.
  */
 float sensor_voting_algorithm(float input_A, float input_B, float input_C,
-		Voting_Alg_Config* config);
+		float meop);
+
+
+
 
 #endif /* INC_SENSOR_VOTING_H_ */
