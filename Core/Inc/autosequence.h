@@ -42,7 +42,20 @@ typedef struct {
 	uint8_t hotfire_fuel_tank_enable_PID_control;
 	uint8_t ignition_failure_shutdown_flag;
 
-} Autosequence_Timings;
+	// Start time variables
+	volatile uint32_t ignition_start_time_ms;  // Set in command interrupt
+	uint32_t hotfire_start_time_ms;
+	uint32_t post_start_time_ms;
+
+} Autosequence_Info;
+
+void init_autosequence_timings();
+
+
+void init_tank_pressure_control_configuration();
+
+
+void execute_autosequence();
 
 
 /**

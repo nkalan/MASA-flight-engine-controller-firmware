@@ -64,13 +64,13 @@ extern TIM_HandleTypeDef htim13;
 #define FUEL_CONTROL_VALVE_CH          (1)
 #define LOX_TANK_VENT_VALVE_CH         (2)
 #define FUEL_TANK_VENT_VALVE_CH        (3)
-#define COPV_VENT_VALVE_CH             (4)
-#define MPV_PURGE_VALVE_CH             (5)
-#define FUEL_MPV_VENT_VALVE_CH         (6)
-#define LOX_MPV_VENT_VALVE_CH          (7)
-#define MPV_PRESS_VALVE_CH             (8)
-#define NOZZLE_FILM_COOLING_VALVE_CH   (9)
-#define IGNITOR_CH                    (10)
+#define MPV_PURGE_VALVE_CH             (4)
+#define FUEL_MPV_VENT_VALVE_CH         (5)
+#define LOX_MPV_VENT_VALVE_CH          (6)
+#define MPV_PRESS_VALVE_CH             (7)
+#define NOZZLE_FILM_COOLING_VALVE_CH   (8)
+#define IGNITOR_CH                     (9)
+#define COPV_VENT_VALVE_CH            (10)
 //#define EMERGENCY_MPV_CLOSE_VALVE_CH
 //#define ACTUATE_MPV_CLOSE_VALVE_CH
 

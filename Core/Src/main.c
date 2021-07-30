@@ -33,7 +33,7 @@
 #include "serial_data.h"
 #include "tank_pressure_control.h"
 
-
+#include <string.h>
 
 #include "L6470.h"
 
@@ -65,7 +65,6 @@ TIM_HandleTypeDef htim11;
 TIM_HandleTypeDef htim13;
 
 UART_HandleTypeDef huart1;
-DMA_HandleTypeDef hdma_usart1_rx;
 
 /* USER CODE BEGIN PV */
 
@@ -80,7 +79,7 @@ extern uint8_t telem_disabled;
 extern DmaBufferInfo buffer_info;
 
 // Autosequence control info and timings
-extern Autosequence_Timings autosequence;
+extern Autosequence_Info autosequence;
 
 L6470_Motor_IC motor;
 uint16_t motor_config_reg = 0;
@@ -90,7 +89,6 @@ uint16_t motor_config_reg = 0;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_DMA_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_SPI4_Init(void);
 static void MX_SPI2_Init(void);
@@ -125,12 +123,33 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
 /**
  * DMA rx handling
  */
+/*
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	handle_uart_dma_rx(huart, &buffer_info);
 }
 
+*/
 
 
+void init_peripherals() {
+
+}
+
+uint8_t last_byte_uart = 255;
+volatile uint16_t telem_buffer_sz = 0;
+uint8_t telem_buffer[255];
+uint8_t eof_received = 0;
+
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+	if (huart == &COM_UART) {
+		HAL_UART_Receive_IT(&COM_UART, &last_byte_uart, 1);
+		telem_buffer[telem_buffer_sz++] = last_byte_uart;
+		if (last_byte_uart == 0) {
+			eof_received = 1;
+		}
+	}
+}
 
 /* USER CODE END 0 */
 
@@ -162,7 +181,6 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
   MX_SPI1_Init();
   MX_SPI4_Init();
   MX_SPI2_Init();
@@ -184,19 +202,27 @@ int main(void)
   HAL_TIM_Base_Start_IT(&TIM_100MS);
 
   // UART DMA
+  HAL_UART_Receive_IT(&COM_UART, &last_byte_uart, 1);
+  //__HAL_UART_ENABLE_IT(&COM_UART, UART_IT_IDLE);   // enable idle line interrupt
+  //HAL_UART_Receive_DMA(&COM_UART, buffer_info.DMA_RX_Buffer, DMA_RX_BUFFER_SIZE);
 
 
   // Watchdog
 
+  //pressure[0] = 1;
 
   // Board-specific hardware
   //init_spi_peripherals();  // Set chip selects high and initialize
 
   //init_adcs();
   //init_thermocouples();
-  //init_serial_data();
+  init_serial_data(&buffer_info);
   //init_autosequence_timings();  // TODO: is this really needed?
   //init_flash(&flash, &SPI_MEM, FLASH_CS_GPIO_Port, FLASH_CS_Pin);
+
+  init_board(FLIGHT_EC_ADDR);
+
+  init_autosequence_timings();
 
 
   // Motor stress test
@@ -209,45 +235,28 @@ int main(void)
   L6470_init_motor(&motor, L6470_FULL_STEP_MODE, 1.8);
   //motor_config_reg = L6470_read_register(&motor, L6470_PARAM_CONFIG_ADDR);
 
-  L6470_hard_stop(&motor);
-
-  uint8_t delay_code = 0;
-
-  if (delay_code) {
-	  HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, 0);
-	  HAL_GPIO_WritePin(LED_1_GPIO_Port, LED_1_Pin, 0);
-	  HAL_GPIO_WritePin(LED_2_GPIO_Port, LED_2_Pin, 0);
-	  HAL_GPIO_WritePin(LED_3_GPIO_Port, LED_3_Pin, 0);
-	  HAL_Delay(7000);
-
-	  HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, 1);
-	  HAL_GPIO_WritePin(LED_1_GPIO_Port, LED_1_Pin, 0);
-	  HAL_GPIO_WritePin(LED_2_GPIO_Port, LED_2_Pin, 0);
-	  HAL_GPIO_WritePin(LED_3_GPIO_Port, LED_3_Pin, 0);
-	  HAL_Delay(7000);
-
-	  HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, 1);
-	  HAL_GPIO_WritePin(LED_1_GPIO_Port, LED_1_Pin, 1);
-	  HAL_GPIO_WritePin(LED_2_GPIO_Port, LED_2_Pin, 0);
-	  HAL_GPIO_WritePin(LED_3_GPIO_Port, LED_3_Pin, 0);
-	  HAL_Delay(7000);
-
-	  HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, 1);
-	  HAL_GPIO_WritePin(LED_1_GPIO_Port, LED_1_Pin, 1);
-	  HAL_GPIO_WritePin(LED_2_GPIO_Port, LED_2_Pin, 1);
-	  HAL_GPIO_WritePin(LED_3_GPIO_Port, LED_3_Pin, 0);
-	  HAL_Delay(7000);
-
-	  HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, 1);
-	  HAL_GPIO_WritePin(LED_1_GPIO_Port, LED_1_Pin, 1);
-	  HAL_GPIO_WritePin(LED_2_GPIO_Port, LED_2_Pin, 1);
-	  HAL_GPIO_WritePin(LED_3_GPIO_Port, LED_3_Pin, 1);
-  }
-
   // Move the motor
-  L6470_run(&motor, 1, 720);
-  //L6470_hard_stop(&motor);
+  //L6470_run(&motor, 1, 720);
+  //HAL_Delay(1000);
+  //L6470_stop_motor(&motor);
 
+  // Set the valve
+  //set_valve_channel(0, 1);
+
+  /*
+  L6470_run(&motor, 1, 720);
+  for (uint8_t i = 0; i < 9; i++) {
+	  set_valve_channel(i, 1);
+  }
+  */
+
+  /*
+  HAL_Delay(20000);
+  for (uint8_t i = 0; i < 9; i++) {
+	  set_valve_channel(i, 0);
+  }
+  L6470_stop_motor(&motor);
+	*/
 
   /* USER CODE END 2 */
 
@@ -258,27 +267,40 @@ int main(void)
 	  // Handle autosequence first in every loop
 	  // most important, time sensitive operation
 	  // TODO: call autosequence functions
-	  L6470_get_status(&motor);
-	  HAL_Delay(10);
+	  execute_autosequence();
+	  flash_mem = get_bytes_remaining(&flash);
+
+	  //L6470_get_status(&motor);
+	  //HAL_Delay(10);
 
 	  /*
+	  set_valve_channel(0, 1);
+	  HAL_Delay(1000);
+	  set_valve_channel(0, 0);
+	  HAL_Delay(1000);
+	  */
+
+	  /*
+	  char string[15] = "Hello world!\n";
+	  HAL_UART_Transmit(&COM_UART, (uint8_t*)string, strlen(string), 0xFF);
+	  HAL_Delay(500);
+	  */
+
 	  if (periodic_flag_50ms) {
 		  periodic_flag_50ms = 0;
 
 		  // Active tank pressure PID control
 		  // tank enable flags get set during the autosequence
 		  if (STATE == Hotfire) {
-			  if (autosequence.lox_tank_enable_PID_control) {
+			  if (autosequence.hotfire_lox_tank_enable_PID_control) {
 				  tank_PID_pressure_control(&tanks[LOX_TANK_NUM]);
 			  }
-			  if (autosequence.fuel_tank_enable_PID_control) {
+			  if (autosequence.hotfire_fuel_tank_enable_PID_control) {
 				  tank_PID_pressure_control(&tanks[FUEL_TANK_NUM]);
 			  }
 		  }
 	  }
-	  */
 
-	  /*
 	  if (periodic_flag_5ms) {
 		  periodic_flag_5ms = 0;
 
@@ -313,14 +335,13 @@ int main(void)
 		  }
 
 	  }
-	  */
 
 
-	  /*
+
 	  // Check periodic interrupt flags and call appropriate functions if needed
 	  if (periodic_flag_100ms) {
 		  periodic_flag_100ms = 0;
-		  HAL_GPIO_TogglePin(LED_TELEM_PORT, LED_TELEM_PIN);
+		  //HAL_GPIO_TogglePin(LED_TELEM_PORT, LED_TELEM_PIN);
 
 
 		  if (!telem_disabled) {
@@ -330,7 +351,14 @@ int main(void)
 
 	  }
 
-	*/
+	  //HAL_UART_Receive(&COM_UART, rx_buffer, 13, HAL_MAX_DELAY);
+
+	  if (eof_received) {
+		  receive_data(&COM_UART, telem_buffer, telem_buffer_sz);
+		  eof_received = 0;
+		  telem_buffer_sz = 0;
+	  }
+
 
     /* USER CODE END WHILE */
 
@@ -704,22 +732,6 @@ static void MX_USART1_UART_Init(void)
   /* USER CODE BEGIN USART1_Init 2 */
 
   /* USER CODE END USART1_Init 2 */
-
-}
-
-/**
-  * Enable DMA controller clock
-  */
-static void MX_DMA_Init(void)
-{
-
-  /* DMA controller clock enable */
-  __HAL_RCC_DMA2_CLK_ENABLE();
-
-  /* DMA interrupt init */
-  /* DMA2_Stream2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
 
 }
 

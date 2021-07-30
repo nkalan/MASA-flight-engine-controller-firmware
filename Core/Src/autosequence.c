@@ -19,8 +19,28 @@
 // Telem on/off toggle
 extern uint8_t telem_disabled;
 
+
 // Tanks
 TPC_Info tanks[NUM_TANKS];
+
+
+// Timings struct declared here
+Autosequence_Info autosequence;
+
+void init_autosequence_timings() {
+	autosequence.ignition_ignitor_on_time_ms = 500;
+	autosequence.ignition_ignitor_off_time_ms = 1250;
+
+	autosequence.hotfire_fuel_on_time_ms = 3;  // TODO: read from flash
+	autosequence.hotfire_lox_PID_control_start_time_ms = 0;  // TODO: read from flash
+	autosequence.hotfire_fuel_PID_control_start_time_ms = 10;  //  TODO: read from flash
+	autosequence.hotfire_film_cooling_on_time_ms = 50;  // TODO: update
+	autosequence.hotfire_complete_time_ms = 4000;  // TODO: replace with test_duration
+
+	autosequence.post_vent_on_time_ms = 1000;  // TODO: update
+	autosequence.post_vent_off_time_ms = 2000;  // TODO: update
+	autosequence.post_purge_off_time_ms = 10000;  // TODO: update
+}
 
 
 /**
@@ -57,12 +77,6 @@ void init_tank_pressure_control_configuration() {
 }
 
 /**
- * Timings struct declared here
- */
-Autosequence_Timings autosequence;
-
-
-/**
  * Call this function every time you want to abort.
  * Handles all actuations.
  */
@@ -73,6 +87,9 @@ void handle_abort_case_actuations() {
 	set_valve_channel(MPV_PRESS_VALVE_CH, VALVE_OFF);
 	set_valve_channel(LOX_MPV_VENT_VALVE_CH, VALVE_OFF);
 	set_valve_channel(FUEL_MPV_VENT_VALVE_CH, VALVE_OFF);
+
+	// Stop nozzle film cooling
+	set_valve_channel(NOZZLE_FILM_COOLING_VALVE_CH, VALVE_OFF);
 
 	// Close control valves
 	set_valve_channel(LOX_CONTROL_VALVE_CH, VALVE_OFF);
@@ -141,6 +158,9 @@ void manual_state_transition(uint8_t next_state) {
 		if (next_state == Manual) {
 			STATE = Safe;
 		}
+		else if (next_state == AutoPress) {
+			STATE = Startup;
+		}
 		// TODO: manual override into Startup (not sure about timing or command)
 	}
 	else if (STATE == Startup) {
@@ -149,8 +169,8 @@ void manual_state_transition(uint8_t next_state) {
 		}
 		else if (next_state == Ignition) {
 			STATE = Ignition;
-			// Turn purge on
-			set_valve_channel(MPV_PURGE_VALVE_CH, VALVE_ON);
+			autosequence.ignition_start_time_ms = SYS_MILLIS;
+			set_valve_channel(MPV_PURGE_VALVE_CH, VALVE_ON);  // Turn purge on
 		}
 	}
 	else if (STATE == IgnitionFail) {
@@ -165,15 +185,39 @@ void manual_state_transition(uint8_t next_state) {
 	}
 }
 
-void execute_autosequence(int32_t T_state, Autosequence_Timings* autosequence) {
+/**
+ * Only works for Ignition, Hotfire, and Post
+ */
+uint32_t get_ellapsed_time_in_autosequence_state() {
+	if (STATE == Ignition) {
+		return SYS_MILLIS - autosequence.ignition_start_time_ms;
+	}
+	else if (STATE == Hotfire) {
+		return SYS_MILLIS - autosequence.hotfire_start_time_ms;
+	}
+	else if (STATE == Post) {
+		return SYS_MILLIS - autosequence.post_start_time_ms;
+	}
+	else {
+		return 0;
+	}
+}
+
+
+void execute_autosequence() {
+
+	// Autosequence timings are done relative to the start of the state
+	uint32_t T_state = get_ellapsed_time_in_autosequence_state();
+
+
 	// Doesn't use if else in case the timings overlap
 
 	if (STATE == Ignition) {
 		// Purge should've turned on when entering Ignition
-		if (T_state >= autosequence->ignition_ignitor_on_time_ms) {
+		if (T_state >= autosequence.ignition_ignitor_on_time_ms) {
 			set_valve_channel(IGNITOR_CH, VALVE_ON);
 		}
-		if (T_state >= autosequence->ignition_ignitor_off_time_ms) {
+		if (T_state >= autosequence.ignition_ignitor_off_time_ms) {
 			// Ignitor low
 			set_valve_channel(IGNITOR_CH, VALVE_OFF);
 
@@ -191,6 +235,7 @@ void execute_autosequence(int32_t T_state, Autosequence_Timings* autosequence) {
 
 			// Transition to Hotfire state
 			STATE = Hotfire;
+			autosequence.hotfire_start_time_ms = SYS_MILLIS;
 		}
 	}
 
@@ -198,7 +243,7 @@ void execute_autosequence(int32_t T_state, Autosequence_Timings* autosequence) {
 		// Prevents the operator from going back to Manual, if they somehow
 		// give the Manual command before this finishes executing
 		// if (done with whatever) {
-			autosequence->ignition_failure_shutdown_flag = 1;
+			autosequence.ignition_failure_shutdown_flag = 1;
 		// }
 	}
 
@@ -206,39 +251,46 @@ void execute_autosequence(int32_t T_state, Autosequence_Timings* autosequence) {
 		// Tank pressure control periodic function calls handled in main()
 		// Not using else if in case the timings overlap
 
-		if (T_state >= autosequence->hotfire_lox_PID_control_start_time_ms
-				&& autosequence->hotfire_lox_tank_enable_PID_control) {
+		if (T_state >= autosequence.hotfire_lox_PID_control_start_time_ms
+				&& autosequence.hotfire_lox_tank_enable_PID_control) {
 			// Should only get called once when it starts pressure control
 			tank_init_control_loop(&tanks[LOX_TANK_NUM]);
-			autosequence->hotfire_lox_tank_enable_PID_control = 1;
+			autosequence.hotfire_lox_tank_enable_PID_control = 1;
 		}
-		if (T_state >= autosequence->hotfire_fuel_on_time_ms) {
+		if (T_state >= autosequence.hotfire_fuel_on_time_ms) {
 			// Open Fuel MPV (MPV Press should already be open)
 			set_valve_channel(FUEL_MPV_VENT_VALVE_CH, VALVE_ON);
+
+			// Open Fuel control valve
+			set_valve_channel(FUEL_CONTROL_VALVE_CH, VALVE_ON);
 
 			// Re-enable telemetry
 			// TODO: remove this when DMA tx is working?
 			telem_disabled = 0;
 		}
-		if (T_state >= autosequence->hotfire_fuel_PID_control_start_time_ms
-			&& !autosequence->hotfire_fuel_tank_enable_PID_control) {
+		if (T_state >= autosequence.hotfire_fuel_PID_control_start_time_ms
+			&& !autosequence.hotfire_fuel_tank_enable_PID_control) {
 			// Should only get called once when it starts pressure control
 			tank_init_control_loop(&tanks[FUEL_TANK_NUM]);
-			autosequence->hotfire_fuel_tank_enable_PID_control = 1;
+			autosequence.hotfire_fuel_tank_enable_PID_control = 1;
 		}
-		if (T_state >= autosequence->hotfire_purge_off_time_ms) {
+		if (T_state >= autosequence.hotfire_purge_off_time_ms) {
 			// Purge low
 			set_valve_channel(MPV_PURGE_VALVE_CH, VALVE_OFF);
 		}
-		if (T_state >= autosequence->hotfire_film_cooling_on_time_ms) {
+		if (T_state >= autosequence.hotfire_film_cooling_on_time_ms) {
 			// Nozzle film cooling on
 			set_valve_channel(NOZZLE_FILM_COOLING_VALVE_CH, VALVE_ON);
 		}
-		if (T_state >= autosequence->hotfire_complete_time_ms) {
+		if (T_state >= autosequence.hotfire_complete_time_ms) {
 			// Close LOX and Fuel MPVs
 			set_valve_channel(MPV_PRESS_VALVE_CH, VALVE_OFF);
 			set_valve_channel(LOX_MPV_VENT_VALVE_CH, VALVE_OFF);
 			set_valve_channel(FUEL_MPV_VENT_VALVE_CH, VALVE_OFF);
+
+			// Close control valves
+			set_valve_channel(LOX_CONTROL_VALVE_CH, VALVE_OFF);
+			set_valve_channel(FUEL_CONTROL_VALVE_CH, VALVE_OFF);
 
 			// Purge high
 			set_valve_channel(MPV_PURGE_VALVE_CH, VALVE_ON);
@@ -247,28 +299,29 @@ void execute_autosequence(int32_t T_state, Autosequence_Timings* autosequence) {
 			set_valve_channel(NOZZLE_FILM_COOLING_VALVE_CH, VALVE_OFF);
 
 			// Stop tank pressure control
-			tank_end_control_loop(&tanks[LOX_TANK_NUM]);
-			tank_end_control_loop(&tanks[FUEL_TANK_NUM]);
+			autosequence.hotfire_lox_tank_enable_PID_control = 0;
+			autosequence.hotfire_fuel_tank_enable_PID_control = 0;
 
 			// Transition to Post state
 			STATE = Post;
+			autosequence.post_start_time_ms = SYS_MILLIS;
 		}
 	}
 
 	else if (STATE == Post) {
 		// MPVs should already be closed and purge should've started by now
 
-		if (T_state >= autosequence->post_vent_on_time_ms) {
+		if (T_state >= autosequence.post_vent_on_time_ms) {
 			// Vent both tanks
 			set_valve_channel(LOX_TANK_VENT_VALVE_CH, VALVE_ON);
 			set_valve_channel(FUEL_TANK_VENT_VALVE_CH, VALVE_ON);
 		}
-		if (T_state >= autosequence->post_vent_off_time_ms) {
+		if (T_state >= autosequence.post_vent_off_time_ms) {
 			// Close tank vents
 			set_valve_channel(LOX_TANK_VENT_VALVE_CH, VALVE_OFF);
 			set_valve_channel(FUEL_TANK_VENT_VALVE_CH, VALVE_OFF);
 		}
-		if (T_state >= autosequence->post_purge_off_time_ms) {
+		if (T_state >= autosequence.post_purge_off_time_ms) {
 			// Purge low
 			set_valve_channel(MPV_PURGE_VALVE_CH, VALVE_OFF);
 
