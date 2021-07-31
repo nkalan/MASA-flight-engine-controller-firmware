@@ -2,7 +2,7 @@
  * sensor_voting.c
  *
  *  Created on: Jul 4, 2021
- *      Author: nathan
+ *      Author: Elham Islam
  */
 
 
