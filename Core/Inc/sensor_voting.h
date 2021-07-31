@@ -8,11 +8,7 @@
 #ifndef INC_SENSOR_VOTING_H_
 #define INC_SENSOR_VOTING_H_
 
-#include "status_flags.h"
 
-#define MEOP_LOX (340)
-#define MEOP_COPV (1400)
-#define MEOP_FUEL (340)
 
 typedef struct {
 
