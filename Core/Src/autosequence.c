@@ -27,15 +27,17 @@ TPC_Info tanks[NUM_TANKS];
 // Timings struct declared here
 Autosequence_Info autosequence;
 
+/**
+ * This function must be called AFTER variables are read from flash
+ */
 void init_autosequence_timings() {
-	autosequence.ignition_ignitor_on_time_ms = 500;
-	autosequence.ignition_ignitor_off_time_ms = 1250;
+	// TODO: move to flash
+	// Ignition timings moved to flash
 
-	autosequence.hotfire_fuel_on_time_ms = 3;  // TODO: read from flash
-	autosequence.hotfire_lox_PID_control_start_time_ms = 0;  // TODO: read from flash
-	autosequence.hotfire_fuel_PID_control_start_time_ms = 10;  //  TODO: read from flash
-	autosequence.hotfire_film_cooling_on_time_ms = 50;  // TODO: update
-	autosequence.hotfire_complete_time_ms = 4000;  // TODO: replace with test_duration
+	// Valve timings read from flash
+	// PID start delay read from flash
+	// Film cooling start time read from flash
+	// hotfire duration read from flash
 
 	autosequence.post_vent_on_time_ms = 1000;  // TODO: update
 	autosequence.post_vent_off_time_ms = 2000;  // TODO: update
@@ -84,9 +86,9 @@ void handle_abort_case_actuations() {
 	// TODO: check normally open/normally closed on ALL these valves
 
 	// Close MPVs
-	set_valve_channel(MPV_PRESS_VALVE_CH, VALVE_OFF);
-	set_valve_channel(LOX_MPV_VENT_VALVE_CH, VALVE_OFF);
+	set_valve_channel(FUEL_MPV_PRESS_VALVE_CH, VALVE_OFF);
 	set_valve_channel(FUEL_MPV_VENT_VALVE_CH, VALVE_OFF);
+	set_valve_channel(LOX_MPV_VALVE_CH, VALVE_OFF);
 
 	// Stop nozzle film cooling
 	set_valve_channel(NOZZLE_FILM_COOLING_VALVE_CH, VALVE_OFF);
@@ -103,7 +105,7 @@ void handle_abort_case_actuations() {
 	set_valve_channel(LOX_TANK_VENT_VALVE_CH, VALVE_ON);
 
 	// Open purge valve
-	set_valve_channel(MPV_PURGE_VALVE_CH, VALVE_ON);
+	set_valve_channel(PURGE_VALVE_CH, VALVE_ON);
 
 	// Close motors (needle valves), 0 degrees should be closed.
 	L6470_goto_motor_pos(&(tanks[LOX_TANK_NUM].motor), 0);
@@ -170,7 +172,7 @@ void manual_state_transition(uint8_t next_state) {
 		else if (next_state == Ignition) {
 			STATE = Ignition;
 			autosequence.ignition_start_time_ms = SYS_MILLIS;
-			set_valve_channel(MPV_PURGE_VALVE_CH, VALVE_ON);  // Turn purge on
+			set_valve_channel(PURGE_VALVE_CH, VALVE_ON);  // Turn purge on
 		}
 	}
 	else if (STATE == IgnitionFail) {
@@ -214,16 +216,18 @@ void execute_autosequence() {
 
 	if (STATE == Ignition) {
 		// Purge should've turned on when entering Ignition
-		if (T_state >= autosequence.ignition_ignitor_on_time_ms) {
+		// Wait for the delay, then turn ignitor on
+		if (T_state >= autosequence.ignition_ignitor_on_delay_ms) {
 			set_valve_channel(IGNITOR_CH, VALVE_ON);
 		}
-		if (T_state >= autosequence.ignition_ignitor_off_time_ms) {
+		// Hold ignitor high for a certain amount of time
+		if (T_state >= autosequence.ignition_ignitor_on_delay_ms
+				+ autosequence.ignition_ignitor_high_duration_ms) {
 			// Ignitor low
 			set_valve_channel(IGNITOR_CH, VALVE_OFF);
 
 			// Open LOX MPV
-			set_valve_channel(MPV_PRESS_VALVE_CH, VALVE_ON);
-			set_valve_channel(LOX_MPV_VENT_VALVE_CH, VALVE_ON);
+			set_valve_channel(LOX_MPV_VALVE_CH, VALVE_ON);
 
 			// Open LOX control valve
 			set_valve_channel(LOX_CONTROL_VALVE_CH, VALVE_ON);
@@ -251,15 +255,20 @@ void execute_autosequence() {
 		// Tank pressure control periodic function calls handled in main()
 		// Not using else if in case the timings overlap
 
-		if (T_state >= autosequence.hotfire_lox_PID_control_start_time_ms
-				&& autosequence.hotfire_lox_tank_enable_PID_control) {
+		// Turn on LOX pressure control
+		// Relative to 0 because LOX leads
+		if (T_state >= (0 + autosequence.hotfire_pid_start_delay_ms)
+				&& !autosequence.hotfire_lox_tank_enable_PID_control) {
 			// Should only get called once when it starts pressure control
 			tank_init_control_loop(&tanks[LOX_TANK_NUM]);
 			autosequence.hotfire_lox_tank_enable_PID_control = 1;
 		}
-		if (T_state >= autosequence.hotfire_fuel_on_time_ms) {
-			// Open Fuel MPV (MPV Press should already be open)
+
+		// Fuel on
+		if (T_state >= autosequence.hotfire_fuel_mpv_opening_delay_ms) {
+			// Open Fuel MPV (Press AND Vent)
 			set_valve_channel(FUEL_MPV_VENT_VALVE_CH, VALVE_ON);
+			set_valve_channel(FUEL_MPV_PRESS_VALVE_CH, VALVE_ON);
 
 			// Open Fuel control valve
 			set_valve_channel(FUEL_CONTROL_VALVE_CH, VALVE_ON);
@@ -268,32 +277,42 @@ void execute_autosequence() {
 			// TODO: remove this when DMA tx is working?
 			telem_disabled = 0;
 		}
-		if (T_state >= autosequence.hotfire_fuel_PID_control_start_time_ms
-			&& !autosequence.hotfire_fuel_tank_enable_PID_control) {
+
+		// Turn on Fuel pressure control
+		// Delay is relative to MPV opening
+		if (T_state >= (autosequence.hotfire_fuel_mpv_opening_delay_ms
+				+ autosequence.hotfire_pid_start_delay_ms)
+				&& !autosequence.hotfire_fuel_tank_enable_PID_control) {
 			// Should only get called once when it starts pressure control
 			tank_init_control_loop(&tanks[FUEL_TANK_NUM]);
 			autosequence.hotfire_fuel_tank_enable_PID_control = 1;
 		}
-		if (T_state >= autosequence.hotfire_purge_off_time_ms) {
-			// Purge low
-			set_valve_channel(MPV_PURGE_VALVE_CH, VALVE_OFF);
-		}
+
+		// Nozzle film cooling timing is relative to LOX MPV opening
 		if (T_state >= autosequence.hotfire_film_cooling_on_time_ms) {
 			// Nozzle film cooling on
 			set_valve_channel(NOZZLE_FILM_COOLING_VALVE_CH, VALVE_ON);
 		}
+
+		// After combustion starts, turn off purge
+		if (T_state >= autosequence.hotfire_purge_off_time_ms) {
+			// Purge low
+			set_valve_channel(PURGE_VALVE_CH, VALVE_OFF);
+		}
+
+		// Stop hotfire
 		if (T_state >= autosequence.hotfire_complete_time_ms) {
 			// Close LOX and Fuel MPVs
-			set_valve_channel(MPV_PRESS_VALVE_CH, VALVE_OFF);
-			set_valve_channel(LOX_MPV_VENT_VALVE_CH, VALVE_OFF);
+			set_valve_channel(FUEL_MPV_PRESS_VALVE_CH, VALVE_OFF);
 			set_valve_channel(FUEL_MPV_VENT_VALVE_CH, VALVE_OFF);
+			set_valve_channel(LOX_MPV_VALVE_CH, VALVE_OFF);
 
 			// Close control valves
 			set_valve_channel(LOX_CONTROL_VALVE_CH, VALVE_OFF);
 			set_valve_channel(FUEL_CONTROL_VALVE_CH, VALVE_OFF);
 
 			// Purge high
-			set_valve_channel(MPV_PURGE_VALVE_CH, VALVE_ON);
+			set_valve_channel(PURGE_VALVE_CH, VALVE_ON);
 
 			// Nozzle film cooling off
 			set_valve_channel(NOZZLE_FILM_COOLING_VALVE_CH, VALVE_OFF);
@@ -314,16 +333,20 @@ void execute_autosequence() {
 		if (T_state >= autosequence.post_vent_on_time_ms) {
 			// Vent both tanks
 			set_valve_channel(LOX_TANK_VENT_VALVE_CH, VALVE_ON);
+
+			// TODO: this should be moved to the GSE controller
 			set_valve_channel(FUEL_TANK_VENT_VALVE_CH, VALVE_ON);
 		}
 		if (T_state >= autosequence.post_vent_off_time_ms) {
 			// Close tank vents
 			set_valve_channel(LOX_TANK_VENT_VALVE_CH, VALVE_OFF);
+
+			// This should be moved to the GSE controller
 			set_valve_channel(FUEL_TANK_VENT_VALVE_CH, VALVE_OFF);
 		}
 		if (T_state >= autosequence.post_purge_off_time_ms) {
 			// Purge low
-			set_valve_channel(MPV_PURGE_VALVE_CH, VALVE_OFF);
+			set_valve_channel(PURGE_VALVE_CH, VALVE_OFF);
 
 			// Transition back to Manual
 			STATE = Manual;

@@ -32,6 +32,7 @@
 #include "globals.h"  // included for STATE
 #include "serial_data.h"
 #include "tank_pressure_control.h"
+#include "nonvolatile_memory.h"
 
 #include <string.h>
 
@@ -209,6 +210,10 @@ int main(void)
 
   // Watchdog
 
+  // Read variables from flash: this must be called very early in initialization!
+  init_flash(&flash, &SPI_MEM, FLASH_CS_GPIO_Port, FLASH_CS_Pin);
+  read_nonvolatile_variables();
+
   //pressure[0] = 1;
 
   // Board-specific hardware
@@ -217,10 +222,8 @@ int main(void)
   //init_adcs();
   //init_thermocouples();
   init_serial_data(&buffer_info);
-  //init_autosequence_timings();  // TODO: is this really needed?
-  //init_flash(&flash, &SPI_MEM, FLASH_CS_GPIO_Port, FLASH_CS_Pin);
 
-  init_board(FLIGHT_EC_ADDR);
+  init_board(FLIGHT_EC_ADDR);  // Comms
 
   init_autosequence_timings();
 
@@ -233,30 +236,6 @@ int main(void)
   motor.busy_pin = MTR0_BUSY_Pin;
 
   L6470_init_motor(&motor, L6470_FULL_STEP_MODE, 1.8);
-  //motor_config_reg = L6470_read_register(&motor, L6470_PARAM_CONFIG_ADDR);
-
-  // Move the motor
-  //L6470_run(&motor, 1, 720);
-  //HAL_Delay(1000);
-  //L6470_stop_motor(&motor);
-
-  // Set the valve
-  //set_valve_channel(0, 1);
-
-  /*
-  L6470_run(&motor, 1, 720);
-  for (uint8_t i = 0; i < 9; i++) {
-	  set_valve_channel(i, 1);
-  }
-  */
-
-  /*
-  HAL_Delay(20000);
-  for (uint8_t i = 0; i < 9; i++) {
-	  set_valve_channel(i, 0);
-  }
-  L6470_stop_motor(&motor);
-	*/
 
   /* USER CODE END 2 */
 
@@ -267,24 +246,10 @@ int main(void)
 	  // Handle autosequence first in every loop
 	  // most important, time sensitive operation
 	  // TODO: call autosequence functions
-	  execute_autosequence();
+	  //execute_autosequence();
 	  flash_mem = get_bytes_remaining(&flash);
 
-	  //L6470_get_status(&motor);
-	  //HAL_Delay(10);
 
-	  /*
-	  set_valve_channel(0, 1);
-	  HAL_Delay(1000);
-	  set_valve_channel(0, 0);
-	  HAL_Delay(1000);
-	  */
-
-	  /*
-	  char string[15] = "Hello world!\n";
-	  HAL_UART_Transmit(&COM_UART, (uint8_t*)string, strlen(string), 0xFF);
-	  HAL_Delay(500);
-	  */
 
 	  if (periodic_flag_50ms) {
 		  periodic_flag_50ms = 0;
@@ -341,8 +306,6 @@ int main(void)
 	  // Check periodic interrupt flags and call appropriate functions if needed
 	  if (periodic_flag_100ms) {
 		  periodic_flag_100ms = 0;
-		  //HAL_GPIO_TogglePin(LED_TELEM_PORT, LED_TELEM_PIN);
-
 
 		  if (!telem_disabled) {
 			  send_telem_packet(SERVER_ADDR);

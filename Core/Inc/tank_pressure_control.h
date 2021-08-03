@@ -23,7 +23,7 @@ typedef struct {
 	/**
 	 * Inputs: user must set all these variables on initialization
 	 */
-	uint8_t tank_enable;   // Enable motor/valve actuations
+	volatile uint8_t tank_enable;   // Enable motor/valve actuations
 
 	uint8_t is_cryogenic;  // Affects initial motor position calculation
 
@@ -37,7 +37,7 @@ typedef struct {
 	float* COPV_temp;     // for initial motor position
 
 	// Setpoint
-	float target_pres;
+	volatile float target_pres;
 
 	// Thresholds used in Autopress bang bang
 	// Pressure above target pressure which to trigger control valve
@@ -49,12 +49,12 @@ typedef struct {
 	// in addition to the needle valve when control pressure goes a
 	// certain range, defined as a percent of the target pressure.
 	// Not technically part of the PID calculation, but used in parallel.
-	float PID_ctrl_vlv_low_pres_percent;
-	float PID_ctrl_vlv_high_pres_percent;
+	volatile float PID_ctrl_vlv_low_pres;
+	volatile float PID_ctrl_vlv_high_pres;
 
 	uint32_t PID_ctrl_loop_period_ms;  // Used in I/D calculations
 
-	float K_p, K_i, K_d;  // Gains
+	volatile float K_p, K_i, K_d;  // Gains
 
 
 	/*

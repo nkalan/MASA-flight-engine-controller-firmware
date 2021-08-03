@@ -23,27 +23,28 @@
 typedef struct {
 
 	// Timing variables, organized by state
-	uint32_t ignition_ignitor_on_time_ms;
-	uint32_t ignition_ignitor_off_time_ms;
+	// volatile variables are set from the GUI and saved to flash
 
-	uint32_t hotfire_fuel_on_time_ms;
-	uint32_t hotfire_lox_PID_control_start_time_ms;
-	uint32_t hotfire_fuel_PID_control_start_time_ms;
-	uint32_t hotfire_film_cooling_on_time_ms;
+	volatile uint16_t ignition_ignitor_on_delay_ms;
+	volatile uint16_t ignition_ignitor_high_duration_ms;
+
+	volatile uint8_t hotfire_fuel_mpv_opening_delay_ms;
+	volatile uint16_t hotfire_film_cooling_on_time_ms;
+	volatile uint16_t hotfire_pid_start_delay_ms;
 	uint32_t hotfire_purge_off_time_ms;
-	uint32_t hotfire_complete_time_ms;
+	volatile uint32_t hotfire_complete_time_ms;
 
 	uint32_t post_vent_on_time_ms;
 	uint32_t post_vent_off_time_ms;
 	uint32_t post_purge_off_time_ms;
 
 	// Control variables
-	uint8_t hotfire_lox_tank_enable_PID_control;
-	uint8_t hotfire_fuel_tank_enable_PID_control;
 	uint8_t ignition_failure_shutdown_flag;
+	uint8_t hotfire_lox_tank_enable_PID_control;   // 1 during active TPC
+	uint8_t hotfire_fuel_tank_enable_PID_control;  // 1 during active TPC
 
-	// Start time variables
-	volatile uint32_t ignition_start_time_ms;  // Set in command interrupt
+	// Start time variables - set automatically during autosequence
+	volatile uint32_t ignition_start_time_ms;  // Set in Ignition set_state command
 	uint32_t hotfire_start_time_ms;
 	uint32_t post_start_time_ms;
 

@@ -11,6 +11,8 @@
 #include "valves.h"
 #include "math.h"
 
+extern float init_motor_pos_deg_correction_factor;  // from globals
+
 
 /**
  * Small wrapper around motor actuation, to allow specific
@@ -143,6 +145,10 @@ void reset_control_variables(int32_t test_start_time, uint8_t tank_num) {
 }
 */
 
+
+/**
+ * Call this right before entering the control loop
+ */
 void tank_init_control_loop(TPC_Info* tank) {
 	tank->Kp_error = 0,
 	tank->Ki_error = 0;
@@ -210,12 +216,10 @@ void tank_PID_pressure_control(TPC_Info* tank) {
 // Almost identical to autopress bang bang but it runs in parallel
 // with the PID control loop and has different thresholds.
 void tank_check_control_valve_threshold(TPC_Info* tank) {
-    if (*(tank->control_pres) < (tank->target_pres
-    		* tank->PID_ctrl_vlv_low_pres_percent)) {
+    if (*(tank->control_pres) < (tank->PID_ctrl_vlv_low_pres)) {
     	actuate_tank_control_valve(tank, 1);
     }
-    else if (*(tank->control_pres) > (tank->target_pres
-    		* tank->PID_ctrl_vlv_high_pres_percent)) {
+    else if (*(tank->control_pres) > (tank->PID_ctrl_vlv_high_pres)) {
     	actuate_tank_control_valve(tank, 0);
     }
 }
@@ -249,8 +253,6 @@ void tank_startup_init_motor_position(TPC_Info* tank) {
 	double t_std = 288; // K
 	double p_std = 14.7; // psi
 
-	double deg_correction_factor = 0.25;  // %degrees to move motor past the calculated deg
-
 	if (tank->is_cryogenic) {
 		vdot   = 0.00317;
 	}
@@ -258,12 +260,10 @@ void tank_startup_init_motor_position(TPC_Info* tank) {
 		vdot   = 0.00361;
 	}
 
-
 	// Calculations
 	crit_pr = pow(2.0 / (gamma + 1), gamma / (gamma - 1));
 	t_r     = (double)(*(tank->COPV_temp)) * (9.0/5);
 	q_acf = vdot*2118.88; // cfm
-	// TODO: what units is meant by _acf? cf/m or cf?
 
 	if (tank->is_cryogenic) { // cryogenic liquid case
 		q_scf = q_acf*p_o/(p_std)*1.3;
@@ -278,7 +278,7 @@ void tank_startup_init_motor_position(TPC_Info* tank) {
 		valve_cv = q_scf/16.05/sqrt((pow(p_i,2)-pow(p_o,2))/sg/t_r);
 	}
 
-	deg = /*deg_correction_factor * No longer needed */ (c1*pow(valve_cv, 4) +
+	deg = init_motor_pos_deg_correction_factor * (c1*pow(valve_cv, 4) +
 		  c2*pow(valve_cv, 3) +
 		  c3*pow(valve_cv, 2) +
 		  c4*valve_cv);
