@@ -82,8 +82,10 @@ void init_tank_pressure_control_configuration() {
  * Call this function every time you want to abort.
  * Handles all actuations.
  */
-void handle_abort_case_actuations() {
-	// TODO: check normally open/normally closed on ALL these valves
+void enter_abort_state() {
+	// Enter Abort state
+	// This line is for in case someone forgets to set Abort elsewhere
+	STATE = Abort;
 
 	// Close MPVs
 	set_valve_channel(FUEL_MPV_PRESS_VALVE_CH, VALVE_OFF);
@@ -122,7 +124,10 @@ void handle_abort_case_actuations() {
  *
  * Can only be called in AutoPress and Startup.
  */
-void handle_safe_disarm_actuations() {
+void enter_safe_disarm_state() {
+	// Including this line in case programmer forgets to set it elsewhere
+	STATE = Safe;
+
 	// Close control valves and go back to Manual.
 	// TODO: should tank enable be looked at here?
 	set_valve_channel(LOX_CONTROL_VALVE_CH, VALVE_OFF);
@@ -136,7 +141,7 @@ void manual_state_transition(uint8_t next_state) {
 	// Aborts work in any state
 	if (next_state == Abort) {
 		STATE = Abort;
-		handle_abort_case_actuations();
+		enter_abort_state();
 		set_status_flag(EC_FLAG_ABORT_MANUAL);
 		return;
 	}
@@ -159,6 +164,7 @@ void manual_state_transition(uint8_t next_state) {
 	else if (STATE == AutoPress) {
 		if (next_state == Manual) {
 			STATE = Safe;
+			enter_safe_disarm_state();
 		}
 		else if (next_state == AutoPress) {
 			STATE = Startup;
@@ -168,6 +174,7 @@ void manual_state_transition(uint8_t next_state) {
 	else if (STATE == Startup) {
 		if (next_state == Manual) {
 			STATE = Safe;
+			enter_safe_disarm_state();
 		}
 		else if (next_state == Ignition) {
 			STATE = Ignition;
@@ -205,14 +212,32 @@ uint32_t get_ellapsed_time_in_autosequence_state() {
 	}
 }
 
+void get_remaining_time_in_autosequence_state(uint32_t T_state) {
+	if (STATE == Ignition) {
+		return (autosequence.ignition_ignitor_on_delay_ms
+				+ autosequence.ignition_ignitor_high_duration_ms) - T_state;
+	}
+	else if (STATE == Hotfire) {
+		return autosequence.hotfire_test_duration_ms - T_state;
+	}
+	else if (STATE == Post) {
+		return autosequence.post_purge_off_time_ms - T_state;
+	}
+	else {
+		return 0;
+	}
+}
+
 
 void execute_autosequence() {
 
 	// Autosequence timings are done relative to the start of the state
 	uint32_t T_state = get_ellapsed_time_in_autosequence_state();
 
+	// Update time remaining in state for GUI
+	state_rem_duration = get_remaining_time_in_autosequence_state(T_state);
 
-	// Doesn't use if else in case the timings overlap
+	// Doesn't use if else within each state in case the timings overlap
 
 	if (STATE == Ignition) {
 		// Purge should've turned on when entering Ignition
