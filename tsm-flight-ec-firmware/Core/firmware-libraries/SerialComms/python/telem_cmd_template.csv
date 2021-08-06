@@ -1,0 +1,47 @@
+packet_type,function_name,nums args,arg0,arg_type0,xmit_scale,arg1,arg_type1,xmit_scale,arg2,arg_type2,xmit_scale,supported_target_addr,description
+8,set_vlv,2,vlv_num,uint32_t,1,state,uint8_t,1,,,,0 1 2 3,write high/low to specific valve
+9,send_telem_short,1,board_num,uint8_t,1,,,,,,,0 1 3,send short version of telem data
+10,send_telem_all,1,board_num,uint8_t,1,,,,,,,0 1 3,send full telem data
+11,set_stepper_period,2,stepper_num,uint8_t,1,period,uint16_t,1,,,,3,set speed of stepper motor x the period refers to the time between each step
+12,set_stepper_direction,2,stepper_num,uint8_t,1,direction,int8_t,1,,,,3,set direction of stepper motor x
+13,set_kp,2,motor_num,uint8_t,1,gain,double,100,,,,2 3,"set kp value, Max value is 599.99"
+14,set_ki,2,motor_num,uint8_t,1,gain,double,100,,,,2 3,set ki value Max value is 599.99
+15,set_kd,2,motor_num,uint8_t,1,gain,double,100,,,,2 3,set kd value Max value is 599.99
+16,set_control_calc_period,1,period,uint8_t,1,,,,,,,3,rate of pid control loop time in hz
+17,set_state,1,next_state,uint8_t,1,,,,,,,0 1 2 3,"set state number of control loop, ref firmware code for state definitions (rate defined in ms)"
+18,move_stepper_degrees,2,motor_num,uint8_t,1,deg,uint16_t,1,,,,3,moves the stepper motor degrees from current pos
+19,download_flash,0,,,,,,,,,,0 1 2 3,download flash memory contents to a txt file
+20,wipe_flash,0,,,,,,,,,,0 1 2 3,erase all contents on flash
+21,start_logging,0,,,,,,,,,,0 1 2 3,start logging data to flash
+22,stop_logging,0,,,,,,,,,,0 1 2 3,stop logging data to flash
+23,set_stepper_pos,2,motor_num,uint8_t,1,position,float,100,,,,2 3,"sets stepper motor to move to certain position, max value is 2,999.9"
+24,set_stepper_zero,1,motor_num,uint8_t,1,,,,,,,2 3,zeros out current stepper motor pos 
+25,set_control_target_pressure,2,tank_num,uint8_t,1,target_pressure,float,1000,,,,2 3,set control loop target pressure for tanks on press board
+26,ambientize_pressure_transducers,0,,,,,,,,,,0 2 3,ambientizes selected pressure transducers
+27,set_low_toggle_percent,2,tank_num,uint8_t,1,lower_threshold_pct,float,1000,,,,2 3,set lower bang bang toggle pressure threshold percentage for tank
+28,set_high_toggle_percent,2,tank_num,uint8_t,1,upper_threshold_pct,float,1000,,,,2 3,set higher bang bang toggle pressure threshold percentage for tank
+29,set_control_loop_duration,1,duration,uint32_t,1,,,,,,,3,sets control loop duration for press board (in ms)
+30,set_stepper_speed,2,motor_num,uint8_t,1,target_speed,uint16_t,1,,,,2 3,sets stepper motor n speed (in steps/sec)
+31,set_telem,1,state,uint8_t,1,,,,,,,0 1 2 3,enables/disables telem
+32,set_presstank_status,2,tank_num,uint8_t,1,state,uint8_t,1,,,,2 3,enables/disables pressurization tank num
+33,ambientize_pot,1,pot_num,uint8_t,1,,,,,,,2 3,ambientizes potentiometer position
+34,led_write,2,led_num,uint8_t,1,state,uint8_t,1,,,,0 2,turn an led on or off
+35,tare_load_cells,0,,,,,,,,,,0,zero out all the load cells
+36,set_system_clock,1,system_time,uint32_t,1,,,,,,,0 1 2 3,sets the system clock time
+37,remove_pressure_ambients,0,,,,,,,,,,2,Sets stored pressure ambients to 0
+38,set_fuel_mpv_on_delay,1,mpv_delay_ms,uint8_t,1,,,,,,,2,MPV valve delay time in milliseconds
+39,set_engine_test_duration,1,engine_test_duration_ms,uint32_t,1,,,,,,,2,Like set_control_loop_duration but for the engine controller (ms)
+40,set_pid_start_delay,1,pid_delay_ms,uint16_t,1,,,,,,,2,Sets purge duration in ms after hotfire
+41,set_ignitor_on_delay,1,ignitor_on_delay_ms,uint16_t,1,,,,,,,2,Sets time into ignition state in ms to turn on ignitor
+42,set_ignitor_high_duration,1,ignitor_high_duration_ms,uint16_t,1,,,,,,,2,Sets total duration in ms to leave the ignitor on before combustion
+43,set_film_cooling_on_delay,1,film_cooling_delay_ms,uint16_t,1,,,,,,,2,Sets time into hotfire in ms to turn on nozzle film cooling
+44,set_init_motor_deg_factor,1,deg_correction_factor,double,10000,,,,,,,2,Initial motor position coefficient
+45,clear_status_flags,0,,,,,,,,,,2,Removes all status flags from the status_flags_variable
+46,start_simulation,0,,,,,,,,,,2,Starts an already loaded software in loop simulation
+47,advance_simulation,0,,,,,,,,,,2,Moves to the next simulation test case
+48,stop_simulation,0,,,,,,,,,,2,Stops the data simulation
+49,set_pt_lower_voltage,2,pt_num,uint8_t,1,lower_voltage,float,10,,,,2,Sets a pressure transducer calibration lower voltage range
+50,set_pt_upper_voltage,2,pt_num,uint8_t,1,upper_voltage,float,10,,,,2,Sets a pressure transducer calibration upper voltage range
+51,set_pt_upper_pressure,2,pt_num,uint8_t,1,pressure_range,float,1,,,,2,Sets a pressure transducer calibration upper pressure range
+52,refresh_calibrations,0,,,,,,,,,,2,Pings the board and tells it to send a calibration packet
+53,send_gse_cmd,2,vlv_num,uint32_t,1,state,uint8_t,1,,,,2,Commands the board to send a valve command to the GSE

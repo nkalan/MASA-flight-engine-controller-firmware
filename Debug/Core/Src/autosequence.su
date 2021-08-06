@@ -1,7 +1,0 @@
-autosequence.c:33:6:init_autosequence_timings	4	static
-autosequence.c:54:6:init_tank_pressure_control_configuration	8	static
-autosequence.c:85:6:handle_abort_case_actuations	8	static
-autosequence.c:125:6:handle_safe_disarm_actuations	8	static
-autosequence.c:134:6:manual_state_transition	16	static
-autosequence.c:193:10:get_ellapsed_time_in_autosequence_state	4	static
-autosequence.c:209:6:execute_autosequence	16	static

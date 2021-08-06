@@ -1,0 +1,28 @@
+variable,type_cast,xmit_scale,board
+pt_ambients[0],int32_t,10,0 2 3
+pt_ambients[1],int32_t,10,0 2 3
+pt_ambients[2],int32_t,10,0 2 3
+pt_ambients[3],int32_t,10,0 2 3
+pt_ambients[4],int32_t,10,0 2 3
+pt_ambients[5],int32_t,10,0 2 3
+pt_ambients[6],int32_t,10,0 2
+pt_ambients[7],int32_t,10,0 2
+pt_ambients[8],int32_t,10,0 2
+pt_ambients[9],int32_t,10,0 2
+pt_ambients[10],int32_t,10,0 2
+pt_ambients[11],int32_t,10,0 2
+pt_ambients[12],int32_t,10,0 2
+pt_ambients[13],int32_t,10,0 2
+pt_ambients[14],int32_t,10,0 2
+pt_ambients[15],int32_t,10,0 2
+pt_ambients[16],int32_t,10,0 2
+pt_ambients[17],int32_t,10,0 2
+pt_ambients[18],int32_t,10,0 2
+pt_ambients[19],int32_t,10,0 2
+pt_ambients[20],int32_t,10,0 2
+pt_ambients[21],int32_t,10,0 2
+lc_ambients[0],,10,0
+lc_ambients[1],,10,0
+lc_ambients[2],,10,0
+lc_ambients[3],,10,0
+lc_ambients[4],,10,0
