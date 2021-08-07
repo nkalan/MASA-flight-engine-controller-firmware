@@ -1,0 +1,16 @@
+comms.c:15:6:init_board	16	static
+comms.c:20:6:init_data	24	static
+comms.c:45:9:send_data	64	static
+comms.c:127:9:receive_data	40	static
+comms.c:168:23:validate_command	16	static
+comms.c:175:10:return_telem_buffer	16	static
+comms.c:180:6:receive_packet	16	static
+comms.c:186:6:transmit_packet	16	static
+comms.c:194:6:unpack_header	16	static
+comms.c:206:6:pack_header	16	static
+comms.c:221:6:pack_packet	32	static
+comms.c:229:9:verify_checksum	16	static
+comms.c:234:10:compute_checksum	4	static
+comms.c:239:9:compute_packet_sz	16	static
+comms.c:246:10:stuff_packet	40	static
+comms.c:293:10:unstuff_packet	40	static
