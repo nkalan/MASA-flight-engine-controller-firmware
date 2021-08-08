@@ -9,14 +9,13 @@ C_SRCS += \
 ../Core/Src/board_commands.c \
 ../Core/Src/calibrations.c \
 ../Core/Src/globals.c \
+../Core/Src/hardware.c \
 ../Core/Src/main.c \
-../Core/Src/motors.c \
 ../Core/Src/nonvolatile_memory.c \
 ../Core/Src/pack_calibration_defines.c \
 ../Core/Src/pack_cmd_defines.c \
 ../Core/Src/pack_telem_defines.c \
 ../Core/Src/sensor_voting.c \
-../Core/Src/sensors.c \
 ../Core/Src/serial_data.c \
 ../Core/Src/status_flags.c \
 ../Core/Src/stm32f4xx_hal_msp.c \
@@ -34,14 +33,13 @@ OBJS += \
 ./Core/Src/board_commands.o \
 ./Core/Src/calibrations.o \
 ./Core/Src/globals.o \
+./Core/Src/hardware.o \
 ./Core/Src/main.o \
-./Core/Src/motors.o \
 ./Core/Src/nonvolatile_memory.o \
 ./Core/Src/pack_calibration_defines.o \
 ./Core/Src/pack_cmd_defines.o \
 ./Core/Src/pack_telem_defines.o \
 ./Core/Src/sensor_voting.o \
-./Core/Src/sensors.o \
 ./Core/Src/serial_data.o \
 ./Core/Src/status_flags.o \
 ./Core/Src/stm32f4xx_hal_msp.o \
@@ -59,14 +57,13 @@ C_DEPS += \
 ./Core/Src/board_commands.d \
 ./Core/Src/calibrations.d \
 ./Core/Src/globals.d \
+./Core/Src/hardware.d \
 ./Core/Src/main.d \
-./Core/Src/motors.d \
 ./Core/Src/nonvolatile_memory.d \
 ./Core/Src/pack_calibration_defines.d \
 ./Core/Src/pack_cmd_defines.d \
 ./Core/Src/pack_telem_defines.d \
 ./Core/Src/sensor_voting.d \
-./Core/Src/sensors.d \
 ./Core/Src/serial_data.d \
 ./Core/Src/status_flags.d \
 ./Core/Src/stm32f4xx_hal_msp.d \
@@ -89,10 +86,10 @@ Core/Src/calibrations.o: ../Core/Src/calibrations.c Core/Src/subdir.mk
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../Core/Inc -I../Core/firmware-libraries/MAX31855/inc -I../Core/firmware-libraries/MAX11131/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/calibrations.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/globals.o: ../Core/Src/globals.c Core/Src/subdir.mk
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../Core/Inc -I../Core/firmware-libraries/MAX31855/inc -I../Core/firmware-libraries/MAX11131/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/globals.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
+Core/Src/hardware.o: ../Core/Src/hardware.c Core/Src/subdir.mk
+	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../Core/Inc -I../Core/firmware-libraries/MAX31855/inc -I../Core/firmware-libraries/MAX11131/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/hardware.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/main.o: ../Core/Src/main.c Core/Src/subdir.mk
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../Core/Inc -I../Core/firmware-libraries/MAX31855/inc -I../Core/firmware-libraries/MAX11131/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/main.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
-Core/Src/motors.o: ../Core/Src/motors.c Core/Src/subdir.mk
-	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../Core/Inc -I../Core/firmware-libraries/MAX31855/inc -I../Core/firmware-libraries/MAX11131/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/motors.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/nonvolatile_memory.o: ../Core/Src/nonvolatile_memory.c Core/Src/subdir.mk
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../Core/Inc -I../Core/firmware-libraries/MAX31855/inc -I../Core/firmware-libraries/MAX11131/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/nonvolatile_memory.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/pack_calibration_defines.o: ../Core/Src/pack_calibration_defines.c Core/Src/subdir.mk
@@ -103,8 +100,6 @@ Core/Src/pack_telem_defines.o: ../Core/Src/pack_telem_defines.c Core/Src/subdir.
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../Core/Inc -I../Core/firmware-libraries/MAX31855/inc -I../Core/firmware-libraries/MAX11131/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/pack_telem_defines.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/sensor_voting.o: ../Core/Src/sensor_voting.c Core/Src/subdir.mk
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../Core/Inc -I../Core/firmware-libraries/MAX31855/inc -I../Core/firmware-libraries/MAX11131/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/sensor_voting.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
-Core/Src/sensors.o: ../Core/Src/sensors.c Core/Src/subdir.mk
-	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../Core/Inc -I../Core/firmware-libraries/MAX31855/inc -I../Core/firmware-libraries/MAX11131/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/sensors.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/serial_data.o: ../Core/Src/serial_data.c Core/Src/subdir.mk
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../Core/Inc -I../Core/firmware-libraries/MAX31855/inc -I../Core/firmware-libraries/MAX11131/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/serial_data.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/status_flags.o: ../Core/Src/status_flags.c Core/Src/subdir.mk

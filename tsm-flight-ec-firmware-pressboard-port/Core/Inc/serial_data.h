@@ -15,14 +15,16 @@
 #include "stm32f4xx.h"
 
 // For DMA RX
+/*
 #define DMA_RX_BUFFER_SIZE          2048
 #define NUM_BUFFER_PACKETS          10
 #define CIRCULAR_TELEM_BUFFER_SZ    PONG_MAX_PACKET_SIZE*NUM_BUFFER_PACKETS
-
+*/
 
 /**
  * Struct to hold all the comms bullshit
  */
+/*
 typedef struct {
 	uint8_t circular_telem_buffer[CIRCULAR_TELEM_BUFFER_SZ];
 	volatile int16_t curr_circular_buffer_pos;
@@ -33,12 +35,16 @@ typedef struct {
 	uint8_t telem_buffer[PONG_MAX_PACKET_SIZE];
 	uint8_t DMA_RX_Buffer[DMA_RX_BUFFER_SIZE];
 } DmaBufferInfo;
-
+*/
 
 /**
  * Inits telemetry stuff and flash.
  */
-void init_serial_data(DmaBufferInfo* buffer_info);
+void init_serial_data(/*DmaBufferInfo* buffer_info*/);
+
+
+void update_serial_data_vars();
+
 
 /**
  * Sends a telemetry packet to an address in blocking mode
@@ -76,6 +82,6 @@ void send_calibration_data();
  * Reads an incoming packet and handles it.
  * Note: this is called in an interrupt.
  */
-void handle_uart_dma_rx(UART_HandleTypeDef *huart, DmaBufferInfo* buffer_info);
+//void handle_uart_dma_rx(UART_HandleTypeDef *huart, DmaBufferInfo* buffer_info);
 
 #endif /* INC_SERIAL_DATA_H_ */

@@ -7,9 +7,10 @@
 
 #include "autosequence.h"
 #include "globals.h"  // STATE enum
-#include "valvelib.h"
+//#include "valvelib.h"
 #include "constants.h"  // sensor/actuator mappings
 #include "status_flags.h"
+#include "board_commands.h"
 
 #define STEPPER_MOTOR_STEP_ANGLE   (1.8)
 #define VALVE_ON                   (GPIO_PIN_SET)
@@ -109,7 +110,8 @@ void enter_abort_state() {
 	set_valve_channel(IGNITOR_CH, VALVE_OFF);
 
 	// Open vent valves
-	set_valve_channel(FUEL_TANK_VENT_VALVE_CH, VALVE_ON);
+	//set_valve_channel(FUEL_TANK_VENT_VALVE_CH, VALVE_ON);
+	send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH, VALVE_ON);
 	set_valve_channel(LOX_TANK_VENT_VALVE_CH, VALVE_ON);
 
 	// Open purge valve
@@ -266,7 +268,7 @@ void execute_autosequence() {
 		if (T_state >= autosequence.ignition_ignitor_on_delay_ms
 				+ autosequence.ignition_ignitor_high_duration_ms) {
 
-			uint8_t ignitor_break_detected;
+			uint8_t ignitor_break_detected = 1;
 
 			// TODO
 			if (ignitor_break_detected) {
@@ -391,14 +393,17 @@ void execute_autosequence() {
 			set_valve_channel(LOX_TANK_VENT_VALVE_CH, VALVE_ON);
 
 			// TODO: this should be moved to the GSE controller
-			set_valve_channel(FUEL_TANK_VENT_VALVE_CH, VALVE_ON);
+			//set_valve_channel(FUEL_TANK_VENT_VALVE_CH, VALVE_ON);
+			send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH, VALVE_ON);
+
 		}
 		if (T_state >= autosequence.post_vent_off_time_ms) {
 			// Close tank vents
 			set_valve_channel(LOX_TANK_VENT_VALVE_CH, VALVE_OFF);
 
 			// This should be moved to the GSE controller
-			set_valve_channel(FUEL_TANK_VENT_VALVE_CH, VALVE_OFF);
+			//set_valve_channel(FUEL_TANK_VENT_VALVE_CH, VALVE_OFF);
+			send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH, VALVE_OFF);
 		}
 		if (T_state >= autosequence.post_purge_off_time_ms) {
 			// Purge low

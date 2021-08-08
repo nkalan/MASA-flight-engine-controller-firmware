@@ -12,22 +12,24 @@
 #include "main.h"
 #include "comms.h"
 #include "constants.h"
+#include "globals.h"
 
 
 W25N01GV_Flash flash;  // Flash struct
 uint8_t telem_disabled = 0;
-DmaBufferInfo buffer_info;  // DMA rx
+//DmaBufferInfo buffer_info;  // DMA rx
 
 
 /**
  * Initialize the flash struct and chip.
  * Initialize all the DMA rx buffers.
  */
-void init_serial_data(DmaBufferInfo* buffer_info) {
+void init_serial_data(/*DmaBufferInfo* buffer_info*/) {
 	// Flash
-	init_flash(&flash, &SPI_MEM, FLASH_CS_GPIO_Port, FLASH_CS_Pin);
+	//init_flash(&flash, &SPI_MEM, FLASH_CS_GPIO_Port, FLASH_CS_Pin);
 
 	// DMA RX
+	/*
 	buffer_info->curr_circular_buffer_pos = 0;
 	buffer_info->last_telem_packet_pos = 0;
 
@@ -39,6 +41,14 @@ void init_serial_data(DmaBufferInfo* buffer_info) {
 	for (uint16_t i = 0; i < PONG_MAX_PACKET_SIZE; i++) {
 		buffer_info->telem_buffer[i] = 0;
 	}
+	*/
+}
+
+void update_serial_data_vars() {
+    flash_mem = get_bytes_remaining(&flash);
+
+    // Update last command received
+    last_command_id = CLB_last_cmd_received;
 }
 
 
@@ -50,7 +60,9 @@ void init_packet_header(CLB_Packet_Header* header, uint8_t target_addr) {
 	header->origin_addr = FLIGHT_EC_ADDR;
 	header->target_addr = target_addr;
 	header->priority = 1; // medium
+	header->num_packets = 1;
 	header->do_cobbs = 1; // enable COBS
+	header->checksum = 0;
 	header->timestamp = SYS_MICROS;
 }
 
@@ -113,6 +125,7 @@ void transmit_flash_data() {
  * NOTE: for transmitting a daisy chained packet to another board ONLY
  * Not used on this board
  */
+/*
 void copyDataToBuffer(uint8_t* buffer, int16_t buffer_sz,
 		DmaBufferInfo* buffer_info) {
     uint8_t* buffer_tail = buffer_info->circular_telem_buffer
@@ -129,12 +142,14 @@ void copyDataToBuffer(uint8_t* buffer, int16_t buffer_sz,
     }
     memcpy(curr, buffer, buffer_sz);
 }
+*/
 
 
 /**
  * Called by the DMA rx interrupt callback function.
  * Receives and handles a packet from UART DMA.
  */
+/*
 void handle_uart_dma_rx(UART_HandleTypeDef *huart, DmaBufferInfo* buffer_info) {
 
     // UART Rx Complete Callback;
@@ -207,7 +222,6 @@ void handle_uart_dma_rx(UART_HandleTypeDef *huart, DmaBufferInfo* buffer_info) {
 
             // handle telem for others in buffer
             // TODO: remove this
-            /*
             if (cmd_status == CLB_RECEIVE_DAISY_TELEM) {
             	buffer_info->curr_telem_start[buffer_info->last_telem_packet_pos]
 											  = buffer_info->curr_circular_buffer_pos;
@@ -216,7 +230,6 @@ void handle_uart_dma_rx(UART_HandleTypeDef *huart, DmaBufferInfo* buffer_info) {
                 buffer_info->last_telem_packet_pos = (buffer_info->last_telem_packet_pos
                 		+ 1) % NUM_BUFFER_PACKETS;
             }
-            */
         } else {
             // buffer overflow error:
         	// TODO
@@ -229,6 +242,7 @@ void handle_uart_dma_rx(UART_HandleTypeDef *huart, DmaBufferInfo* buffer_info) {
         RxRollover++;       // increment Rollover Counter
     }
 }
+*/
 
 void send_calibration_data() {
 	CLB_Packet_Header cal_header;

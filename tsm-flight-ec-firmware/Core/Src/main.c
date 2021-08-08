@@ -83,7 +83,6 @@ extern DmaBufferInfo buffer_info;
 extern Autosequence_Info autosequence;
 
 L6470_Motor_IC motor;
-uint16_t motor_config_reg = 0;
 
 /* USER CODE END PV */
 

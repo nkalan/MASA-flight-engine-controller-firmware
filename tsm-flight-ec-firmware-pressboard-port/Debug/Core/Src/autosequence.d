@@ -31,9 +31,12 @@ Core/Src/autosequence.o: ../Core/Src/autosequence.c \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  ../Core/Inc/main.h ../Core/Inc/tank_pressure_control.h \
- ../Core/Inc/constants.h ../Core/Inc/motors.h ../Core/Inc/globals.h \
- ../Core/firmware-libraries/ValveLibs/inc/valvelib.h \
- ../Core/Inc/status_flags.h
+ ../Core/Inc/constants.h ../Core/Inc/hardware.h \
+ ../Core/firmware-libraries/MAX31855/inc/MAX31855.h \
+ ../Core/firmware-libraries/MAX11131/inc/MAX11131.h \
+ ../Core/firmware-libraries/W25N01GV/inc/W25N01GV.h ../Core/Inc/globals.h \
+ ../Core/Inc/calibrations.h ../Core/Inc/globals.h \
+ ../Core/Inc/status_flags.h ../Core/Inc/board_commands.h
 
 ../Core/Inc/autosequence.h:
 
@@ -107,10 +110,20 @@ Core/Src/autosequence.o: ../Core/Src/autosequence.c \
 
 ../Core/Inc/constants.h:
 
-../Core/Inc/motors.h:
+../Core/Inc/hardware.h:
+
+../Core/firmware-libraries/MAX31855/inc/MAX31855.h:
+
+../Core/firmware-libraries/MAX11131/inc/MAX11131.h:
+
+../Core/firmware-libraries/W25N01GV/inc/W25N01GV.h:
 
 ../Core/Inc/globals.h:
 
-../Core/firmware-libraries/ValveLibs/inc/valvelib.h:
+../Core/Inc/calibrations.h:
+
+../Core/Inc/globals.h:
 
 ../Core/Inc/status_flags.h:
+
+../Core/Inc/board_commands.h:

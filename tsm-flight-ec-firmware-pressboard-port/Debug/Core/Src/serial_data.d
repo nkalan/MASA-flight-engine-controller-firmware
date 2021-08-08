@@ -34,9 +34,12 @@ Core/Src/serial_data.o: ../Core/Src/serial_data.c \
  ../Core/firmware-libraries/SerialComms/inc/comms.h \
  ../Core/Inc/pack_cmd_defines.h ../Core/Inc/pack_telem_defines.h \
  ../Core/Inc/globals.h ../Core/Inc/tank_pressure_control.h \
- ../Core/Inc/constants.h ../Core/Inc/main.h ../Core/Inc/motors.h \
- ../Core/Inc/autosequence.h ../Core/Inc/valves.h ../Core/Inc/constants.h \
- ../Core/Inc/main.h
+ ../Core/Inc/constants.h ../Core/Inc/main.h ../Core/Inc/hardware.h \
+ ../Core/firmware-libraries/MAX31855/inc/MAX31855.h \
+ ../Core/firmware-libraries/MAX11131/inc/MAX11131.h \
+ ../Core/Inc/calibrations.h ../Core/Inc/autosequence.h \
+ ../Core/Inc/valves.h ../Core/Inc/constants.h ../Core/Inc/main.h \
+ ../Core/Inc/globals.h
 
 ../Core/Inc/serial_data.h:
 
@@ -116,7 +119,13 @@ Core/Src/serial_data.o: ../Core/Src/serial_data.c \
 
 ../Core/Inc/main.h:
 
-../Core/Inc/motors.h:
+../Core/Inc/hardware.h:
+
+../Core/firmware-libraries/MAX31855/inc/MAX31855.h:
+
+../Core/firmware-libraries/MAX11131/inc/MAX11131.h:
+
+../Core/Inc/calibrations.h:
 
 ../Core/Inc/autosequence.h:
 
@@ -125,3 +134,5 @@ Core/Src/serial_data.o: ../Core/Src/serial_data.c \
 ../Core/Inc/constants.h:
 
 ../Core/Inc/main.h:
+
+../Core/Inc/globals.h:

@@ -6,10 +6,12 @@
  */
 
 #include "valves.h"
+#include "hardware.h"
 #include "main.h"
 
 extern uint32_t valve_states;
 
+/*
 // Arrays mapping valve channel number to GPIO pins
 GPIO_TypeDef* VALVE_GPIO_PORTS[NUM_VALVES] = {
 		en_vlv0_GPIO_Port,
@@ -44,8 +46,10 @@ uint16_t VALVE_GPIO_PINS[NUM_VALVES] = {
 		en_vlv12_Pin,
 		en_vlv13_Pin
 };
+*/
 
 void set_valve_channel(uint32_t vlv_num, uint8_t vlv_state) {
+	/*  Flight EC
 	// Error checking
 	if (vlv_num >= NUM_VALVES) {
 		return;
@@ -59,4 +63,8 @@ void set_valve_channel(uint32_t vlv_num, uint8_t vlv_state) {
     uint32_t vlv_value = vlv_state << vlv_num;
     valve_states &= ~vlv_bit;  // Clear the previous valve state
     valve_states |= vlv_value;  // Set the new valve state
+    */
+
+	// Press board
+	setValve(vlv_num, vlv_state);
 }

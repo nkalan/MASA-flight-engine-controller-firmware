@@ -12,7 +12,7 @@
 uint8_t read_nonvolatile_variables();
 
 
-uint8_t write_nonvolatile_variables();
+uint8_t save_nonvolatile_variables();
 
 
 #endif /* INC_NONVOLATILE_MEMORY_H_ */

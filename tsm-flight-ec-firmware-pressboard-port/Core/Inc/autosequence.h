@@ -61,6 +61,9 @@ void init_tank_pressure_control_configuration();
 void execute_autosequence();
 
 
+uint32_t get_ellapsed_time_in_autosequence_state_ms();
+
+
 /**
  * Called by set_state in telem.c
  * Modifies global variable STATE

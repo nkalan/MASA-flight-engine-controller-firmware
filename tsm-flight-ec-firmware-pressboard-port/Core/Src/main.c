@@ -23,6 +23,18 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "constants.h"
+#include "autosequence.h"
+//#include "sensors.h"
+#include "globals.h"  // included for STATE
+#include "serial_data.h"
+#include "tank_pressure_control.h"
+#include "nonvolatile_memory.h"
+#include "hardware.h"
+
+#include <string.h>
+
+//#include "L6470.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,6 +72,33 @@ DMA_HandleTypeDef hdma_usart2_rx;
 
 /* USER CODE BEGIN PV */
 
+// Timer interrupt flags
+volatile uint8_t periodic_flag_5ms;
+volatile uint8_t periodic_flag_50ms;
+volatile uint8_t periodic_flag_100ms;
+
+// Serial data
+extern W25N01GV_Flash flash;
+extern uint8_t telem_disabled;
+//extern DmaBufferInfo buffer_info;
+
+// Autosequence control info and timings
+extern Autosequence_Info autosequence;
+
+// DMA
+#define DMA_RX_BUFFER_SIZE          2048
+uint8_t DMA_RX_Buffer[DMA_RX_BUFFER_SIZE];
+
+#define NUM_BUFFER_PACKETS          10
+#define CIRCULAR_TELEM_BUFFER_SZ    PONG_MAX_PACKET_SIZE*NUM_BUFFER_PACKETS
+uint8_t circular_telem_buffer[CIRCULAR_TELEM_BUFFER_SZ];
+uint8_t temp_telem_buffer[PONG_MAX_PACKET_SIZE] = { 0 };
+uint8_t daisy_telem_buffer[CIRCULAR_TELEM_BUFFER_SZ] = { 0 };
+volatile int16_t curr_circular_buffer_pos               = 0;
+volatile int16_t curr_telem_start[NUM_BUFFER_PACKETS]   = { 0 };
+volatile int16_t curr_telem_len[NUM_BUFFER_PACKETS]     = { 0 };
+volatile int16_t last_telem_packet_pos                  = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -85,6 +124,102 @@ static void MX_IWDG_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+/**
+ * Timer interrupt flag handling
+ */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
+	if (htim == &TIM_5MS) {
+		periodic_flag_5ms = 1;
+	}
+	else if (htim == &TIM_50MS) {
+		periodic_flag_50ms = 1;
+	}
+	else if (htim == &TIM_100MS) {
+		periodic_flag_100ms = 1;
+	}
+	else if (htim == &htim6) {
+		handleMotorStepping(1);
+	}
+	else if (htim == &htim13) {
+		handleMotorStepping(0);
+	}
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+    static uint8_t RxRollover  = 0;
+    static uint16_t RxBfrPos   = 0;
+    // UART Rx Complete Callback;
+    // Rx Complete is called by: DMA (automatically), if it rolls over
+    // and when an IDLE Interrupt occurs
+    // DMA Interrupt allays occurs BEFORE the idle interrupt can be fired because
+    // idle detection needs at least one UART clock to detect the bus is idle. So
+    // in the case, that the transmission length is one full buffer length
+    // and the start buffer pointer is at 0, it will be also 0 at the end of the
+    // transmission. In this case the DMA rollover will increment the RxRollover
+    // variable first and len will not be zero.
+    if(__HAL_UART_GET_FLAG(huart, UART_FLAG_IDLE)) {                    // Check if it is an "Idle Interrupt"
+        __HAL_UART_CLEAR_IDLEFLAG(huart);                             // clear the interrupt
+
+        uint16_t start = RxBfrPos;                                        // Rx bytes start position (=last buffer position)
+        RxBfrPos = DMA_RX_BUFFER_SIZE - (uint16_t)huart->hdmarx->Instance->NDTR;// determine actual buffer position
+        uint16_t len = DMA_RX_BUFFER_SIZE;                                // init len with max. size
+
+        if(RxRollover < 2)  {
+            if(RxRollover) {                                                        // rolled over once
+                if(RxBfrPos <= start) {
+                    len = RxBfrPos + DMA_RX_BUFFER_SIZE - start;  // no bytes overwritten
+                } else {
+                    len = DMA_RX_BUFFER_SIZE + 1;                 // bytes overwritten error
+                }
+            } else {
+                len = RxBfrPos - start;                           // no bytes overwritten
+            }
+        } else {
+            len = DMA_RX_BUFFER_SIZE + 2;                         // dual rollover error
+        }
+
+        if(len && (len <= DMA_RX_BUFFER_SIZE)) {
+            uint16_t bytes_in_first_part = len;
+            uint16_t bytes_in_second_part = 0;
+            if (RxBfrPos < start) { // if data loops in buffer
+                bytes_in_first_part = DMA_RX_BUFFER_SIZE - start;
+                bytes_in_second_part= len - bytes_in_first_part;
+            }
+
+            // handle telem for yourself immediately
+            memcpy(temp_telem_buffer, DMA_RX_Buffer+start, bytes_in_first_part);
+            memcpy(temp_telem_buffer+bytes_in_first_part, DMA_RX_Buffer, bytes_in_second_part);
+            uint8_t cmd_status = receive_data(huart, temp_telem_buffer, len);
+
+            // handle telem for others in buffer
+            /*
+            if (cmd_status == CLB_RECEIVE_DAISY_TELEM) {
+                curr_telem_start[last_telem_packet_pos]= curr_circular_buffer_pos;
+                copyDataToBuffer(temp_telem_buffer, len);
+                curr_telem_len[last_telem_packet_pos]  = len;
+                last_telem_packet_pos = (last_telem_packet_pos + 1) % NUM_BUFFER_PACKETS;
+            }
+            */
+        } else {
+            // buffer overflow error:
+            HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+        }
+
+        RxRollover = 0;                                                    // reset the Rollover variable
+    } else {
+        // no idle flag? --> DMA rollover occurred
+        RxRollover++;       // increment Rollover Counter
+    }
+}
+
+
+
+void readPeripherals() {
+    readAdcs(&SPI_ADC, adc_pins, adc_counts);
+    readThermocouples(&SPI_TC, tc_pins, 5);
+    updatePeripherals(adc_counts);
+}
 
 /* USER CODE END 0 */
 
@@ -132,12 +267,143 @@ int main(void)
   MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
 
+  // Initialize everything
+
+  /* Initialize HAL stuff */
+  // Timers
+  HAL_TIM_Base_Start(&TIM_MICROS);
+  HAL_TIM_Base_Start_IT(&TIM_5MS);
+  HAL_TIM_Base_Start_IT(&TIM_50MS);
+  HAL_TIM_Base_Start_IT(&TIM_100MS);
+  HAL_TIM_Base_Start(&htim2);
+  HAL_TIM_Base_Start(&htim3);
+  HAL_TIM_Base_Start_IT(&htim6);
+  HAL_TIM_Base_Start_IT(&htim13);
+
+  // UART DMA
+  //HAL_UART_Receive_IT(&COM_UART, &last_byte_uart, 1);
+  __HAL_UART_ENABLE_IT(&COM_UART, UART_IT_IDLE);   // enable idle line interrupt
+  HAL_UART_Receive_DMA(&COM_UART, DMA_RX_Buffer, DMA_RX_BUFFER_SIZE);
+
+
+  // Watchdog
+
+  // Read variables from flash: this must be called very early in initialization!
+  init_flash(&flash, &SPI_MEM, FLASH_CS_GPIO_Port, FLASH_CS_Pin);
+  read_nonvolatile_variables();
+
+  //init_serial_data(/*&buffer_info*/);
+
+  init_board(FLIGHT_EC_ADDR);  // Comms
+
+  init_autosequence_timings();
+
+  init_hardware();
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  // Handle autosequence first in every loop
+	  // most important, time sensitive operation
+	  execute_autosequence();
+
+	  if (periodic_flag_50ms) {
+		  periodic_flag_50ms = 0;
+
+		  // Active tank pressure PID control
+		  // tank enable flags get set during the autosequence
+		  if (STATE == Hotfire) {
+			  if (autosequence.hotfire_lox_tank_enable_PID_control) {
+				  tank_PID_pressure_control(&tanks[LOX_TANK_NUM]);
+			  }
+			  if (autosequence.hotfire_fuel_tank_enable_PID_control) {
+				  tank_PID_pressure_control(&tanks[FUEL_TANK_NUM]);
+			  }
+		  }
+	  }
+
+	  if (periodic_flag_5ms) {
+		  periodic_flag_5ms = 0;
+
+		  // sample adcs and thermocouples
+		  readAdcs(&SPI_ADC, adc_pins, adc_counts);
+		  readThermocouples(&SPI_TC, tc_pins, 5);
+		  updatePeripherals(adc_counts);
+
+		  update_serial_data_vars();
+
+		  // handle redundant sensor voting algorithms
+		  //resolve_redundant_sensors();
+
+		  // Autopress bang bang
+		  if (STATE == AutoPress) {
+			  tank_autopress_bang_bang(&tanks[LOX_TANK_NUM]);
+			  tank_autopress_bang_bang(&tanks[FUEL_TANK_NUM]);
+		  }
+
+		  else if (STATE == Startup || STATE == Ignition) {
+			  uint32_t T_state = get_ellapsed_time_in_autosequence_state_ms();
+
+			  // Initial motor position is arbitrarily put in the 5ms loop
+			  // TODO: this code has a flaw, if Ignition begins less than
+			  // autosequence.startup_motor_start_delay_ms after Startup,
+			  // then initial position code will run before the delay
+			  // is finished.
+			  if (STATE == Ignition || (STATE == Startup && T_state
+					  >= autosequence.startup_motor_start_delay_ms)) {
+				  tank_startup_init_motor_position(&tanks[LOX_TANK_NUM]);
+				  tank_startup_init_motor_position(&tanks[FUEL_TANK_NUM]);
+			  }
+		  }
+
+		  // Active tank pressure control valve bang bang
+		  // tank enable flags get set during the autosequence
+		  else if (STATE == Hotfire) {
+			  if (autosequence.hotfire_lox_tank_enable_PID_control) {
+				  tank_check_control_valve_threshold(&tanks[LOX_TANK_NUM]);
+			  }
+			  if (autosequence.hotfire_fuel_tank_enable_PID_control) {
+				  tank_check_control_valve_threshold(&tanks[FUEL_TANK_NUM]);
+			  }
+		  }
+
+		  // log flash data
+		  if (LOGGING_ACTIVE) {
+			  save_flash_packet();
+		  }
+
+	  }
+
+
+
+	  // Check periodic interrupt flags and call appropriate functions if needed
+	  if (periodic_flag_100ms) {
+		  periodic_flag_100ms = 0;
+
+		  if (!telem_disabled) {
+			  send_telem_packet(SERVER_ADDR);
+			  HAL_GPIO_TogglePin(LED_TELEM_PORT, LED_TELEM_PIN);
+		  }
+
+	  }
+
+	  //HAL_UART_Receive(&COM_UART, rx_buffer, 13, HAL_MAX_DELAY);
+
+	  /*
+	  if (eof_received) {
+		  receive_data(&COM_UART, telem_buffer, telem_buffer_sz);
+		  eof_received = 0;
+		  telem_buffer_sz = 0;
+	  }
+	  */
+
+	  HAL_IWDG_Refresh(&hiwdg);
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

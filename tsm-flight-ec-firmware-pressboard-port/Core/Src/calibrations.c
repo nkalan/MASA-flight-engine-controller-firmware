@@ -9,7 +9,7 @@
 #include "calibrations.h"
 #include "constants.h"
 
-#define ADC_COUNTS_TO_VOLTS (3.3/4096)
+//#define ADC_COUNTS_TO_VOLTS (3.3/4096)
 
 //#define PT_4WIRE_5V_VDIV_GAIN  (0.6565614618)   // R1=5.6k, R2=3k,  RG=56k
 //#define PT_3WIRE_5V_VDIV_GAIN  (0.6511627907)   // R1=3k,   R2=5.6k
@@ -24,6 +24,7 @@
 /* Calibration Constants */
 // TODO: update cals, these are taken from the Press board, which is taken from ECS3
 // TODO: are these fine?
+/*
 #define IBATT_CAL           (0.01611721)   // checked
 #define EBATT_CAL           (0.00324707)   // checked
 #define EVLV_CAL            (0.00324707)   // checked
@@ -45,6 +46,7 @@
 
 #define POT_CAL_SLOPE  ((EPOT_DMAX - EPOT_DMIN)*(EPOT_RES_POT+2*EPOT_RES_LEAD)/(EPOT_MAX_COUNTS*(EPOT_RES_POT - 2.0*EPOT_RES_POT_MIN)))
 #define POT_CAL_OFFSET (((EPOT_MAX_COUNTS*(EPOT_RES_POT_MIN + EPOT_RES_LEAD))/(EPOT_RES_POT + 2.0*EPOT_RES_LEAD)))
+*/
 
 #define PT_3WIRE_5V_VDIV_GAIN   (0.6511627907)   // R1=3k,   R2=5.6k
 #define PT_COUNTS_TO_VOLTS_CAL  (3.3/4096/PT_3WIRE_5V_VDIV_GAIN)
@@ -57,23 +59,25 @@ float pt_cal_lower_voltage[NUM_PTS] = { 0 };
 float pt_cal_upper_voltage[NUM_PTS] = { 0 };
 float pt_cal_upper_pressure[NUM_PTS] = { 0 };
 
-
+/*
 float pot_counts_to_deg(uint8_t pot_num, uint16_t counts) {
     // negative sign to align motor pos direction with pot pos direction
     return -EPOT_CHAR_SLOPE*((POT_CAL_SLOPE * (counts - POT_CAL_OFFSET))
     		- pot_ambients[pot_num] - EPOT_CHAR_OFFSET);
 }
+*/
 
 /**
  * Use the channel-specific calibrations to convert voltage back to pressure
  */
-float pt_counts_to_psi(uint8_t pt_num, uint16_t pt_volts) {
+float pt_counts_to_psi(uint8_t pt_num, uint16_t pt_counts) {
+
 	if (pt_num < NUM_PTS) {
+		float pt_volts = pt_counts * PT_COUNTS_TO_VOLTS_CAL;
 		return ((pt_volts - pt_cal_lower_voltage[pt_num]) * pt_cal_upper_pressure[pt_num]
              / (pt_cal_upper_voltage[pt_num] - pt_cal_lower_voltage[pt_num]));
 	}
 	else {
-		return 0;
+		return -1;
 	}
 }
-

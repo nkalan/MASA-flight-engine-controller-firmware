@@ -21,7 +21,7 @@ extern float pt_cal_upper_pressure[NUM_PTS];
 
 // TODO: add all other
 
-float pot_counts_to_deg(uint8_t pot_num, uint16_t counts);
+//float pot_counts_to_deg(uint8_t pot_num, uint16_t counts);
 
 float pt_counts_to_psi(uint8_t pt_num, uint16_t pt_volts);
 

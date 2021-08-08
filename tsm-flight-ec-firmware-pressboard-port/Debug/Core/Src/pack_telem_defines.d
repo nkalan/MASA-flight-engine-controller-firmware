@@ -31,7 +31,11 @@ Core/Src/pack_telem_defines.o: ../Core/Src/pack_telem_defines.c \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
- ../Core/Inc/main.h ../Core/Inc/motors.h ../Core/Inc/autosequence.h \
+ ../Core/Inc/main.h ../Core/Inc/hardware.h \
+ ../Core/firmware-libraries/MAX31855/inc/MAX31855.h \
+ ../Core/firmware-libraries/MAX11131/inc/MAX11131.h \
+ ../Core/firmware-libraries/W25N01GV/inc/W25N01GV.h \
+ ../Core/Inc/calibrations.h ../Core/Inc/autosequence.h \
  ../Core/Inc/valves.h ../Core/Inc/constants.h
 
 ../Core/Inc/pack_telem_defines.h:
@@ -104,7 +108,15 @@ Core/Src/pack_telem_defines.o: ../Core/Src/pack_telem_defines.c \
 
 ../Core/Inc/main.h:
 
-../Core/Inc/motors.h:
+../Core/Inc/hardware.h:
+
+../Core/firmware-libraries/MAX31855/inc/MAX31855.h:
+
+../Core/firmware-libraries/MAX11131/inc/MAX11131.h:
+
+../Core/firmware-libraries/W25N01GV/inc/W25N01GV.h:
+
+../Core/Inc/calibrations.h:
 
 ../Core/Inc/autosequence.h:
 

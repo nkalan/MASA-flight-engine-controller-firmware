@@ -33,30 +33,43 @@ extern TIM_HandleTypeDef htim13;
 // Addresses
 #define GSE_CONTROLLER_ADDR  (0)
 #define FLIGHT_COMP_ADDR     (1)
-#define FLIGHT_EC_ADDR       (2)
+#define FLIGHT_EC_ADDR       (3)
 #define SERVER_ADDR          (7)
 
 // SPI bus mappings
-#define SPI_TC            hspi1
-#define SPI_ADC           hspi2
+#define SPI_TC            hspi4
+#define SPI_ADC           hspi1
 //#define SPI_MOTOR         hspi3
-#define SPI_MEM           hspi4
+#define SPI_MEM           hspi2
 
 // Communication mappings
 #define COM_UART          huart2
 //#define CAN_BUS           hcan1
 
 // Timer mappings
+/*
 #define TIM_5MS           htim13
 #define TIM_50MS          htim10
 #define TIM_100MS         htim11
 #define TIM_MICROS        htim5
+*/
+#define TIM_5MS           htim7
+#define TIM_50MS          htim10
+#define TIM_100MS         htim11
+#define TIM_MICROS        htim5
+#define TIM_MTR0_STEP
 
 // LED mappings
+/*
 #define LED_TELEM_PORT              (LED_0_GPIO_Port)
 #define LED_TELEM_PIN               (LED_0_Pin)
 #define LED_FLASH_LOGGING_PORT      (LED_1_GPIO_Port)
 #define LED_FLASH_LOGGING_PIN       (LED_1_Pin)
+*/
+#define LED_TELEM_PORT              (LED0_GPIO_Port)
+#define LED_TELEM_PIN               (LED0_Pin)
+#define LED_FLASH_LOGGING_PORT      (LED1_GPIO_Port)
+#define LED_FLASH_LOGGING_PIN       (LED1_Pin)
 
 // Microseconds since board reset
 #define SYS_MICROS        ((uint32_t)(__HAL_TIM_GET_COUNTER(&TIM_MICROS)))
@@ -66,50 +79,35 @@ extern TIM_HandleTypeDef htim13;
  * Valve channel mappings
  * TODO: fix these
  */
-#define LOX_CONTROL_VALVE_CH           (0)
-#define FUEL_CONTROL_VALVE_CH          (1)
-#define LOX_TANK_VENT_VALVE_CH         (2)
-#define FUEL_TANK_VENT_VALVE_CH        (3)
-#define PURGE_VALVE_CH                 (4)
-#define FUEL_MPV_VENT_VALVE_CH         (5)
-#define FUEL_MPV_PRESS_VALVE_CH        (6)
-#define LOX_MPV_VALVE_CH               (7)
-#define NOZZLE_FILM_COOLING_VALVE_CH   (8)
-#define IGNITOR_CH                     (9)
-#define COPV_VENT_VALVE_CH            (10)
-//#define EMERGENCY_MPV_CLOSE_VALVE_CH
-//#define ACTUATE_MPV_CLOSE_VALVE_CH
+#define LOX_CONTROL_VALVE_CH          (0)
+#define LOX_MPV_VALVE_CH              (1)
+#define LOX_TANK_VENT_VALVE_CH        (2)
+#define FUEL_CONTROL_VALVE_CH         (3)
+#define FUEL_MPV_PRESS_VALVE_CH       (4)
+#define FUEL_MPV_VENT_VALVE_CH        (5)
+#define IGNITOR_CH                    (6)
+#define PURGE_VALVE_CH                (7)
+#define NOZZLE_FILM_COOLING_VALVE_CH  (8)
 
+#define GSE_FUEL_TANK_VENT_VALVE_CH   (9)
 /*
  * Sensor channel mappings
  * TODO: these mappings are all wrong
  */
 // Pressure transducers and potentiometers
-#define CHAMBER_PRES_CH                (0)
-#define REGEN_INJ_PRES_CH              (1)  // TODO: 2 PTs are named regen?
-#define REGEN_FUEL_LINE_PRES_CH        (2)
-#define LOX_DOME_PRES_CH               (3)
-#define LOX_TANK_A_PRES_CH             (4)
-#define LOX_TANK_B_PRES_CH             (5)
-#define LOX_TANK_C_PRES_CH             (6)
-#define LOX_TANK_DIF_PRES_CH           (7)
-#define FUEL_TANK_A_PRES_CH            (8)
-#define FUEL_TANK_B_PRES_CH            (9)
-#define FUEL_TANK_C_PRES_CH           (10)
-#define FUEL_TANK_DIF_PRES_CH         (11)
-#define COPV_A_PRES_CH                (12)
-#define COPV_B_PRES_CH                (13)
-#define COPV_C_PRES_CH                (14)
-#define ACTUATE_PRES_CH               (15)  // todo: wtf is this?
-#define LOX_PNEU_CAV_PRES_CH          (16)
-#define FUEL_PNEU_CAV_PRES_CH         (17)
-#define CHAMBER_2_PRES_CH             (18)
-#define NOZZLE_FILM_PRES_CH           (19)
-#define POT_0_CH                      (20)  // TODO: A/B or 0/1 or 1/2?
-#define POT_1_CH                      (21)
+#define LOX_TANK_PRES_CH               (0)
+#define CHAMBER_PRES_CH                (1)
+#define FUEL_TANK_PRES_CH              (2)
+#define LOX_INJ_MANIFOLD_PRES_CH       (3)
+#define COPV_PRES_CH                   (4)
+#define FUEL_INJ_MANIFOLD_PRES_CH      (5)
+
+#define POT_0_CH                       (0)
+#define POT_1_CH                       (1)
 
 // Thermocouples
 // TODO: fix these
+// TODO
 #define FIN_TEMP_CH                    (0)
 #define AV_BAY_TEMP_CH                 (1)
 #define RACEWAY_A_TEMP_CH              (2)
@@ -127,9 +125,9 @@ extern TIM_HandleTypeDef htim13;
  * Misc definitions of system parameters
  */
 #define NUM_TANKS                      (2)
-#define NUM_VALVES                    (14)
-#define NUM_TCS                       (12)
-#define NUM_PTS                       (20)
+#define NUM_VALVES                     (9)
+#define NUM_TCS                        (5)
+#define NUM_PTS                        (6)
 #define NUM_POTS                       (2)
 #define NUM_MOTORS                     (2)
 

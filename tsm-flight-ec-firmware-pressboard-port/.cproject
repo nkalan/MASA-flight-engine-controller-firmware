@@ -151,7 +151,7 @@
                     					
                     <sourceEntries>
                         						
-                        <entry excluding="firmware-libraries/L6470|firmware-libraries/MAX11128|firmware-libraries/MAX31856" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
+                        <entry excluding="Src/motors.c|Src/sensors.c|Inc/sensors.h|Inc/motors.h|firmware-libraries/L6470|firmware-libraries/MAX11128|firmware-libraries/MAX31856" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
                         						
                         <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
                         					

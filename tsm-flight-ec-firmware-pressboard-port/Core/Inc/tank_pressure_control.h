@@ -10,8 +10,9 @@
 
 #include <stdint.h>
 #include "constants.h"
+#include "hardware.h"
 //#include "L6470.h"
-#include "motors.h"
+//#include "motors.h"
 //#include "valvelib.h"
 
 
@@ -129,6 +130,6 @@ void tank_startup_init_motor_position(TPC_Info* tank);
  * Reads the absolute position and speed from the motor IC,
  * and updates the variables
  */
-void check_motor_state(TPC_Info* tank);
+//void check_motor_state(TPC_Info* tank);
 
 #endif /* INC_TANK_PRESSURE_CONTROL_H_ */

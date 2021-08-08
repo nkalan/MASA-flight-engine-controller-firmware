@@ -7,6 +7,7 @@
 
 
 #include "tank_pressure_control.h"
+#include "hardware.h"
 #include "constants.h"
 #include "valves.h"
 #include "math.h"
@@ -19,11 +20,13 @@ extern float init_motor_pos_deg_correction_factor;  // from globals
  * tanks to be disabled. Calculations are always run, but actuations
  * are stopped when tank_enable is false.
  */
+/*
 void actuate_tank_motor_pos(TPC_Info* tank, float motor_pos) {
 	if (tank->tank_enable) {
 		// actuate motor to pos
 	}
 }
+*/
 
 /**
  * Small wrapper around control valve actuation, to allow specific
@@ -35,116 +38,6 @@ void actuate_tank_control_valve(TPC_Info* tank, uint8_t state) {
 		set_valve_channel(tank->control_valve_channel, state);
 	}
 }
-
-
-// copied from press board
-/*
-void doCalculations(uint8_t motor_num) {
-    static float next_errSum        = 0;
-    static float pid_change         = 0;
-    static float maxDiff            = 0;
-
-    if (do_calculations[motor_num]) { //for timer
-        //-----------------------//
-        //Control Loop
-
-        // PID error term calculations
-        maxDiff = maxPos - curPos[motor_num]; //distance from maxPos
-        timeChange = control_loop_period; //in seconds
-        error = tank_tar_pres[motor_num] - *controlPres[motor_num];
-
-        next_errSum = errSum[motor_num] + (error * timeChange);
-        kp_term =  mtr_kp[motor_num] * error;
-        ki_term = mtr_ki[motor_num] * next_errSum;
-        kd_term = mtr_kd[motor_num] * (error - last_error[motor_num]) / timeChange;
-        pid_change = kp_term + ki_term + kd_term; //total change
-
-        // Next state update
-        if (pid_change < -curPos[motor_num]) { //min cap
-            delta = -curPos[motor_num];
-        } else if (pid_change > maxDiff) { //max cap
-            delta = maxDiff;
-        } else {
-            delta = pid_change;
-            errSum[motor_num] = next_errSum; // perform errSum update iff not saturated
-        }
-        targetPos[motor_num] = curPos[motor_num] + delta;
-
-        // Stepping Actuation
-        curDir[motor_num] = (curPos[motor_num] < targetPos[motor_num]) ? 1 : -1;
-
-        last_error[motor_num] = error;
-
-        // Saving variables to telem
-        mtr_set[motor_num] = targetPos[motor_num];
-        mtr_kp_err[motor_num] = kp_term;
-        mtr_ki_err[motor_num] = ki_term;
-        mtr_kd_err[motor_num] = kd_term;
-
-        do_calculations[motor_num] = 0; //reset timer
-    }
-}
-*/
-
-/*
-void init_control_variables() {
-    for (uint8_t i = 0 ; i < NUM_TANKS; ++i) {
-        last_error[i] = Setpoint[i];
-        curDir[i] = 0; // change to one to enable motor spinning manually
-        if (!is_flash_constant_good) {
-            mtr_kp[i] = 9.75;
-            mtr_ki[i] = 3.75;
-            mtr_kd[i] = 2;        // dont need to be reset before running each loop
-
-            tank_tar_pres[i] = Setpoint[i]; // Redundant but still keep in case flash doesn't work
-            tank_low_pres[i] = Setpoint[i]*0.95f;
-            tank_high_pres[i]= Setpoint[i]*1.1f;
-
-            pass_low_tol[i] = tank_low_pres[i];
-            pass_high_tol[i] = tank_high_pres[i];
-        }
-    }
-
-    // init stepper ramping variables
-
-    //stepper.SPS = 1000; // start motor 1000 steps per second
-    //stepper.SPS_target = 2000; // target steps/sec
-    //stepper.tim_osc = 1000000; // tim6 update speed
-    //stepper.SPS_tim_reg = (uint16_t)(stepper.tim_osc / stepper.SPS);
-    //stepper.acc_res = 2; // increments SPS by step res
-    //stepper.acc_step = 0;
-
-    // ^ These should be configured by the motor library
-
-    //control_loop_period = ( 1.0/1000 ) * (__HAL_TIM_GET_AUTORELOAD(&htim10)+1);
-
-    //test_duration = 4000; // test duration four seconds
-}
-*/
-
-/*
-// Note this function should be called automatically right before the test
-void reset_control_variables(int32_t test_start_time, uint8_t tank_num) {
-    // PID variables reset
-
-    errSum[tank_num] = 0;     // I term
-    last_error[tank_num] = tank_tar_pres[tank_num] - *controlPres[tank_num]; // D term
-    kp_term = 0;
-    ki_term = 0;
-    kd_term = 0;
-
-    curDir[tank_num] = 0; // set initial motor direction
-
-    // Reset targetPos from curPos
-    targetPos[tank_num] = curPos[tank_num];
-
-    // Update values for telem
-    mtr_kp_err[tank_num] = kp_term;
-    mtr_ki_err[tank_num] = ki_term;
-    mtr_kd_err[tank_num] = kd_term;
-}
-*/
-
 
 /**
  * Call this right before entering the control loop
@@ -173,6 +66,7 @@ void tank_autopress_bang_bang(TPC_Info* tank) {
 
 void tank_PID_pressure_control(TPC_Info* tank) {
 	float dt = (tank->PID_ctrl_loop_period_ms)/1000.0;
+    float max_motor_delta = maxPos - curPos[tank->motor_num]; //distance from maxPos
 
 	// The missile knows where it is
 	float error = tank->target_pres - *(tank->control_pres);  // P
@@ -188,12 +82,8 @@ void tank_PID_pressure_control(TPC_Info* tank) {
 
 	// Limit output
 	float motor_delta;
-	// TODO: define these 2 motor variables somewhere, probably motor struct
-	// TODO: change all these variable names when they get decided
-	float motor_pos, max_motor_pos;
-	float max_motor_delta = max_motor_pos - motor_pos;
-	if (PID_total_output < -motor_pos) {  // Lower bound
-		motor_delta = -motor_pos;
+	if (PID_total_output < -curPos[tank->motor_num]) {  // Lower bound
+		motor_delta = -curPos[tank->motor_num];
 	}
 	else if (PID_total_output > max_motor_delta) {  // Upper bound
 		motor_delta = max_motor_delta;
@@ -205,11 +95,15 @@ void tank_PID_pressure_control(TPC_Info* tank) {
 	}
 
 	// Actuate motor to new position
-	actuate_tank_motor_pos(tank, motor_pos + motor_delta);
+	//actuate_tank_motor_pos(tank, motor_pos + motor_delta);  Not yet lol
+    targetPos[tank->motor_num] = curPos[tank->motor_num] + motor_delta;
+    curDir[tank->motor_num] = (curPos[tank->motor_num] < targetPos[tank->motor_num]) ? 1 : -1;
 
 	// Log data
-	// TODO: should this go here, or in a different function?
-	// Maybe just update some struct variables and log them later
+    mtr_set[tank->motor_num] = targetPos[tank->motor_num];
+    tank->Kp_error = Kp_term;
+    tank->Ki_error = Ki_term;
+    tank->Kd_error = Kd_term;
 }
 
 
@@ -235,7 +129,7 @@ void tank_startup_init_motor_position(TPC_Info* tank) {
 	static double c3     = 5360;
 	static double c4     = 769.8;
 
-	double crit_pr, t_r, valve_cv, t_f, p_rat, t_rat, q_acf, q_scf, vdot;
+	double crit_pr, t_r, valve_cv, t_f, /*p_rat, t_rat,*/ q_acf, q_scf, vdot;
 	double deg = 0;
 
 	double p_i    = (double)(*(tank->COPV_pres));       // cng pressure
@@ -290,13 +184,11 @@ void tank_startup_init_motor_position(TPC_Info* tank) {
 
 	// TODO: Why is the direction manually set here?
 	// can it just be the shortest path?
-	/*
-	if (is_tank_enabled[tank_num]) {
-		manual_stepper_pos_override[tank_num] = 1;
-		targetPos[tank_num] = deg; // position given in deg
-		curDir[tank_num] = (curPos[tank_num] < targetPos[tank_num]) ? 1 : -1; // CCW facing the motor
-		mtr_set[tank_num] = deg; // save new motor position setpoint
+	if (tank->tank_enable) {
+		manual_stepper_pos_override[tank->motor_num] = 1;
+		targetPos[tank->motor_num] = deg; // position given in deg
+		curDir[tank->motor_num] = (curPos[tank->motor_num] < targetPos[tank->motor_num]) ? 1 : -1; // CCW facing the motor
+		mtr_set[tank->motor_num] = deg; // save new motor position setpoint
 	}
-	*/
 }
 

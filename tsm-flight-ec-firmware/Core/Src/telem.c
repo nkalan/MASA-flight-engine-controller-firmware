@@ -12,6 +12,7 @@
 #include "tank_pressure_control.h"
 #include "nonvolatile_memory.h"
 #include "calibrations.h"
+#include "board_commands.h"
 
 #include "W25N01GV.h"
 #include "L6470.h"

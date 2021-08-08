@@ -39,7 +39,7 @@ Core/Src/telem.o: ../Core/Src/telem.c ../Core/Inc/autosequence.h \
  ../Core/Inc/pack_calibration_defines.h ../Core/Inc/calibrations.h \
  ../Core/Inc/globals.h ../Core/Inc/valves.h ../Core/Inc/status_flags.h \
  ../Core/Inc/tank_pressure_control.h ../Core/Inc/nonvolatile_memory.h \
- ../Core/Inc/calibrations.h
+ ../Core/Inc/calibrations.h ../Core/Inc/board_commands.h
 
 ../Core/Inc/autosequence.h:
 
@@ -142,3 +142,5 @@ Core/Src/telem.o: ../Core/Src/telem.c ../Core/Inc/autosequence.h \
 ../Core/Inc/nonvolatile_memory.h:
 
 ../Core/Inc/calibrations.h:
+
+../Core/Inc/board_commands.h:
