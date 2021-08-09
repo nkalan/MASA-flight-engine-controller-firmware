@@ -1,2 +1,0 @@
-MAX31855.c:9:9:findClosestTTMV	32	static
-MAX31855.c:25:7:read_tc	112	static,ignoring_inline_asm

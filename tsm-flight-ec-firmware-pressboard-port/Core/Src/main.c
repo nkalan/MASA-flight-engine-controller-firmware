@@ -138,11 +138,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
 	else if (htim == &TIM_100MS) {
 		periodic_flag_100ms = 1;
 	}
-	else if (htim == &htim6) {
-		handleMotorStepping(1);
-	}
-	else if (htim == &htim13) {
+	else if (htim == &TIM_MTR0_STEP) {
 		handleMotorStepping(0);
+	}
+	else if (htim == &TIM_MTR1_STEP) {
+		handleMotorStepping(1);
 	}
 }
 
@@ -204,6 +204,9 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
         } else {
             // buffer overflow error:
             HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+			init_board(OWN_BOARD_ADDR); //Fixes an issue with CLB_board_addr changing
+			last_telem_packet_pos = 0;
+			HAL_UART_Receive_DMA(&COM_UART, DMA_RX_Buffer, DMA_RX_BUFFER_SIZE); // dma buffer overflowed
         }
 
         RxRollover = 0;                                                    // reset the Rollover variable
@@ -211,14 +214,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
         // no idle flag? --> DMA rollover occurred
         RxRollover++;       // increment Rollover Counter
     }
-}
-
-
-
-void readPeripherals() {
-    readAdcs(&SPI_ADC, adc_pins, adc_counts);
-    readThermocouples(&SPI_TC, tc_pins, 5);
-    updatePeripherals(adc_counts);
 }
 
 /* USER CODE END 0 */
@@ -275,31 +270,29 @@ int main(void)
   HAL_TIM_Base_Start_IT(&TIM_5MS);
   HAL_TIM_Base_Start_IT(&TIM_50MS);
   HAL_TIM_Base_Start_IT(&TIM_100MS);
-  HAL_TIM_Base_Start(&htim2);
-  HAL_TIM_Base_Start(&htim3);
-  HAL_TIM_Base_Start_IT(&htim6);
-  HAL_TIM_Base_Start_IT(&htim13);
+  HAL_TIM_Base_Start(&TIM_MTR0_PWM);
+  HAL_TIM_Base_Start(&TIM_MTR1_PWM);
+  HAL_TIM_Base_Start_IT(&TIM_MTR0_STEP);
+  HAL_TIM_Base_Start_IT(&TIM_MTR1_STEP);
 
   // UART DMA
-  //HAL_UART_Receive_IT(&COM_UART, &last_byte_uart, 1);
   __HAL_UART_ENABLE_IT(&COM_UART, UART_IT_IDLE);   // enable idle line interrupt
   HAL_UART_Receive_DMA(&COM_UART, DMA_RX_Buffer, DMA_RX_BUFFER_SIZE);
-
-
-  // Watchdog
 
   // Read variables from flash: this must be called very early in initialization!
   init_flash(&flash, &SPI_MEM, FLASH_CS_GPIO_Port, FLASH_CS_Pin);
   read_nonvolatile_variables();
 
-  //init_serial_data(/*&buffer_info*/);
+  // Initializations
+  init_board(OWN_BOARD_ADDR);  // Comms
+  init_autosequence_constants();  // Hardcoded values
+  init_autosequence_control_variables();
+  init_tank_pressure_control_configuration();  // PID
+  init_hardware();  // Press board sensors, etc
 
-  init_board(FLIGHT_EC_ADDR);  // Comms
-
-  init_autosequence_timings();
-
-  init_hardware();
-
+  // Packet values
+  telem_rate = 1000/(TIM_100MS.Init.Period+1);
+  adc_rate = 1000/(TIM_5MS.Init.Period+1);
 
   /* USER CODE END 2 */
 
@@ -345,16 +338,17 @@ int main(void)
 			  tank_autopress_bang_bang(&tanks[FUEL_TANK_NUM]);
 		  }
 
-		  else if (STATE == Startup || STATE == Ignition) {
-			  uint32_t T_state = get_ellapsed_time_in_autosequence_state_ms();
+		  // Initial motor position
+		  if (STATE == Startup || STATE == Ignition) {
+			  autosequence.T_state = get_ellapsed_time_in_autosequence_state_ms();
 
 			  // Initial motor position is arbitrarily put in the 5ms loop
-			  // TODO: this code has a flaw, if Ignition begins less than
-			  // autosequence.startup_motor_start_delay_ms after Startup,
-			  // then initial position code will run before the delay
-			  // is finished.
-			  if (STATE == Ignition || (STATE == Startup && T_state
+			  if (STATE == Ignition || (STATE == Startup && autosequence.T_state
 					  >= autosequence.startup_motor_start_delay_ms)) {
+				  // Allow manual transition to Ignition
+				  autosequence.startup_init_motor_pos_complete = 1;
+
+				  // Set motors to initial position
 				  tank_startup_init_motor_position(&tanks[LOX_TANK_NUM]);
 				  tank_startup_init_motor_position(&tanks[FUEL_TANK_NUM]);
 			  }
@@ -362,7 +356,7 @@ int main(void)
 
 		  // Active tank pressure control valve bang bang
 		  // tank enable flags get set during the autosequence
-		  else if (STATE == Hotfire) {
+		  if (STATE == Hotfire) {
 			  if (autosequence.hotfire_lox_tank_enable_PID_control) {
 				  tank_check_control_valve_threshold(&tanks[LOX_TANK_NUM]);
 			  }
@@ -374,6 +368,18 @@ int main(void)
 		  // log flash data
 		  if (LOGGING_ACTIVE) {
 			  save_flash_packet();
+		  }
+
+		  // Ignitor break detection
+		  if (STATE == Ignition && autosequence.T_state
+				  >= autosequence.ignition_ignitor_on_delay_ms) {
+			  update_ignitor_break_detector();
+		  }
+
+		  // Combustion failure detection
+		  if (STATE == Hotfire && autosequence.T_state
+				  >= autosequence.hotfire_chamber_pres_lower_bound_abort_start_time_ms) {
+			  update_combustion_failure_detector();
 		  }
 
 	  }
@@ -391,16 +397,7 @@ int main(void)
 
 	  }
 
-	  //HAL_UART_Receive(&COM_UART, rx_buffer, 13, HAL_MAX_DELAY);
-
-	  /*
-	  if (eof_received) {
-		  receive_data(&COM_UART, telem_buffer, telem_buffer_sz);
-		  eof_received = 0;
-		  telem_buffer_sz = 0;
-	  }
-	  */
-
+	  // Refresh watchdog timer to keep the board running
 	  HAL_IWDG_Refresh(&hiwdg);
 
 

@@ -6,7 +6,7 @@
  */
 
 #include "autosequence.h"
-#include "globals.h"  // STATE enum
+#include "globals.h"  // STATE enum and automatic abort toggle
 //#include "valvelib.h"
 #include "constants.h"  // sensor/actuator mappings
 #include "status_flags.h"
@@ -20,10 +20,8 @@
 // Telem on/off toggle
 extern uint8_t telem_disabled;
 
-
 // Tanks
 TPC_Info tanks[NUM_TANKS];
-
 
 // Timings struct declared here
 Autosequence_Info autosequence;
@@ -31,20 +29,20 @@ Autosequence_Info autosequence;
 /**
  * This function must be called AFTER variables are read from flash
  */
-void init_autosequence_timings() {
-	// TODO: move to flash
-	// Ignition timings moved to flash
-
-	// Valve timings read from flash
-	// PID start delay read from flash
-	// Film cooling start time read from flash
-	// hotfire duration read from flash
-
+void init_autosequence_constants() {
+	// Hardcoded timings
 	autosequence.startup_motor_start_delay_ms = 500;
-
 	autosequence.post_vent_on_time_ms = 1000;
 	autosequence.post_vent_off_time_ms = 6000;
 	autosequence.post_purge_off_time_ms = 10000;
+
+	// Detection thresholds
+	autosequence.ignition_ignitor_current_lower_bound = 3;  // TODO: fix this
+	autosequence.ignition_ignitor_current_lower_bound_pass_min_detections = 30;  // 150ms
+	autosequence.hotfire_chamber_pres_upper_bound = 421.9;  // Nominal * 1.5
+	autosequence.hotfire_chamber_pres_lower_bound = 140.64; // Nominal * 0.5
+	autosequence.hotfire_chamber_pres_lower_bound_pass_min_detections = 10;  // 50ms
+	autosequence.hotfire_chamber_pres_lower_bound_abort_start_time_ms = 1000;  // Wait 1s
 }
 
 
@@ -71,18 +69,21 @@ void init_tank_pressure_control_configuration() {
 	tanks[FUEL_TANK_NUM].COPV_pres = &copv_control_pressure;
 	tanks[FUEL_TANK_NUM].COPV_temp = &tc[COPV_TEMP_CH];
 	tanks[FUEL_TANK_NUM].PID_ctrl_loop_period_ms = 50;
+}
 
-	// Motor configuration
-	/*
-	L6470_init_motor(&(tanks[LOX_TANK_NUM].motor), L6470_FULL_STEP_MODE,
-			STEPPER_MOTOR_STEP_ANGLE);
-	L6470_init_motor(&(tanks[FUEL_TANK_NUM].motor), L6470_FULL_STEP_MODE,
-			STEPPER_MOTOR_STEP_ANGLE);
-	*/
+/**
+ * Call this on initialization and every time you exit the autosequence
+ */
+void init_autosequence_control_variables() {
+	autosequence.startup_init_motor_pos_complete = 0;
+	autosequence.hotfire_lox_tank_enable_PID_control = 0;
+	autosequence.hotfire_fuel_tank_enable_PID_control = 0;
 
-	// TODO: fill in press board motor init here?s
+	autosequence.ignition_ignitor_current_lower_bound_pass_count = 0;
+	autosequence.hotfire_chamber_pres_lower_bound_pass_count = 0;
 
-	// TODO: what else here?
+	autosequence.ignition_ignitor_current_lower_bound_threshold_passed = 0;
+	autosequence.hotfire_chamber_pres_lower_bound_threshold_passed = 0;
 }
 
 /**
@@ -110,7 +111,7 @@ void enter_abort_state() {
 	set_valve_channel(IGNITOR_CH, VALVE_OFF);
 
 	// Open vent valves
-	//set_valve_channel(FUEL_TANK_VENT_VALVE_CH, VALVE_ON);
+	// Fuel vent is handled by GSE controller
 	send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH, VALVE_ON);
 	set_valve_channel(LOX_TANK_VENT_VALVE_CH, VALVE_ON);
 
@@ -118,16 +119,15 @@ void enter_abort_state() {
 	set_valve_channel(PURGE_VALVE_CH, VALVE_ON);
 
 	// Close motors (needle valves), 0 degrees should be closed.
-	/*
-	L6470_goto_motor_pos(&(tanks[LOX_TANK_NUM].motor), 0);
-	L6470_goto_motor_pos(&(tanks[FUEL_TANK_NUM].motor), 0);
-	*/
-
-	// TODO: press board motor closing
+	moveMotorToPos(0, LOX_TANK_NUM);
+	moveMotorToPos(0, FUEL_TANK_NUM);
 
 	// Stop TPC (not an actuation)
 	autosequence.hotfire_lox_tank_enable_PID_control = 0;
 	autosequence.hotfire_fuel_tank_enable_PID_control = 0;
+
+	// Reset all control variables whenever exiting the autosequence
+	init_autosequence_control_variables();
 }
 
 /**
@@ -145,8 +145,67 @@ void enter_safe_disarm_state() {
 	set_valve_channel(LOX_CONTROL_VALVE_CH, VALVE_OFF);
 	set_valve_channel(FUEL_CONTROL_VALVE_CH, VALVE_OFF);
 
+	// Reset all control variables whenever exiting the autosequence
+	init_autosequence_control_variables();
+
 	// TODO: go back to Manual?
 }
+
+/**
+ * Keep a counter of consecutive times that the ematch current
+ * is below a certain threshold while it's set high. If it
+ * reaches a certain count, set a flag. Current should drop
+ * out after the ematch burns and the ignitor lights.
+ *
+ *  This function is called every 5ms during the detection period.
+ */
+void update_ignitor_break_detector() {			  // Counter
+	  if (ivlv[IGNITOR_CH] < autosequence.ignition_ignitor_current_lower_bound) {
+		  ++autosequence.ignition_ignitor_current_lower_bound_pass_count;
+	  }
+	  else {
+		  autosequence.ignition_ignitor_current_lower_bound_pass_count = 0;
+	  }
+
+	  // Threshold check
+	  if (autosequence.ignition_ignitor_current_lower_bound_pass_count
+			  >= autosequence.ignition_ignitor_current_lower_bound_pass_min_detections) {
+		  autosequence.ignition_ignitor_current_lower_bound_threshold_passed = 1;
+	  }
+	  else {
+		  autosequence.ignition_ignitor_current_lower_bound_threshold_passed = 0;
+	  }
+}
+
+
+/**
+ * Keep a counter of consecutive times the chamber pressure
+ * is below a certain threshold (wait until after the startup
+ * transient). If it reaches a certain count, set a flag.
+ * Pressure should stay above this threshold during
+ * a nominal hotfire.
+ *
+ * This function is called every 5ms during the detection period.
+ */
+void update_combustion_failure_detector() {
+	  // Counter
+	  if (pressure[CHAMBER_PRES_CH] < autosequence.hotfire_chamber_pres_lower_bound) {
+		  ++autosequence.hotfire_chamber_pres_lower_bound_pass_count;
+	  }
+	  else {
+		  autosequence.hotfire_chamber_pres_lower_bound_pass_count = 0;
+	  }
+
+	  // Threshold check
+	  if (autosequence.hotfire_chamber_pres_lower_bound_pass_count
+			  >= autosequence.hotfire_chamber_pres_lower_bound_pass_min_detections) {
+		  autosequence.hotfire_chamber_pres_lower_bound_threshold_passed = 1;
+	  }
+	  else {
+		  autosequence.hotfire_chamber_pres_lower_bound_threshold_passed = 0;
+	  }
+}
+
 
 void manual_state_transition(uint8_t next_state) {
 
@@ -193,9 +252,13 @@ void manual_state_transition(uint8_t next_state) {
 			enter_safe_disarm_state();
 		}
 		else if (next_state == Ignition) {
-			STATE = Ignition;
-			autosequence.ignition_start_time_ms = SYS_MILLIS;
-			set_valve_channel(PURGE_VALVE_CH, VALVE_ON);  // Turn purge on
+			// Only allow ignition after initial motor position is handled
+			if (autosequence.startup_init_motor_pos_complete) {
+				autosequence.startup_init_motor_pos_complete = 0;  // Reset flag
+				STATE = Ignition;
+				autosequence.ignition_start_time_ms = SYS_MILLIS;
+				set_valve_channel(PURGE_VALVE_CH, VALVE_ON);  // Turn purge on
+			}
 		}
 	}
 	else if (STATE == IgnitionFail) {
@@ -211,7 +274,7 @@ void manual_state_transition(uint8_t next_state) {
 }
 
 /**
- * Only works for Ignition, Hotfire, and Post
+ * Only works for Startup, Ignition, Hotfire, and Post
  */
 uint32_t get_ellapsed_time_in_autosequence_state_ms() {
 	if (STATE == Startup) {
@@ -231,6 +294,9 @@ uint32_t get_ellapsed_time_in_autosequence_state_ms() {
 	}
 }
 
+/*
+ * Only Ignition, Hotfire, and Post have defined time limits
+ */
 uint32_t get_remaining_time_in_autosequence_state(uint32_t T_state) {
 	if (STATE == Ignition) {
 		return (autosequence.ignition_ignitor_on_delay_ms
@@ -247,52 +313,42 @@ uint32_t get_remaining_time_in_autosequence_state(uint32_t T_state) {
 	}
 }
 
-
+/**
+ * Called every main while loop
+ */
 void execute_autosequence() {
 
 	// Autosequence timings are done relative to the start of the state
-	uint32_t T_state = get_ellapsed_time_in_autosequence_state_ms();
+	autosequence.T_state = get_ellapsed_time_in_autosequence_state_ms();
 
 	// Update time remaining in state for GUI
-	state_rem_duration = get_remaining_time_in_autosequence_state(T_state);
+	state_rem_duration =
+			get_remaining_time_in_autosequence_state(autosequence.T_state);
 
 	// Doesn't use if else within each state in case the timings overlap
-
 	if (STATE == Ignition) {
 		// Purge should've turned on when entering Ignition
 		// Wait for the delay, then turn ignitor on
-		if (T_state >= autosequence.ignition_ignitor_on_delay_ms) {
+		if (autosequence.T_state >= autosequence.ignition_ignitor_on_delay_ms) {
 			set_valve_channel(IGNITOR_CH, VALVE_ON);
 		}
 		// Hold ignitor high for a certain amount of time
-		if (T_state >= autosequence.ignition_ignitor_on_delay_ms
+		if (autosequence.T_state >= autosequence.ignition_ignitor_on_delay_ms
 				+ autosequence.ignition_ignitor_high_duration_ms) {
 
-			uint8_t ignitor_break_detected = 1;
-
-			// TODO
-			if (ignitor_break_detected) {
-				// Transition to Hotfire state
-				STATE = Hotfire;
-				autosequence.hotfire_start_time_ms = SYS_MILLIS;
-
-				// Ignitor low
-				set_valve_channel(IGNITOR_CH, VALVE_OFF);
-
-				// Open LOX MPV
-				set_valve_channel(LOX_MPV_VALVE_CH, VALVE_ON);
-
-				// Open LOX control valve
-				set_valve_channel(LOX_CONTROL_VALVE_CH, VALVE_ON);
-
-				// Disable telemetry to prevent telem from blocking valve timings
-				// to prevent a hard start
-				// TODO: get rid of this when DMA tx is working?
-				telem_disabled = 1;
-			}
-			else {
+			// Only proceed to Hotfire if the ignitor break is detected
+			// and automatic aborts are enabled
+			if (autosequence.enable_auto_aborts &&
+					!autosequence.ignition_ignitor_current_lower_bound_threshold_passed) {
 				// Transition to IgnitionFail state
 				STATE = IgnitionFail;
+
+				// Reset all control variables whenever exiting the autosequence
+				autosequence.ignition_ignitor_current_lower_bound_threshold_passed = 0;  // Not needed
+				init_autosequence_control_variables();
+
+				// Reset all control variables whenever exiting the autosequence
+				init_autosequence_control_variables();
 
 				// Close control valves
 				set_valve_channel(LOX_CONTROL_VALVE_CH, VALVE_OFF);
@@ -306,6 +362,26 @@ void execute_autosequence() {
 
 				// Now wait for operator to go to Manual
 			}
+			// Successful ignitor break OR auto aborts disabled
+			else {
+				// Transition to Hotfire state
+				STATE = Hotfire;
+				autosequence.hotfire_start_time_ms = SYS_MILLIS;
+
+				// Ignitor low
+				set_valve_channel(IGNITOR_CH, VALVE_OFF);
+
+				// Open LOX MPV
+				set_valve_channel(LOX_MPV_VALVE_CH, VALVE_ON);
+
+				// Open LOX control valve
+				set_valve_channel(LOX_CONTROL_VALVE_CH, VALVE_ON);
+
+				// Disable telemetry to prevent telem from blocking valve
+				// timings to prevent a hard start
+				// TODO: get rid of this when DMA tx is working?
+				telem_disabled = 1;
+			}
 		}
 	}
 
@@ -313,9 +389,35 @@ void execute_autosequence() {
 		// Tank pressure control periodic function calls handled in main()
 		// Not using else if in case the timings overlap
 
+		// Automatic abort cases
+		if (autosequence.enable_auto_aborts) {
+			// Chamber pressure too low - only active 1s after Hotfire
+			// see update_combustion_failure() and its call in main()
+			// Double check that it waits until after the startup transient
+			if (autosequence.T_state > autosequence.hotfire_chamber_pres_lower_bound_abort_start_time_ms
+					&& autosequence.hotfire_chamber_pres_lower_bound_threshold_passed) {
+				// Reset abort flag
+				autosequence.hotfire_chamber_pres_lower_bound_threshold_passed = 0;
+
+				// Handle abort
+				STATE = Abort;
+				enter_abort_state();
+				set_status_flag(EC_FLAG_ABORT_CHMBR_PRES_LOW);
+			}
+
+			// Chamber pressure too high - active through entire Hotfire
+			// Aborts on first instance of detection to catch hard starts
+			if (pressure[CHAMBER_PRES_CH]
+						 > autosequence.hotfire_chamber_pres_upper_bound) {
+				STATE = Abort;
+				enter_abort_state();
+				set_status_flag(EC_FLAG_ABORT_CHMBR_PRES_HIGH);
+			}
+		}
+
 		// Turn on LOX pressure control
 		// Relative to 0 because LOX leads
-		if (T_state >= (0 + autosequence.hotfire_pid_start_delay_ms)
+		if (autosequence.T_state >= (0 + autosequence.hotfire_pid_start_delay_ms)
 				&& !autosequence.hotfire_lox_tank_enable_PID_control) {
 			// Should only get called once when it starts pressure control
 			tank_init_control_loop(&tanks[LOX_TANK_NUM]);
@@ -323,7 +425,7 @@ void execute_autosequence() {
 		}
 
 		// Fuel on
-		if (T_state >= autosequence.hotfire_fuel_mpv_delay_ms) {
+		if (autosequence.T_state >= autosequence.hotfire_fuel_mpv_delay_ms) {
 			// Open Fuel MPV (Press AND Vent)
 			set_valve_channel(FUEL_MPV_VENT_VALVE_CH, VALVE_ON);
 			set_valve_channel(FUEL_MPV_PRESS_VALVE_CH, VALVE_ON);
@@ -338,7 +440,7 @@ void execute_autosequence() {
 
 		// Turn on Fuel pressure control
 		// Delay is relative to MPV opening
-		if (T_state >= (autosequence.hotfire_fuel_mpv_delay_ms
+		if (autosequence.T_state >= (autosequence.hotfire_fuel_mpv_delay_ms
 				+ autosequence.hotfire_pid_start_delay_ms)
 				&& !autosequence.hotfire_fuel_tank_enable_PID_control) {
 			// Should only get called once when it starts pressure control
@@ -347,19 +449,19 @@ void execute_autosequence() {
 		}
 
 		// Nozzle film cooling timing is relative to LOX MPV opening
-		if (T_state >= autosequence.hotfire_film_cooling_on_time_ms) {
+		if (autosequence.T_state >= autosequence.hotfire_film_cooling_on_time_ms) {
 			// Nozzle film cooling on
 			set_valve_channel(NOZZLE_FILM_COOLING_VALVE_CH, VALVE_ON);
 		}
 
 		// After combustion starts, turn off purge
-		if (T_state >= autosequence.hotfire_purge_off_time_ms) {
+		if (autosequence.T_state >= autosequence.hotfire_purge_off_time_ms) {
 			// Purge low
 			set_valve_channel(PURGE_VALVE_CH, VALVE_OFF);
 		}
 
 		// Stop hotfire
-		if (T_state >= autosequence.hotfire_test_duration_ms) {
+		if (autosequence.T_state >= autosequence.hotfire_test_duration_ms) {
 			// Transition to Post state
 			STATE = Post;
 			autosequence.post_start_time_ms = SYS_MILLIS;
@@ -388,26 +490,27 @@ void execute_autosequence() {
 	else if (STATE == Post) {
 		// MPVs should already be closed and purge should've started by now
 
-		if (T_state >= autosequence.post_vent_on_time_ms) {
+		if (autosequence.T_state >= autosequence.post_vent_on_time_ms) {
 			// Vent both tanks
 			set_valve_channel(LOX_TANK_VENT_VALVE_CH, VALVE_ON);
 
-			// TODO: this should be moved to the GSE controller
-			//set_valve_channel(FUEL_TANK_VENT_VALVE_CH, VALVE_ON);
+			// Handled by GSE controller
 			send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH, VALVE_ON);
 
 		}
-		if (T_state >= autosequence.post_vent_off_time_ms) {
+		if (autosequence.T_state >= autosequence.post_vent_off_time_ms) {
 			// Close tank vents
 			set_valve_channel(LOX_TANK_VENT_VALVE_CH, VALVE_OFF);
 
-			// This should be moved to the GSE controller
-			//set_valve_channel(FUEL_TANK_VENT_VALVE_CH, VALVE_OFF);
+			// Handled by GSE controller
 			send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH, VALVE_OFF);
 		}
-		if (T_state >= autosequence.post_purge_off_time_ms) {
+		if (autosequence.T_state >= autosequence.post_purge_off_time_ms) {
 			// Purge low
 			set_valve_channel(PURGE_VALVE_CH, VALVE_OFF);
+
+			// Reset all control variables whenever exiting the autosequence
+			init_autosequence_control_variables();
 
 			// Transition back to Manual
 			STATE = Manual;

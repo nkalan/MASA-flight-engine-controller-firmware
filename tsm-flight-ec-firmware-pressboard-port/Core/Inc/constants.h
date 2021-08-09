@@ -33,39 +33,32 @@ extern TIM_HandleTypeDef htim13;
 // Addresses
 #define GSE_CONTROLLER_ADDR  (0)
 #define FLIGHT_COMP_ADDR     (1)
-#define FLIGHT_EC_ADDR       (3)
+#define FLIGHT_EC_ADDR       (2)
+#define PRESS_BOARD_ADDR     (3)
 #define SERVER_ADDR          (7)
+
+#define OWN_BOARD_ADDR       PRESS_BOARD_ADDR
 
 // SPI bus mappings
 #define SPI_TC            hspi4
 #define SPI_ADC           hspi1
-//#define SPI_MOTOR         hspi3
 #define SPI_MEM           hspi2
 
 // Communication mappings
 #define COM_UART          huart2
-//#define CAN_BUS           hcan1
+#define CAN_BUS           hcan1
 
 // Timer mappings
-/*
-#define TIM_5MS           htim13
-#define TIM_50MS          htim10
-#define TIM_100MS         htim11
-#define TIM_MICROS        htim5
-*/
 #define TIM_5MS           htim7
 #define TIM_50MS          htim10
 #define TIM_100MS         htim11
 #define TIM_MICROS        htim5
-#define TIM_MTR0_STEP
+#define TIM_MTR0_STEP     htim13
+#define TIM_MTR1_STEP     htim6
+#define TIM_MTR0_PWM      htim2
+#define TIM_MTR1_PWM      htim3
 
 // LED mappings
-/*
-#define LED_TELEM_PORT              (LED_0_GPIO_Port)
-#define LED_TELEM_PIN               (LED_0_Pin)
-#define LED_FLASH_LOGGING_PORT      (LED_1_GPIO_Port)
-#define LED_FLASH_LOGGING_PIN       (LED_1_Pin)
-*/
 #define LED_TELEM_PORT              (LED0_GPIO_Port)
 #define LED_TELEM_PIN               (LED0_Pin)
 #define LED_FLASH_LOGGING_PORT      (LED1_GPIO_Port)
@@ -77,7 +70,6 @@ extern TIM_HandleTypeDef htim13;
 
 /**
  * Valve channel mappings
- * TODO: fix these
  */
 #define LOX_CONTROL_VALVE_CH          (0)
 #define LOX_MPV_VALVE_CH              (1)
@@ -86,8 +78,8 @@ extern TIM_HandleTypeDef htim13;
 #define FUEL_MPV_PRESS_VALVE_CH       (4)
 #define FUEL_MPV_VENT_VALVE_CH        (5)
 #define IGNITOR_CH                    (6)
-#define PURGE_VALVE_CH                (7)
-#define NOZZLE_FILM_COOLING_VALVE_CH  (8)
+#define NOZZLE_FILM_COOLING_VALVE_CH  (7)
+#define PURGE_VALVE_CH                (8)
 
 #define GSE_FUEL_TANK_VENT_VALVE_CH   (9)
 /*
@@ -107,19 +99,7 @@ extern TIM_HandleTypeDef htim13;
 
 // Thermocouples
 // TODO: fix these
-// TODO
-#define FIN_TEMP_CH                    (0)
-#define AV_BAY_TEMP_CH                 (1)
-#define RACEWAY_A_TEMP_CH              (2)
-#define RACEWAY_B_TEMP_CH              (3)
-#define CHAMBER_TEMP_CH                (4)
-#define REGEN_TEMP_CH                  (5)
-#define NOZZLE_TEMP_CH                 (6)
-#define COPV_TEMP_CH                   (7)
-#define LOX_ULLAGE_TEMP_CH             (8)
-#define LOX_TEMP_CH                    (9)
-#define FUEL_ULLAGE_TEMP_CH           (10)
-#define FUEL_TEMP_CH                  (11)
+#define COPV_TEMP_CH                   (2)
 
 /**
  * Misc definitions of system parameters

@@ -14,10 +14,14 @@
 #include "constants.h"
 #include "globals.h"
 
+#include "pack_calibration_defines.h"
+
 
 W25N01GV_Flash flash;  // Flash struct
 uint8_t telem_disabled = 0;
 //DmaBufferInfo buffer_info;  // DMA rx
+
+uint8_t calibration_telem_buffer[CLB_NUM_CALIBRATION_ITEMS];
 
 
 /**
@@ -57,7 +61,7 @@ void update_serial_data_vars() {
  */
 void init_packet_header(CLB_Packet_Header* header, uint8_t target_addr) {
 	header->packet_type = 0; // default packet
-	header->origin_addr = FLIGHT_EC_ADDR;
+	header->origin_addr = OWN_BOARD_ADDR;
 	header->target_addr = target_addr;
 	header->priority = 1; // medium
 	header->num_packets = 1;
@@ -248,13 +252,16 @@ void send_calibration_data() {
 	CLB_Packet_Header cal_header;
 
 	cal_header.packet_type = 2; // calibration packet
-	cal_header.origin_addr = FLIGHT_EC_ADDR;
+	cal_header.origin_addr = OWN_BOARD_ADDR;
 	cal_header.target_addr = SERVER_ADDR;
 	cal_header.priority = 1; // medium
+	cal_header.num_packets = 1;
 	cal_header.do_cobbs = 1; // enable COBS
+	cal_header.checksum = 0;
 	cal_header.timestamp = SYS_MICROS;
 
-    init_data(NULL, -1, &cal_header);  // Comms library (tx, so no buffer)
+	pack_calibration_data(calibration_telem_buffer);
+    init_data(calibration_telem_buffer, CLB_NUM_CALIBRATION_ITEMS, &cal_header);  // Comms library (tx, so no buffer)
 
     CLB_send_data_info info;
     info.uartx = &COM_UART;

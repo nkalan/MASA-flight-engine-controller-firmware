@@ -40,9 +40,28 @@ typedef struct {
 	uint32_t post_vent_off_time_ms;
 	uint32_t post_purge_off_time_ms;
 
+	uint32_t T_state;  // Time in current state; 0 if it doens't care
+
 	// Control variables
 	uint8_t hotfire_lox_tank_enable_PID_control;   // 1 during active TPC
 	uint8_t hotfire_fuel_tank_enable_PID_control;  // 1 during active TPC
+	uint8_t startup_init_motor_pos_complete;       // Make sure motor turns to initial position
+	volatile uint8_t enable_auto_aborts;                   // Toggle automatic aborts
+
+	// Ignition + Combustion detection control variables + constants
+	float ignition_ignitor_current_lower_bound;  // Threshold to detect ignitor break
+	uint32_t ignition_ignitor_current_lower_bound_pass_min_detections;  // Minimum detections to read past lower bound to trigger flag
+	uint32_t ignition_ignitor_current_lower_bound_pass_count;  // Live count of ignitor break current detections
+
+	float hotfire_chamber_pres_upper_bound;  // Hard start detection
+	float hotfire_chamber_pres_lower_bound;  // Combustion failure detection
+	uint32_t hotfire_chamber_pres_lower_bound_pass_min_detections;
+	uint32_t hotfire_chamber_pres_lower_bound_pass_count;
+	uint32_t hotfire_chamber_pres_lower_bound_abort_start_time_ms;
+
+	// Outputs of ignition detection
+	uint8_t ignition_ignitor_current_lower_bound_threshold_passed;
+	uint8_t hotfire_chamber_pres_lower_bound_threshold_passed;
 
 	// Start time variables - set automatically during autosequence
 	volatile uint32_t startup_start_time_ms;   // Set when entering Startup
@@ -52,16 +71,29 @@ typedef struct {
 
 } Autosequence_Info;
 
+
+void init_autosequence_constants();
+
+
 void init_autosequence_timings();
 
 
 void init_tank_pressure_control_configuration();
 
 
+void init_autosequence_control_variables();
+
+
 void execute_autosequence();
 
 
 uint32_t get_ellapsed_time_in_autosequence_state_ms();
+
+
+void update_ignitor_break_detector();
+
+
+void update_combustion_failure_detector();
 
 
 /**

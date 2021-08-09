@@ -20,7 +20,7 @@ void send_gse_set_vlv_cmd(uint32_t vlv_num, uint8_t vlv_state) {
 	uint8_t cobs_cmd_packet[VLV_CMD_SZ+2];
 
 	cmd_packet[0] = 8;  // set_vlv
-	cmd_packet[1] = FLIGHT_EC_ADDR;       // origin_addr
+	cmd_packet[1] = OWN_BOARD_ADDR;       // origin_addr
 	cmd_packet[2] = GSE_CONTROLLER_ADDR;  // target_addr
 	cmd_packet[3] = 1;  // priority
 	cmd_packet[4] = 1;  // num_packets

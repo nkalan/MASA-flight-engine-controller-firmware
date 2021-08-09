@@ -35,6 +35,7 @@
 #define NVM_PT_UPPER_VOLTAGE_NUM_BYTES        (NUM_PTS*2)
 #define NVM_PT_LOWER_VOLTAGE_NUM_BYTES        (NUM_PTS*2)
 #define NVM_PT_PRESSURE_RANGE_NUM_BYTES       (NUM_PTS*2)
+#define NVM_AUTO_ABORT_NUM_BYTES              (1)
 
 // Define variable addresses based on their lengths and order
 #define NVM_FLASH_PAGE_NUM               (0)
@@ -56,6 +57,7 @@
 #define NVM_PT_UPPER_VOLTAGE_ADDR        (NVM_INIT_POS_DEG_CORR_FAC_ADDR + NVM_INIT_POS_DEG_CORR_FAC_NUM_BYTES)
 #define NVM_PT_LOWER_VOLTAGE_ADDR        (NVM_PT_UPPER_VOLTAGE_ADDR + NVM_PT_UPPER_VOLTAGE_NUM_BYTES)
 #define NVM_PT_PRESSURE_RANGE_ADDR       (NVM_PT_LOWER_VOLTAGE_ADDR + NVM_PT_LOWER_VOLTAGE_NUM_BYTES)
+#define NVM_AUTO_ABORT_ADDR              (NVM_PT_PRESSURE_RANGE_ADDR + NVM_PT_PRESSURE_RANGE_NUM_BYTES)
 
 // Total size of variables
 #define NVM_BUFFER_SZ    (NVM_PARITY_BIT_NUM_BYTES \
@@ -71,7 +73,8 @@
 		+ NVM_PID_DELAY_NUM_BYTES \
 		+ NVM_PT_UPPER_VOLTAGE_NUM_BYTES \
 		+ NVM_PT_LOWER_VOLTAGE_NUM_BYTES \
-		+ NVM_PT_PRESSURE_RANGE_NUM_BYTES)
+		+ NVM_PT_PRESSURE_RANGE_NUM_BYTES \
+		+ NVM_AUTO_ABORT_NUM_BYTES)
 
 
 extern W25N01GV_Flash flash;
@@ -186,6 +189,9 @@ uint8_t read_nonvolatile_variables() {
 				(nonvolatile_memory_buffer[NVM_PT_PRESSURE_RANGE_ADDR + 2*i + 1] << 8));
 	}
 
+	// Autosequence automatic abort enable
+	autosequence.enable_auto_aborts = nonvolatile_memory_buffer[NVM_AUTO_ABORT_ADDR];
+
 	// Successful read
 	return 1;
 }
@@ -297,6 +303,9 @@ uint8_t save_nonvolatile_variables() {
 		nonvolatile_memory_buffer[NVM_PT_PRESSURE_RANGE_ADDR + 2*i + 0] = ((uint16_t) (pt_cal_upper_pressure[i])) >> 0;
 		nonvolatile_memory_buffer[NVM_PT_PRESSURE_RANGE_ADDR + 2*i + 1] = ((uint16_t) (pt_cal_upper_pressure[i])) >> 8;
 	}
+
+	// Autosequence automatic abort enable
+	nonvolatile_memory_buffer[NVM_AUTO_ABORT_ADDR] = autosequence.enable_auto_aborts;
 
 	// Overwrite previous values in flash
 	erase_reserved_flash_pages(&flash);

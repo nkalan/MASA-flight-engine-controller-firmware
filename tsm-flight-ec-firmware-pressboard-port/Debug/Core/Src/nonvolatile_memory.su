@@ -1,2 +1,0 @@
-nonvolatile_memory.c:85:9:read_nonvolatile_variables	16	static
-nonvolatile_memory.c:194:9:save_nonvolatile_variables	24	static
