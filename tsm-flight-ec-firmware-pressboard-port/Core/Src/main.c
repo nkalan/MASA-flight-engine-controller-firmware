@@ -394,7 +394,6 @@ int main(void)
 			  send_telem_packet(SERVER_ADDR);
 			  HAL_GPIO_TogglePin(LED_TELEM_PORT, LED_TELEM_PIN);
 		  }
-
 	  }
 
 	  // Refresh watchdog timer to keep the board running

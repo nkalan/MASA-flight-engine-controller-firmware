@@ -12,7 +12,7 @@
 #include "status_flags.h"
 #include "board_commands.h"
 
-#define STEPPER_MOTOR_STEP_ANGLE   (1.8)
+//#define STEPPER_MOTOR_STEP_ANGLE   (1.8)
 #define VALVE_ON                   (GPIO_PIN_SET)
 #define VALVE_OFF                  (GPIO_PIN_RESET)
 
@@ -84,7 +84,11 @@ void init_autosequence_control_variables() {
 
 	autosequence.ignition_ignitor_current_lower_bound_threshold_passed = 0;
 	autosequence.hotfire_chamber_pres_lower_bound_threshold_passed = 0;
+
+	autosequence.gse_fuel_vent_high_signal_sent = 0;
+	autosequence.gse_fuel_vent_low_signal_sent = 0;
 }
+
 
 /**
  * Call this function every time you want to abort.
@@ -112,8 +116,8 @@ void enter_abort_state() {
 
 	// Open vent valves
 	// Fuel vent is handled by GSE controller
-	send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH, VALVE_ON);
 	set_valve_channel(LOX_TANK_VENT_VALVE_CH, VALVE_ON);
+	send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH, VALVE_OFF);
 
 	// Open purge valve
 	set_valve_channel(PURGE_VALVE_CH, VALVE_ON);
@@ -126,8 +130,9 @@ void enter_abort_state() {
 	autosequence.hotfire_lox_tank_enable_PID_control = 0;
 	autosequence.hotfire_fuel_tank_enable_PID_control = 0;
 
-	// Reset all control variables whenever exiting the autosequence
-	init_autosequence_control_variables();
+	// Make sure telem is enabled, in case it aborted during
+	// the MPV delay
+	telem_disabled = 0;
 }
 
 /**
@@ -403,6 +408,7 @@ void execute_autosequence() {
 				STATE = Abort;
 				enter_abort_state();
 				set_status_flag(EC_FLAG_ABORT_CHMBR_PRES_LOW);
+				return;  // Stop other valves from actuating this loop
 			}
 
 			// Chamber pressure too high - active through entire Hotfire
@@ -412,6 +418,7 @@ void execute_autosequence() {
 				STATE = Abort;
 				enter_abort_state();
 				set_status_flag(EC_FLAG_ABORT_CHMBR_PRES_HIGH);
+				return;  // Stop other valves from actuating this loop
 			}
 		}
 
@@ -494,8 +501,11 @@ void execute_autosequence() {
 			// Vent both tanks
 			set_valve_channel(LOX_TANK_VENT_VALVE_CH, VALVE_ON);
 
-			// Handled by GSE controller
-			send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH, VALVE_ON);
+			// Fuel vent handled by GSE controller
+			if (!autosequence.gse_fuel_vent_high_signal_sent) {
+				send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH, VALVE_ON);
+				autosequence.gse_fuel_vent_high_signal_sent = 1;
+			}
 
 		}
 		if (autosequence.T_state >= autosequence.post_vent_off_time_ms) {
@@ -503,11 +513,17 @@ void execute_autosequence() {
 			set_valve_channel(LOX_TANK_VENT_VALVE_CH, VALVE_OFF);
 
 			// Handled by GSE controller
-			send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH, VALVE_OFF);
+			if (!autosequence.gse_fuel_vent_low_signal_sent) {
+				send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH, VALVE_OFF);
+				autosequence.gse_fuel_vent_low_signal_sent = 1;
+			};
 		}
 		if (autosequence.T_state >= autosequence.post_purge_off_time_ms) {
 			// Purge low
 			set_valve_channel(PURGE_VALVE_CH, VALVE_OFF);
+
+			// Stop valve commands to the GSE
+			send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH, VALVE_OFF);
 
 			// Reset all control variables whenever exiting the autosequence
 			init_autosequence_control_variables();

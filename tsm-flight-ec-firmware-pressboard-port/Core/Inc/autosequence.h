@@ -40,7 +40,15 @@ typedef struct {
 	uint32_t post_vent_off_time_ms;
 	uint32_t post_purge_off_time_ms;
 
-	uint32_t T_state;  // Time in current state; 0 if it doens't care
+	// Flag for sending commands to GSE in periodic loop
+	uint8_t gse_fuel_vent_signal;
+	uint8_t gse_fuel_vent_command_enable;
+
+	uint8_t gse_fuel_vent_high_signal_sent;
+	uint8_t gse_fuel_vent_low_signal_sent;
+
+	// Time in current state; 0 if it doens't care
+	uint32_t T_state;
 
 	// Control variables
 	uint8_t hotfire_lox_tank_enable_PID_control;   // 1 during active TPC
@@ -79,6 +87,9 @@ void init_autosequence_timings();
 
 
 void init_tank_pressure_control_configuration();
+
+
+void transmit_autosequence_gse_valve_commands();
 
 
 void init_autosequence_control_variables();
