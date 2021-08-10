@@ -156,7 +156,9 @@ void tank_startup_init_motor_position(TPC_Info* tank) {
 
 	// Calculations
 	crit_pr = pow(2.0 / (gamma + 1), gamma / (gamma - 1));
-	t_r     = (double)(*(tank->COPV_temp)) * (9.0/5);
+	t_r     = (double)(300) * (9.0/5);  // Hardcoded temp bc tcs are buggy
+	// TODO: uncomment that when tcs are fixed
+	//t_r     = (double)(*(tank->COPV_temp)) * (9.0/5);
 	q_acf = vdot*2118.88; // cfm
 
 	if (tank->is_cryogenic) { // cryogenic liquid case

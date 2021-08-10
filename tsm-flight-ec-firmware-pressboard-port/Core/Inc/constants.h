@@ -88,18 +88,22 @@ extern TIM_HandleTypeDef htim13;
  */
 // Pressure transducers and potentiometers
 #define LOX_TANK_PRES_CH               (0)
-#define CHAMBER_PRES_CH                (1)
-#define FUEL_TANK_PRES_CH              (2)
+#define FUEL_TANK_PRES_CH              (1)
+#define COPV_PRES_CH                   (2)
 #define LOX_INJ_MANIFOLD_PRES_CH       (3)
-#define COPV_PRES_CH                   (4)
-#define FUEL_INJ_MANIFOLD_PRES_CH      (5)
+#define REGEN_PRES_CH                  (4)
+#define CHAMBER_PRES_CH                (5)
 
 #define POT_0_CH                       (0)
 #define POT_1_CH                       (1)
 
 // Thermocouples
 // TODO: fix these
-#define COPV_TEMP_CH                   (2)
+#define COPV_S1_TEMP_CH                (0)
+#define COPV_S2_TEMP_CH                (1)
+#define COPV_S3_TEMP_CH                (2)
+#define COPV_TEMP_CH                   (3)
+#define LOX_1_TOP_TEMP_CH              (4)
 
 /**
  * Misc definitions of system parameters
