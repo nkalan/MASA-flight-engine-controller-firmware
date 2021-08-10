@@ -1,0 +1,7 @@
+serial_data.c:34:6:init_serial_data	4	static
+serial_data.c:54:6:update_serial_data_vars	8	static
+serial_data.c:65:6:init_packet_header	16	static
+serial_data.c:76:6:send_telem_packet	40	static
+serial_data.c:86:6:save_flash_packet	296	static
+serial_data.c:107:6:transmit_flash_data	2064	static
+serial_data.c:254:6:send_calibration_data	32	static

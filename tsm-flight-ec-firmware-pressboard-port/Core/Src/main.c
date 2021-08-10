@@ -382,6 +382,11 @@ int main(void)
 			  update_combustion_failure_detector();
 		  }
 
+		  // Hard start detection
+		  if (STATE == Hotfire) {
+			  update_hard_start_detector();
+		  }
+
 	  }
 
 

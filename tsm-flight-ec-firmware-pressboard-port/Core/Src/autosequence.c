@@ -39,10 +39,13 @@ void init_autosequence_constants() {
 	// Detection thresholds
 	autosequence.ignition_ignitor_current_lower_bound = 3;  // TODO: fix this
 	autosequence.ignition_ignitor_current_lower_bound_pass_min_detections = 30;  // 150ms
-	autosequence.hotfire_chamber_pres_upper_bound = 421.9;  // Nominal * 1.5
+
 	autosequence.hotfire_chamber_pres_lower_bound = 140.64; // Nominal * 0.5
 	autosequence.hotfire_chamber_pres_lower_bound_pass_min_detections = 10;  // 50ms
 	autosequence.hotfire_chamber_pres_lower_bound_abort_start_time_ms = 1000;  // Wait 1s
+
+	autosequence.hotfire_chamber_pres_upper_bound = 421.9;  // Nominal * 1.5
+	autosequence.hotfire_chamber_pres_upper_bound_pass_min_detections = 3;  // 15ms
 }
 
 
@@ -57,18 +60,28 @@ void init_tank_pressure_control_configuration() {
 	// LOX tank configuration
 	tanks[LOX_TANK_NUM].is_cryogenic = 1;
 	tanks[LOX_TANK_NUM].control_valve_channel = LOX_CONTROL_VALVE_CH;
-	tanks[LOX_TANK_NUM].control_pres = &lox_control_pressure;
-	tanks[LOX_TANK_NUM].COPV_pres = &copv_control_pressure;
+	tanks[LOX_TANK_NUM].control_pres = &pressure[LOX_TANK_PRES_CH];  // TODO: change
+	tanks[LOX_TANK_NUM].COPV_pres = &pressure[COPV_PRES_CH];  // TODO: change
 	tanks[LOX_TANK_NUM].COPV_temp = &tc[COPV_TEMP_CH];
 	tanks[LOX_TANK_NUM].PID_ctrl_loop_period_ms = 50;
 
 	// Fuel tank configuration
 	tanks[FUEL_TANK_NUM].is_cryogenic = 0;
 	tanks[FUEL_TANK_NUM].control_valve_channel = FUEL_CONTROL_VALVE_CH;
-	tanks[FUEL_TANK_NUM].control_pres = &fuel_control_pressure;
-	tanks[FUEL_TANK_NUM].COPV_pres = &copv_control_pressure;
+	tanks[FUEL_TANK_NUM].control_pres = &pressure[FUEL_TANK_PRES_CH];  // TODO: change
+	tanks[FUEL_TANK_NUM].COPV_pres = &pressure[COPV_PRES_CH];  // TODO: change
 	tanks[FUEL_TANK_NUM].COPV_temp = &tc[COPV_TEMP_CH];
 	tanks[FUEL_TANK_NUM].PID_ctrl_loop_period_ms = 50;
+
+	// Motor info
+	tanks[LOX_TANK_NUM].motor_num = LOX_TANK_NUM;
+	tanks[LOX_TANK_NUM].motor_num = FUEL_TANK_NUM;
+
+	// Bang bang thresholds
+	tanks[LOX_TANK_NUM].bang_bang_low_pres_diff = 10;
+	tanks[LOX_TANK_NUM].bang_bang_high_pres_diff = 15;
+	tanks[FUEL_TANK_NUM].bang_bang_low_pres_diff = 5;
+	tanks[FUEL_TANK_NUM].bang_bang_high_pres_diff = 10;
 }
 
 /**
@@ -84,6 +97,7 @@ void init_autosequence_control_variables() {
 
 	autosequence.ignition_ignitor_current_lower_bound_threshold_passed = 0;
 	autosequence.hotfire_chamber_pres_lower_bound_threshold_passed = 0;
+	autosequence.hotfire_chamber_pres_upper_bound_threshold_passed = 0;
 
 	autosequence.gse_fuel_vent_high_signal_sent = 0;
 	autosequence.gse_fuel_vent_low_signal_sent = 0;
@@ -212,6 +226,34 @@ void update_combustion_failure_detector() {
 }
 
 
+/**
+ * Keep a counter of consecutive times the chamber pressure
+ * is above a certain threshold. If it reaches a certain count,
+ * set a flag. Pressure should stay below this threshold for
+ * the entire hotfire.
+ *
+ * This function is called every 5ms during the detection period.
+ */
+void update_hard_start_detector() {
+	// Counter
+	if (pressure[CHAMBER_PRES_CH] > autosequence.hotfire_chamber_pres_upper_bound) {
+		++autosequence.hotfire_chamber_pres_upper_bound_pass_count;
+	}
+	else {
+		autosequence.hotfire_chamber_pres_upper_bound_pass_count = 0;
+	}
+
+	// Threshold check
+	if (autosequence.hotfire_chamber_pres_upper_bound_pass_count
+			>= autosequence.hotfire_chamber_pres_upper_bound_pass_min_detections) {
+		autosequence.hotfire_chamber_pres_upper_bound_threshold_passed = 1;
+	}
+	else {
+		autosequence.hotfire_chamber_pres_upper_bound_threshold_passed = 0;
+	}
+}
+
+
 void manual_state_transition(uint8_t next_state) {
 
 	// Aborts work in any state
@@ -241,8 +283,7 @@ void manual_state_transition(uint8_t next_state) {
 			STATE = Safe;
 			enter_safe_disarm_state();
 		}
-		// Autopress is given instead of Startup to simplify the GUI code
-		else if (next_state == AutoPress) {
+		else if (next_state == Startup) {
 			// Close control valves
 			set_valve_channel(LOX_CONTROL_VALVE_CH, VALVE_OFF);
 			set_valve_channel(FUEL_CONTROL_VALVE_CH, VALVE_OFF);
@@ -256,7 +297,8 @@ void manual_state_transition(uint8_t next_state) {
 			STATE = Safe;
 			enter_safe_disarm_state();
 		}
-		else if (next_state == Ignition) {
+		// GUI sends continue command for some reason
+		else if (next_state == Continue) {
 			// Only allow ignition after initial motor position is handled
 			if (autosequence.startup_init_motor_pos_complete) {
 				autosequence.startup_init_motor_pos_complete = 0;  // Reset flag
@@ -268,11 +310,13 @@ void manual_state_transition(uint8_t next_state) {
 	}
 	else if (STATE == IgnitionFail) {
 		if (next_state == Manual) {
+			init_autosequence_control_variables();
 			STATE = Manual;  // Operator must dismiss IgnitionFail condition
 		}
 	}
 	else if (STATE == Abort) {
 		if (next_state == Manual) {
+			init_autosequence_control_variables();
 			STATE = Manual;  // Operator must dismiss Abort condition
 		}
 	}

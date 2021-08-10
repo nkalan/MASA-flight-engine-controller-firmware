@@ -135,12 +135,15 @@ void tank_startup_init_motor_position(TPC_Info* tank) {
 	double p_i    = (double)(*(tank->COPV_pres));       // cng pressure
 	double p_o    = (double)(*(tank->control_pres));     // tank pressure
 
+	p_i = 3000;
+	p_o = tank->target_pres;
+
 	// Avoid divide by zero error
 	if (p_i == 0) {
-		p_i = 0.0000001;
+		p_i = 0.1;
 	}
 	if (p_o == 0) {
-		p_o = 0.0000001;
+		p_o = 0.1;
 	}
 
 	t_f = 300; // K  TODO: what are these, and why aren't they also static?

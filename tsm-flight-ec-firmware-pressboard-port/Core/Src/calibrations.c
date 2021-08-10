@@ -67,12 +67,14 @@ float pot_counts_to_deg(uint8_t pot_num, uint16_t counts) {
 /**
  * Use the channel-specific calibrations to convert voltage back to pressure
  */
-float pt_counts_to_psi(uint8_t pt_num, uint16_t pt_volts) {
+float pt_counts_to_psi(uint8_t pt_num, uint16_t pt_counts) {
+
 	if (pt_num < NUM_PTS) {
-		return ((pt_volts - pt_cal_lower_voltage[pt_num]) * pt_cal_upper_pressure[pt_num]
-             / (pt_cal_upper_voltage[pt_num] - pt_cal_lower_voltage[pt_num]));
+		float pt_volts = pt_counts*ADC_COUNTS_TO_VOLTS/PT_3WIRE_5V_VDIV_GAIN;
+		if ( pt_cal_upper_voltage[pt_num] - pt_cal_lower_voltage[pt_num] != 0) {  // protect from divide by 0
+			return ((pt_volts - pt_cal_lower_voltage[pt_num]) * pt_cal_upper_pressure[pt_num]
+				 / (pt_cal_upper_voltage[pt_num] - pt_cal_lower_voltage[pt_num]));
+		}
 	}
-	else {
-		return 0;
-	}
+	return -1;
 }

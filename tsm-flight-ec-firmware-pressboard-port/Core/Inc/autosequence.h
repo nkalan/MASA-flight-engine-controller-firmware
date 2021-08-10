@@ -59,17 +59,24 @@ typedef struct {
 	// Ignition + Combustion detection control variables + constants
 	float ignition_ignitor_current_lower_bound;  // Threshold to detect ignitor break
 	uint32_t ignition_ignitor_current_lower_bound_pass_min_detections;  // Minimum detections to read past lower bound to trigger flag
-	uint32_t ignition_ignitor_current_lower_bound_pass_count;  // Live count of ignitor break current detections
+	uint16_t ignition_ignitor_current_lower_bound_pass_count;  // Live count of ignitor break current detections
+	// Starts counting when ignitor goes high
 
 	float hotfire_chamber_pres_upper_bound;  // Hard start detection
+	uint32_t hotfire_chamber_pres_upper_bound_pass_min_detections;
+	uint16_t hotfire_chamber_pres_upper_bound_pass_count;
+	// Counts for entire Hotfire state
+
 	float hotfire_chamber_pres_lower_bound;  // Combustion failure detection
 	uint32_t hotfire_chamber_pres_lower_bound_pass_min_detections;
-	uint32_t hotfire_chamber_pres_lower_bound_pass_count;
+	uint16_t hotfire_chamber_pres_lower_bound_pass_count;
 	uint32_t hotfire_chamber_pres_lower_bound_abort_start_time_ms;
+	// Only counts X time after Hotfire starts
 
 	// Outputs of ignition detection
 	uint8_t ignition_ignitor_current_lower_bound_threshold_passed;
 	uint8_t hotfire_chamber_pres_lower_bound_threshold_passed;
+	uint8_t hotfire_chamber_pres_upper_bound_threshold_passed;
 
 	// Start time variables - set automatically during autosequence
 	volatile uint32_t startup_start_time_ms;   // Set when entering Startup
@@ -105,6 +112,9 @@ void update_ignitor_break_detector();
 
 
 void update_combustion_failure_detector();
+
+
+void update_hard_start_detector();
 
 
 /**

@@ -621,7 +621,7 @@ void updatePeripherals(uint16_t (*adc_counts)[16]) {
     /* Load pressure transducer voltages */
     for (int8_t i = 7; i >= 2; --i) {
         uint8_t channel = 7-i;
-        pressure[channel] = pt_counts_to_psi( channel, adc_counts[0][i]);
+        pressure[channel] = pt_counts_to_psi( channel, adc_counts[0][i]) - pt_ambients[channel];
     }
 
     /* Load mtr currents */

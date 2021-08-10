@@ -17,6 +17,9 @@
 #include "pack_calibration_defines.h"
 
 
+extern IWDG_HandleTypeDef hiwdg;
+
+
 W25N01GV_Flash flash;  // Flash struct
 uint8_t telem_disabled = 0;
 //DmaBufferInfo buffer_info;  // DMA rx
@@ -116,7 +119,7 @@ void transmit_flash_data() {
 	    read_next_2KB_from_flash(&flash, read_buffer);
 	    HAL_UART_Transmit(&COM_UART, read_buffer, W25N01GV_BYTES_PER_PAGE, HAL_MAX_DELAY);
 	    ++page;
-		//HAL_IWDG_Refresh(&hiwdg);  TODO: re enable this
+		HAL_IWDG_Refresh(&hiwdg);
 	}
 	reset_flash_read_pointer(&flash);
 }

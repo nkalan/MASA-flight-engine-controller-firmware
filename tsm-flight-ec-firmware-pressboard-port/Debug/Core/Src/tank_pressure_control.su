@@ -1,0 +1,6 @@
+tank_pressure_control.c:36:6:actuate_tank_control_valve	16	static
+tank_pressure_control.c:45:6:tank_init_control_loop	16	static
+tank_pressure_control.c:54:6:tank_autopress_bang_bang	16	static
+tank_pressure_control.c:67:6:tank_PID_pressure_control	56	static
+tank_pressure_control.c:112:6:tank_check_control_valve_threshold	16	static
+tank_pressure_control.c:123:6:tank_startup_init_motor_position	136	static
