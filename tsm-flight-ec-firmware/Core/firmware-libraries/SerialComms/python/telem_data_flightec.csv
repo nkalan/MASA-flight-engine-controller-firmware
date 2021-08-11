@@ -1,0 +1,118 @@
+name,firmware_variable,min_val,max_val,unit,firmware_type,printf_format,type_cast,xmit_scale,python_variable_override,python_type,python_globals,python_init,should_generate
+STATE,STATE,0,127,ul,enum States,%u,uint8_t,1,,int,,,y
+ebatt,e_batt,-20,20,Volts,float,%.2f,int16_t,100,,float,,,y
+ibatt,i_batt,-10,150,Amps,float,%.2f,int16_t,100,,float,,,y
+Valve State Feedback,valve_states,,,ul,uint32_t,%u,uint32_t,1,,int,,,y
+E 3V,e3v,0,5,Volts,float,%.2f,int16_t,100,,float,,,y
+E 5V,e5v,0,5,Volts,float,%.2f,int16_t,100,,float,,,y
+I 5V,i5v,0,2,Amps,float,%.1f,uint8_t,100,,float,,,y
+I 3V,i3v,0,2,Amps,float,%.1f,uint8_t,100,,float,,,y
+Board Temp 0,t_brd[0],,,C,float,%.1f,uint16_t,10,,float,,,n
+Board Temp 1,t_brd[1],,,C,float,%.1f,uint16_t,10,,float,,,n
+Board Temp 2,t_brd[2],,,C,float,%.1f,uint16_t,10,,float,,,n
+Last Command ID,last_command_id,,,ul,uint8_t,%d,uint8_t,1,,float,,,n
+Status flag feedback,status_flags,,,ul,uint32_t,%d,uint32_t,1,,int,,,y
+Pressure 0,pressure[0],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 1,pressure[1],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 2,pressure[2],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 3,pressure[3],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 4,pressure[4],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 5,pressure[5],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 6,pressure[6],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 7,pressure[7],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 8,pressure[8],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 9,pressure[9],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 10,pressure[10],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 11,pressure[11],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 12,pressure[12],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 13,pressure[13],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 14,pressure[14],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 15,pressure[15],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 16,pressure[16],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 17,pressure[17],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 18,pressure[18],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+Pressure 19,pressure[19],-100,10000,psi,float,%.1f,int32_t,10,,float,,,y
+ivlv 0,ivlv[0],0,20,Amps,float,%.1f,uint8_t,10,vlv0.i,float,,,n
+ivlv 1,ivlv[1],0,20,Amps,float,%.1f,uint8_t,10,vlv1.i,float,,,n
+ivlv 2,ivlv[2],0,20,Amps,float,%.1f,uint8_t,10,vlv2.i,float,,,n
+ivlv 3,ivlv[3],0,20,Amps,float,%.1f,uint8_t,10,vlv3.i,float,,,n
+ivlv 4,ivlv[4],0,20,Amps,float,%.1f,uint8_t,10,vlv4.i,float,,,n
+ivlv 5,ivlv[5],0,20,Amps,float,%.1f,uint8_t,10,vlv5.i,float,,,n
+ivlv 6,ivlv[6],0,20,Amps,float,%.1f,uint8_t,10,vlv6.i,float,,,n
+ivlv 7,ivlv[7],0,20,Amps,float,%.1f,uint8_t,10,vlv7.i,float,,,n
+ivlv 8,ivlv[8],0,20,Amps,float,%.1f,uint8_t,10,vlv8.i,float,,,n
+ivlv 9,ivlv[9],0,20,Amps,float,%.1f,uint8_t,10,vlv9.i,float,,,n
+ivlv 10,ivlv[10],0,20,Amps,float,%.1f,uint8_t,10,vlv10.i,float,,,n
+ivlv 11,ivlv[11],0,20,Amps,float,%.1f,uint8_t,10,vlv11.i,float,,,n
+ivlv 12,ivlv[12],0,20,Amps,float,%.1f,uint8_t,10,vlv12.i,float,,,n
+ivlv 13,ivlv[13],0,20,Amps,float,%.1f,uint8_t,10,vlv13.i,float,,,n
+evlv 0,evlv[0],0,15,Volts,float,%.1f,uint8_t,10,vlv0.e,float,,,y
+evlv 1,evlv[1],0,15,Volts,float,%.1f,uint8_t,10,vlv1.e,float,,,y
+evlv 2,evlv[2],0,15,Volts,float,%.1f,uint8_t,10,vlv2.e,float,,,y
+evlv 3,evlv[3],0,15,Volts,float,%.1f,uint8_t,10,vlv3.e,float,,,y
+evlv 4,evlv[4],0,15,Volts,float,%.1f,uint8_t,10,vlv4.e,float,,,y
+evlv 5,evlv[5],0,15,Volts,float,%.1f,uint8_t,10,vlv5.e,float,,,y
+evlv 6,evlv[6],0,15,Volts,float,%.1f,uint8_t,10,vlv6.e,float,,,y
+evlv 7,evlv[7],0,15,Volts,float,%.1f,uint8_t,10,vlv7.e,float,,,y
+evlv 8,evlv[8],0,15,Volts,float,%.1f,uint8_t,10,vlv8.e,float,,,y
+evlv 9,evlv[9],0,15,Volts,float,%.1f,uint8_t,10,vlv9.e,float,,,y
+evlv 10,evlv[10],0,15,Volts,float,%.1f,uint8_t,10,vlv10.e,float,,,y
+evlv 11,evlv[11],0,15,Volts,float,%.1f,uint8_t,10,vlv11.e,float,,,y
+evlv 12,evlv[12],0,15,Volts,float,%.1f,uint8_t,10,vlv12.e,float,,,y
+evlv 13,evlv[13],0,15,Volts,float,%.1f,uint8_t,10,vlv13.e,float,,,y
+tc 0,tc[0],,,K,float,%d,uint16_t,100,,float,,,y
+tc 1,tc[1],,,K,float,%d,uint16_t,100,,float,,,y
+tc 2,tc[2],,,K,float,%d,uint16_t,100,,float,,,y
+tc 3,tc[3],,,K,float,%d,uint16_t,100,,float,,,y
+tc 4,tc[4],,,K,float,%d,uint16_t,100,,float,,,y
+tc 5,tc[5],,,K,float,%d,uint16_t,100,,float,,,y
+tc 6,tc[6],,,K,float,%d,uint16_t,100,,float,,,y
+tc 7,tc[7],,,K,float,%d,uint16_t,100,,float,,,y
+tc 8,tc[8],,,K,float,%d,uint16_t,100,,float,,,y
+tc 9,tc[9],,,K,float,%d,uint16_t,100,,float,,,y
+tc 10,tc[10],,,K,float,%d,uint16_t,100,,float,,,y
+tc 11,tc[11],,,K,float,%d,uint16_t,100,,float,,,y
+tc 12,tc[12],,,K,float,%d,uint16_t,100,,float,,,y
+mtr 0 pos,tanks[0].motor_pos_deg,,,deg,float,%d,int16_t,10,mtr0.pos,float,,,y
+mtr 1 pos,tanks[1].motor_pos_deg,,,deg,float,%d,int16_t,10,mtr1.pos,float,,,y
+mtr 0 vel,tanks[0].motor_vel_steps_sec,,,step/s,int16_t,%d,int16_t,1,mtr0.vel,int,,,y
+mtr 1 vel,tanks[1].motor_vel_steps_sec,,,step/s,int16_t,%d,int16_t,1,mtr1.vel,int,,,y
+mtr 0 setpoint,tanks[0].motor_setpoint_deg,,,deg,float,%d,int16_t,10,mtr0.set,float,,,y
+mtr 1 setpoint,tanks[1].motor_setpoint_deg,,,deg,float,%d,int16_t,10,mtr1.set,float,,,y
+mtr 0 Kp,tanks[0].K_p,,,ul,float,%d,uint16_t,100,mtr0.kp,float,,,y
+mtr 1 Kp,tanks[1].K_p,,,ul,float,%d,uint16_t,100,mtr1.kp,float,,,y
+mtr 0 Ki,tanks[0].K_i,,,ul,float,%d,uint16_t,100,mtr0.ki,float,,,y
+mtr 1 Ki,tanks[1].K_i,,,ul,float,%d,uint16_t,100,mtr1.ki,float,,,y
+mtr 0 Kd,tanks[0].K_d,,,ul,float,%d,uint16_t,100,mtr0.kd,float,,,y
+mtr 1 Kd,tanks[1].K_d,,,ul,float,%d,uint16_t,100,mtr1.kd,float,,,y
+mtr 0 Kp error,tanks[0].Kp_error,,,ul,float,%d,int16_t,10,mtr0.kp_err,float,,,y
+mtr 1 Kp error,tanks[1].Kp_error,,,ul,float,%d,int16_t,10,mtr1.kp_err,float,,,y
+mtr 0 Ki error,tanks[0].Ki_error,,,ul,float,%d,int16_t,10,mtr0.ki_err,float,,,y
+mtr 1 Ki error,tanks[1].Ki_error,,,ul,float,%d,int16_t,10,mtr1.ki_err,float,,,y
+mtr 0 Kd error,tanks[0].Kd_error,,,ul,float,%d,int16_t,10,mtr0.kd_err,float,,,y
+mtr 1 Kd error,tanks[1].Kd_error,,,ul,float,%d,int16_t,10,mtr1.kd_err,float,,,y
+tank 0 target pressure,tanks[0].target_pres,,,psi,float,%.1f,int32_t,100,tnk0.target_pres,float,,,y
+tank 1 target pressure,tanks[1].target_pres,,,psi,float,%.1f,int32_t,100,tnk1.target_pres,float,,,y
+tank 0 high pressure percent,tanks[0].PID_ctrl_vlv_high_pres,,,psi,float,%.1f,int16_t,10,tnk0.high_pres,float,,,y
+tank 1 high pressure percent,tanks[1].PID_ctrl_vlv_high_pres,,,psi,float,%.1f,int16_t,10,tnk1.high_pres,float,,,y
+tank 0 lower pressure percent,tanks[0].PID_ctrl_vlv_low_pres,,,psi,float,%.1f,int16_t,10,tnk0.low_pres,float,,,y
+tank 1 lower pressure percent,tanks[1].PID_ctrl_vlv_low_pres,,,psi,float,%.1f,int16_t,10,tnk1.low_pres,float,,,y
+pot 0,epot[0],,,deg,volatile float,%d,int32_t,10,pot0.e,float,,,y
+pot 1,epot[1],,,deg,volatile float,%d,int32_t,10,pot1.e,float,,,y
+LOX Tank Control Pressure,lox_control_pressure,,,psi,float,%.1f,int32_t,10,lox_ctrl_pres,float,,,y
+Fuel Tank Control Pressure,fuel_control_pressure,,,psi,float,%.1f,int32_t,10,fuel_ctrl_pres,float,,,y
+COPV Control Pressure,copv_control_pressure,,,psi,float,%.1f,int32_t,10,copv_ctrl_pres,float,,,y
+tank 0 enable,tanks[0].tank_enable,,,ul,volatile uint8_t,%i,uint8_t,1,tnk0.en,int,,,y
+tank 1 enable,tanks[1].tank_enable,,,ul,volatile uint8_t,%i,uint8_t,1,tnk1.en,int,,,y
+Test Duration,autosequence.hotfire_test_duration_ms,,,ms,uint32_t,%i,uint32_t,1,test_duration,int,,,y
+Ignitor Delay,autosequence.ignition_ignitor_on_delay_ms,,,ms,uint16_t,%i,uint16_t,1,ignitor_on_delay,int,,,y
+Ignitor Actuation Duration,autosequence.ignition_ignitor_high_duration_ms,,,ms,uint16_t,%i,uint16_t,1,ignitor_high_duration,int,,,y
+Fuel MPV Opening Delay,autosequence.hotfire_fuel_mpv_delay_ms,,,ms,uint8_t,%i,uint8_t,1,fuel_mpv_delay,int,,,y
+Nozzle Film Cooling Start Time,autosequence.hotfire_film_cooling_on_time_ms,,,ms,uint16_t,%i,uint16_t,1,nozzle_film_cooling_delay,int,,,y
+PID Control Delay,autosequence.hotfire_pid_start_delay_ms,,,ms,uint16_t,%i,uint16_t,1,pid_delay,int,,,y
+Initial Position Motor Correction Factor,init_motor_pos_deg_correction_factor,,,ul,float,%.4f,int32_t,10000,deg_corr_factor,float,,,y
+Remaining Time in State,state_rem_duration,,,ms,int32_t,%i,int32_t,1,,int,,,y
+Telem Rate,telem_rate,,,Hz,uint8_t,%i,uint8_t,1,,int,,,y
+ADC Rate,adc_rate,,,Hz,uint8_t,%i,uint8_t,1,,int,,,y
+Flash Memory,flash_mem,,,bytes,uint32_t,%i,uint32_t,1,,int,,,y
+Flash Logging Active,LOGGING_ACTIVE,,,ul,uint8_t,%d,uint8_t,1,,int,,,y

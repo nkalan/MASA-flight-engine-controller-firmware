@@ -1,3 +1,3 @@
-[submodule "Core/firmware-libraries"]
-	path = Core/firmware-libraries
-	url = https://gitlab.eecs.umich.edu/masa/avionics/firmware-libraries.git
+[submodule "tsm-flight-ec-firmware-pressboard-port/Core/firmware-libraries"]
+	path = tsm-flight-ec-firmware-pressboard-port/Core/firmware-libraries
+	url = git@gitlab.eecs.umich.edu:masa/avionics/firmware-libraries.git

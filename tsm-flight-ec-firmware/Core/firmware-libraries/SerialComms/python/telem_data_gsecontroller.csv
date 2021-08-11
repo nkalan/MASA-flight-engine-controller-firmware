@@ -1,0 +1,198 @@
+name,firmware_variable,min_val,max_val,unit,firmware_type,printf_format,type_cast,xmit_scale,python_variable_override,python_type,python_globals,python_init,should_generate
+Valve State Feedback,valve_states,,,ul,uint32_t,%u,uint32_t,1,,int,,0,y
+Pressure 0,pressure[0],-100,3000,psi,float,%.1f,int16_t,1,,float,,[0]*22,y
+Pressure 1,pressure[1],-100,3000,psi,float,%.1f,int16_t,1,,float,,0,y
+Pressure 2,pressure[2],-100,3000,psi,float,%.1f,int16_t,1,,float,,[0]*4,y
+Pressure 3,pressure[3],-100,3000,psi,float,%.1f,int16_t,1,,float,,0,y
+Pressure 4,pressure[4],-100,3000,psi,float,%.1f,int16_t,1,,float,,0,y
+Pressure 5,pressure[5],-100,3000,psi,float,%.1f,int16_t,1,,float,,0,y
+Pressure 6,pressure[6],-100,3000,psi,float,%.1f,int16_t,1,,float,,0,y
+Pressure 7,pressure[7],-100,3000,psi,float,%.1f,int16_t,1,,float,,0,y
+Pressure 8,pressure[8],-100,3000,psi,float,%.1f,int16_t,1,,float,,0,y
+Pressure 9,pressure[9],-100,3000,psi,float,%.1f,int16_t,1,,float,,0,y
+Pressure 10,pressure[10],-100,3000,psi,float,%.1f,int16_t,1,,float,,[0]*4,y
+Pressure 11,pressure[11],-100,3000,psi,float,%.1f,int16_t,1,,float,,[0]*4,y
+Pressure 12,pressure[12],-100,3000,psi,float,%.1f,int16_t,1,,float,,[0]*4,y
+Pressure 13,pressure[13],-100,3000,psi,float,%.1f,int16_t,1,,float,,0,y
+Pressure 14,pressure[14],-100,3000,psi,float,%.1f,int16_t,1,,float,,0,y
+Pressure 15,pressure[15],-100,3000,psi,float,%.1f,int16_t,1,,float,,0,y
+Pressure 16,pressure[16],-100,3000,psi,float,%.1f,int16_t,1,,float,,0,y
+Pressure 17,pressure[17],-100,3000,psi,float,%.1f,int16_t,1,,float,,[0]*5,y
+Pressure 18,pressure[18],-100,3000,psi,float,%.1f,int16_t,1,,float,,0,y
+Pressure 19,pressure[19],-100,3000,psi,float,%.1f,int16_t,1,,float,,[0]*4,y
+Pressure 20,pressure[20],-100,3000,psi,float,%.1f,int16_t,1,,float,,[0]*32,y
+Pressure 21,pressure[21],-100,3000,psi,float,%.1f,int16_t,1,,float,,[0]*32,y
+ebatt,e_batt,-20,20,Volts,float,%.2f,int16_t,100,,float,,0,y
+ibatt,ibus,-10,150,Amps,float,%.2f,int16_t,100,,float,,0,y
+STATE,STATE,0,127,ul,uint8_t,%u,uint8_t,1,,int,,[0]*8,y
+Load 0,load[0],,,kg,float,%.1f,uint16_t,1,,int,,0,y
+Load 1,load[1],,,kg,float,%.1f,uint16_t,1,,float,,0,y
+Load 2,load[2],,,kg,float,%.1f,uint16_t,1,,float,,0,y
+Load 3,load[3],,,kg,float,%.1f,uint16_t,1,,float,,-1,y
+Load 4,load[4],,,kg,float,%.1f,uint16_t,1,,float,,-1,y
+Load 5,load[5],,,kg,float,%.1f,uint16_t,1,,float,,[0]*2,n
+Load 6,load[6],,,kg,float,%.1f,uint16_t,1,,float,,0,n
+Load 7,load[7],,,kg,float,%.1f,uint16_t,1,,float,,0,n
+ivlv 0,ivlv[0],0,20,Amps,float,%.1f,uint8_t,10,vlv0.i,float,,0,y
+ivlv 1,ivlv[1],0,20,Amps,float,%.1f,uint8_t,10,vlv1.i,float,,0,y
+ivlv 2,ivlv[2],0,20,Amps,float,%.1f,uint8_t,10,vlv2.i,float,,0,y
+ivlv 3,ivlv[3],0,20,Amps,float,%.1f,uint8_t,10,vlv3.i,float,,-1,y
+ivlv 4,ivlv[4],0,20,Amps,float,%.1f,uint8_t,10,vlv4.i,float,,0,y
+ivlv 5,ivlv[5],0,20,Amps,float,%.1f,uint8_t,10,vlv5.i,float,,0,y
+ivlv 6,ivlv[6],0,20,Amps,float,%.1f,uint8_t,10,vlv6.i,float,,0,y
+ivlv 7,ivlv[7],0,20,Amps,float,%.1f,uint8_t,10,vlv7.i,float,,0,y
+ivlv 8,ivlv[8],0,20,Amps,float,%.1f,uint8_t,10,vlv8.i,float,,[0]*16,y
+ivlv 9,ivlv[9],0,20,Amps,float,%.1f,uint8_t,10,vlv9.i,float,,[0]*8,y
+ivlv 10,ivlv[10],0,20,Amps,float,%.1f,uint8_t,10,vlv10.i,float,,,y
+ivlv 11,ivlv[11],0,20,Amps,float,%.1f,uint8_t,10,vlv11.i,float,,,y
+ivlv 12,ivlv[12],0,20,Amps,float,%.1f,uint8_t,10,vlv12.i,float,,,y
+ivlv 13,ivlv[13],0,20,Amps,float,%.1f,uint8_t,10,vlv13.i,float,,,y
+ivlv 14,ivlv[14],0,20,Amps,float,%.1f,uint8_t,10,vlv14.i,float,,,y
+ivlv 15,ivlv[15],0,20,Amps,float,%.1f,uint8_t,10,vlv15.i,float,,,y
+ivlv 16,ivlv[16],0,20,Amps,float,%.1f,uint8_t,10,vlv16.i,float,,,y
+ivlv 17,ivlv[17],0,20,Amps,float,%.1f,uint8_t,10,vlv17.i,float,,,y
+ivlv 18,ivlv[18],0,20,Amps,float,%.1f,uint8_t,10,vlv18.i,float,,,y
+ivlv 19,ivlv[19],0,20,Amps,float,%.1f,uint8_t,10,vlv19.i,float,,,y
+ivlv 20,ivlv[20],0,20,Amps,float,%.1f,uint8_t,10,vlv20.i,float,,,y
+ivlv 21,ivlv[21],0,20,Amps,float,%.1f,uint8_t,10,vlv21.i,float,,,y
+ivlv 22,ivlv[22],0,20,Amps,float,%.1f,uint8_t,10,vlv22.i,float,,,y
+ivlv 23,ivlv[23],0,20,Amps,float,%.1f,uint8_t,10,vlv23.i,float,,,y
+ivlv 24,ivlv[24],0,20,Amps,float,%.1f,uint8_t,10,vlv24.i,float,,,y
+ivlv 25,ivlv[25],0,20,Amps,float,%.1f,uint8_t,10,vlv25.i,float,,,y
+ivlv 26,ivlv[26],0,20,Amps,float,%.1f,uint8_t,10,vlv26.i,float,,,y
+ivlv 27,ivlv[27],0,20,Amps,float,%.1f,uint8_t,10,vlv27.i,float,,,y
+ivlv 28,ivlv[28],0,20,Amps,float,%.1f,uint8_t,10,vlv28.i,float,,,y
+ivlv 29,ivlv[29],0,20,Amps,float,%.1f,uint8_t,10,vlv29.i,float,,,y
+ivlv 30,ivlv[30],0,20,Amps,float,%.1f,uint8_t,10,vlv30.i,float,,,y
+ivlv 31,ivlv[31],0,20,Amps,float,%.1f,uint8_t,10,vlv31.i,float,,,y
+evlv 0,evlv[0],0,15,Volts,float,%.1f,uint8_t,10,vlv0.e,float,,,y
+evlv 1,evlv[1],0,15,Volts,float,%.1f,uint8_t,10,vlv1.e,float,,,y
+evlv 2,evlv[2],0,15,Volts,float,%.1f,uint8_t,10,vlv2.e,float,,,y
+evlv 3,evlv[3],0,15,Volts,float,%.1f,uint8_t,10,vlv3.e,float,,,y
+evlv 4,evlv[4],0,15,Volts,float,%.1f,uint8_t,10,vlv4.e,float,,,y
+evlv 5,evlv[5],0,15,Volts,float,%.1f,uint8_t,10,vlv5.e,float,,,y
+evlv 6,evlv[6],0,15,Volts,float,%.1f,uint8_t,10,vlv6.e,float,,,y
+evlv 7,evlv[7],0,15,Volts,float,%.1f,uint8_t,10,vlv7.e,float,,,y
+evlv 8,evlv[8],0,15,Volts,float,%.1f,uint8_t,10,vlv8.e,float,,,y
+evlv 9,evlv[9],0,15,Volts,float,%.1f,uint8_t,10,vlv9.e,float,,,y
+evlv 10,evlv[10],0,15,Volts,float,%.1f,uint8_t,10,vlv10.e,float,,,y
+evlv 11,evlv[11],0,15,Volts,float,%.1f,uint8_t,10,vlv11.e,float,,,y
+evlv 12,evlv[12],0,15,Volts,float,%.1f,uint8_t,10,vlv12.e,float,,,y
+evlv 13,evlv[13],0,15,Volts,float,%.1f,uint8_t,10,vlv13.e,float,,,y
+evlv 14,evlv[14],0,15,Volts,float,%.1f,uint8_t,10,vlv14.e,float,,,y
+evlv 15,evlv[15],0,15,Volts,float,%.1f,uint8_t,10,vlv15.e,float,,,y
+evlv 16,evlv[16],0,15,Volts,float,%.1f,uint8_t,10,vlv16.e,float,,,y
+evlv 17,evlv[17],0,15,Volts,float,%.1f,uint8_t,10,vlv17.e,float,,,y
+evlv 18,evlv[18],0,15,Volts,float,%.1f,uint8_t,10,vlv18.e,float,,,y
+evlv 19,evlv[19],0,15,Volts,float,%.1f,uint8_t,10,vlv19.e,float,,,y
+evlv 20,evlv[20],0,15,Volts,float,%.1f,uint8_t,10,vlv20.e,float,,,y
+evlv 21,evlv[21],0,15,Volts,float,%.1f,uint8_t,10,vlv21.e,float,,,y
+evlv 22,evlv[22],0,15,Volts,float,%.1f,uint8_t,10,vlv22.e,float,,,y
+evlv 23,evlv[23],0,15,Volts,float,%.1f,uint8_t,10,vlv23.e,float,,,y
+evlv 24,evlv[24],0,15,Volts,float,%.1f,uint8_t,10,vlv24.e,float,,,y
+evlv 25,evlv[25],0,15,Volts,float,%.1f,uint8_t,10,vlv25.e,float,,,y
+evlv 26,evlv[26],0,15,Volts,float,%.1f,uint8_t,10,vlv26.e,float,,,y
+evlv 27,evlv[27],0,15,Volts,float,%.1f,uint8_t,10,vlv27.e,float,,,y
+evlv 28,evlv[28],0,15,Volts,float,%.1f,uint8_t,10,vlv28.e,float,,,y
+evlv 29,evlv[29],0,15,Volts,float,%.1f,uint8_t,10,vlv29.e,float,,,y
+evlv 30,evlv[30],0,15,Volts,float,%.1f,uint8_t,10,vlv30.e,float,,,y
+evlv 31,evlv[31],0,15,Volts,float,%.1f,uint8_t,10,vlv31.e,float,,,y
+E 3V,e3v,0,5,Volts,float,%.2f,int32_t,100,,float,,,y
+E 5V,e5v,0,5,Volts,float,%.2f,int32_t,100,,float,,,y
+E 28V,e28v,0,30,Volts,float,%.3f,int16_t,100,,float,,,y
+I 5V,i5v,0,2,Amps,float,%.1f,uint8_t,100,,float,,,y
+I 3V,i3v,0,2,Amps,float,%.1f,uint8_t,100,,float,,,y
+Last Command ID,last_command_id,,,ul,uint8_t,%d,uint16_t,1,,float,,,y
+tc 0,tc[0],,,K,float,%d,uint16_t,100,,float,,,y
+tc 1,tc[1],,,K,float,%d,uint16_t,100,,float,,,y
+tc 2,tc[2],,,K,float,%d,uint16_t,100,,float,,,y
+tc 3,tc[3],,,K,float,%d,uint16_t,100,,float,,,y
+tc 4,tc[4],,,K,float,%d,uint16_t,100,,float,,,y
+tc 5,tc[5],,,K,float,%d,uint16_t,100,,float,,,y
+tc 6,tc[6],,,K,float,%d,uint16_t,100,,float,,,y
+tc 7,tc[7],,,K,float,%d,uint16_t,100,,float,,,y
+tc 8,tc[8],,,K,float,%d,uint16_t,100,,float,,,y
+tc 9,tc[9],,,K,float,%d,uint16_t,100,,float,,,y
+tc 10,tc[10],,,K,float,%d,uint16_t,100,,float,,,y
+tc 11,tc[11],,,K,float,%d,uint16_t,100,,float,,,y
+tc 12,tc[12],,,K,float,%d,uint16_t,100,,float,,,y
+tc 13,tc[13],,,K,float,%d,uint16_t,100,,float,,,y
+tc 14,tc[14],,,K,float,%d,uint16_t,100,,float,,,y
+tc 15,tc[15],,,K,float,%d,uint16_t,100,,float,,,y
+rtd 0,rtd[0],,,K,float,%d,uint16_t,100,,float,,,y
+rtd 1,rtd[1],,,K,float,%d,uint16_t,100,,float,,,y
+rtd 2,rtd[2],,,K,float,%d,uint16_t,100,,float,,,y
+rtd 3,rtd[3],,,K,float,%d,uint16_t,100,,float,,,y
+rtd 4,rtd[4],,,K,float,%d,uint16_t,100,,float,,,y
+rtd 5,rtd[5],,,K,float,%d,uint16_t,100,,float,,,y
+rtd 6,rtd[6],,,K,float,%d,uint16_t,100,,float,,,y
+rtd 7,rtd[7],,,K,float,%d,uint16_t,100,,float,,,y
+I Mtr 0A,i_mtr_ab[0],,,Amps,float,%d,uint16_t,100,mtr0.ia,float,,,n
+I Mtr 0B,i_mtr_ab[1],,,Amps,float,%d,uint16_t,100,mtr0.ib,float,,,n
+I Mtr 1A,i_mtr_ab[2],,,Amps,float,%d,uint16_t,100,mtr1.ia,float,,,n
+I Mtr 1B,i_mtr_ab[3],,,Amps,float,%d,uint16_t,100,mtr1.ib,float,,,n
+I Mtr 2A,i_mtr_ab[4],,,Amps,float,%d,uint16_t,100,,float,,,n
+I Mtr 2B,i_mtr_ab[5],,,Amps,float,%d,uint16_t,100,,float,,,n
+I Mtr 3A,i_mtr_ab[6],,,Amps,float,%d,uint16_t,100,,float,,,n
+I Mtr 3B,i_mtr_ab[7],,,Amps,float,%d,uint16_t,100,,float,,,n
+I Mtr 0,i_mtr[0],,,Amps,float,%d,uint16_t,100,,float,,,n
+I Mtr 1,i_mtr[1],,,Amps,float,%d,uint16_t,100,,float,,,n
+I Mtr 2,i_mtr[2],,,Amps,float,%d,uint16_t,100,,float,,,n
+I Mtr 3,i_mtr[3],,,Amps,float,%d,uint16_t,100,,float,,,n
+I Mtr 4,i_mtr[4],,,Amps,float,%d,uint16_t,100,,float,,,n
+I Mtr 5,i_mtr[5],,,Amps,float,%d,uint16_t,100,,float,,,n
+I Mtr 6,i_mtr[6],,,Amps,float,%d,uint16_t,100,,float,,,n
+I Mtr 7,i_mtr[7],,,Amps,float,%d,uint16_t,100,,float,,,n
+mtr 0 pos,mtr_pos[0],,,deg,float,%d,int16_t,10,mtr0.pos,float,,,n
+mtr 1 pos,mtr_pos[1],,,deg,float,%d,int16_t,10,mtr1.pos,float,,,n
+mtr 2 pos,mtr_pos[2],,,deg,float,%d,int16_t,10,mtr2.pos,float,,,n
+mtr 3 pos,mtr_pos[3],,,deg,float,%d,int16_t,10,mtr3.pos,float,,,n
+mtr 0 vel,mtr_vel[0],,,step/s,int16_t,%d,int16_t,1,mtr0.vel,int,,,n
+mtr 1 vel,mtr_vel[1],,,step/s,int16_t,%d,int16_t,1,mtr1.vel,int,,,n
+mtr 2 vel,mtr_vel[2],,,step/s,int16_t,%d,int16_t,1,mtr2.vel,int,,,n
+mtr 3 vel,mtr_vel[3],,,step/s,int16_t,%d,int16_t,1,mtr3.vel,int,,,n
+mtr 0 setpoint,mtr_set[0],,,deg,float,%d,int16_t,10,mtr0.set,float,,,n
+mtr 1 setpoint,mtr_set[1],,,deg,float,%d,int16_t,10,mtr1.set,float,,,n
+mtr 0 Ki,mtr_ki[0],,,ul,float,%d,uint16_t,100,mtr0.i,float,,,n
+mtr 1 Ki,mtr_ki[1],,,ul,float,%d,uint16_t,100,mtr1.i,float,,,n
+mtr 0 Kd,mtr_kd[0],,,ul,float,%d,uint16_t,100,mtr0.d,float,,,n
+mtr 1 Kd,mtr_kd[1],,,ul,float,%d,uint16_t,100,mtr1.d,float,,,n
+mtr 0 Kp,mtr_kp[0],,,ul,float,%d,uint16_t,100,mtr0.p,float,,,n
+mtr 1 Kp,mtr_kp[1],,,ul,float,%d,uint16_t,100,mtr1.p,float,,,n
+mtr 0 Kp error,mtr_kp_err[0],,,ul,float,%d,int16_t,100,mtr0.kp_err,float,,,n
+mtr 1 Kp error,mtr_kp_err[1],,,ul,float,%d,int16_t,100,mtr1.kp_err,float,,,n
+mtr 0 Ki error,mtr_ki_err[0],,,ul,float,%d,int16_t,100,mtr0.ki_err,float,,,n
+mtr 1 Ki error,mtr_ki_err[1],,,ul,float,%d,int16_t,100,mtr1.ki_err,float,,,n
+mtr 0 Kd error,mtr_kd_err[0],,,ul,float,%d,int16_t,100,mtr0.kd_err,float,,,n
+mtr 1 Kd error,mtr_kd_err[1],,,ul,float,%d,int16_t,100,mtr1.kd_err,float,,,n
+tank 0 target pressure,tank_tar_pres[0],-100,3000,psi,float,%.1f,int16_t,10,,float,,,n
+tank 1 target pressure,tank_tar_pres[1],-100,3000,psi,float,%.1f,int16_t,10,,float,,,n
+tank 0 high pressure,tank_high_pres[0],-100,3000,psi,float,%.1f,int16_t,10,,float,,,n
+tank 1 high pressure,tank_high_pres[1],-100,3000,psi,float,%.1f,int16_t,10,,float,,,n
+tank 0 lower pressure,tank_low_pres[0],-100,3000,psi,float,%.1f,int16_t,10,,float,,,n
+tank 1 lower pressure,tank_low_pres[1],-100,3000,psi,float,%.1f,int16_t,10,,float,,,n
+pot 0,epot[0],,,deg,float,%d,int16_t,1000,,float,,,n
+pot 1,epot[1],,,deg,float,%d,int16_t,1000,,float,,,n
+pot 2,epot[2],,,deg,float,%d,int16_t,1000,,float,,,n
+pot 3,epot[3],,,deg,float,%d,int16_t,1000,,float,,,n
+pot 4,epot[4],,,deg,float,%d,int16_t,1000,,float,,,n
+pot 5,epot[5],,,deg,float,%d,int16_t,1000,,float,,,n
+pot 6,epot[6],,,deg,float,%d,int16_t,1000,,float,,,n
+pot 7,epot[7],,,deg,float,%d,int16_t,1000,,float,,,n
+Elapsed Test Duration,elapsed_test_duration,,,ms,uint32_t,%u,uint32_t,1,,int,,,y
+Micros,micros,,,us,uint64_t,%i,uint64_t,1,,int,micros,,y
+Telem Rate,telem_rate,,,Hz,uint32_t,%i,uint32_t,1,,int,,,y
+ADC Rate,adc_rate,,,Hz,uint32_t,%i,uint32_t,1,,int,,,y
+Flash Memory,flash_mem,,,bytes,uint32_t,%i,uint32_t,1,,int,,,y
+Own Board Addr,own_board_addr,0,0,ul,uint8_t,%i,uint8_t,1,,int,,,y
+sample rate,sample_rate,,,Hz,uint16_t,%u,uint32_t,1,,int,,,n
+main cycle time,main_cycle_time,,,ms,float,%u,uint16_t,1,,float,,,n
+motor cycle time,motor_cycle_time,,,ms,float,%u,uint16_t,1,,float,,,n
+adc cycle time,adc_cycle_time,,,ms,float,%u,uint16_t,1,,float,,,n
+telemetry cycle time,telemetry_cycle_time,,,ms,float,%u,uint32_t,1,,float,,,n
+tbrd,tbrd,,,ul,float,%u,uint16_t,1,,float,,,y
+tvlv,tvlv,,,ul,float,%u,uint16_t,1,,float,,,y
+tmtr,tmtr,,,ul,float,%u,uint16_t,1,,float,,,y
+error code,error_code,,,ul,float,%u,uint8_t,1,,int,,,n
+logging active,LOGGING_ACTIVE,,,ul,uint8_t,%u,uint8_t,1,,int,,,y
+telem active,TELEM_ACTIVE,,,ul,uint8_t,%u,uint8_t,1,,int,,,y
