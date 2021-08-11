@@ -81,7 +81,7 @@ extern TIM_HandleTypeDef htim13;
 #define NOZZLE_FILM_COOLING_VALVE_CH  (7)
 #define PURGE_VALVE_CH                (8)
 
-#define GSE_FUEL_TANK_VENT_VALVE_CH   (9)
+#define GSE_FUEL_TANK_VENT_VALVE_CH   (10)
 /*
  * Sensor channel mappings
  * TODO: these mappings are all wrong
