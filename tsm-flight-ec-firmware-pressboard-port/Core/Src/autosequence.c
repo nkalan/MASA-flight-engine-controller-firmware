@@ -10,7 +10,6 @@
 //#include "valvelib.h"
 #include "constants.h"  // sensor/actuator mappings
 #include "status_flags.h"
-#include "board_commands.h"
 
 //#define STEPPER_MOTOR_STEP_ANGLE   (1.8)
 #define VALVE_ON                   (GPIO_PIN_SET)
@@ -101,10 +100,6 @@ void init_autosequence_control_variables() {
 
 	autosequence.post_gse_fuel_vent_signal = 0;
 	autosequence.post_gse_fuel_vent_command_enable = 0;
-	autosequence.post_gse_fuel_vent_telem_count = 0;
-
-	autosequence.post_gse_fuel_vent_open_sent = 0;
-	autosequence.post_gse_fuel_vent_close_sent = 0;
 }
 
 
@@ -135,11 +130,8 @@ void enter_abort_state() {
 	// Open vent valves
 	// Fuel vent is handled by GSE controller
 	set_valve_channel(LOX_TANK_VENT_VALVE_CH, VALVE_ON);
-	send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH, VALVE_ON);
-	/*
 	autosequence.post_gse_fuel_vent_command_enable = 1;
-	autosequence.post_gse_fuel_vent_signal = VALVE_OFF;
-	*/
+	autosequence.post_gse_fuel_vent_signal = VALVE_ON;
 
 	// Open purge valve
 	set_valve_channel(PURGE_VALVE_CH, VALVE_ON);
@@ -556,36 +548,24 @@ void execute_autosequence() {
 			set_valve_channel(LOX_TANK_VENT_VALVE_CH, VALVE_ON);
 
 			// Fuel vent handled by GSE controller
-			if (!autosequence.post_gse_fuel_vent_open_sent) {
-				send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH, VALVE_ON);
-				autosequence.post_gse_fuel_vent_open_sent = 1;
-			}
-			/*
 			autosequence.post_gse_fuel_vent_command_enable = 1;
 			autosequence.post_gse_fuel_vent_signal = VALVE_ON;
-			*/
 		}
 		if (autosequence.T_state >= autosequence.post_vent_off_time_ms) {
 			// Close tank vents
 			set_valve_channel(LOX_TANK_VENT_VALVE_CH, VALVE_OFF);
 
-			// Handled by GSE controller
-			if (!autosequence.post_gse_fuel_vent_close_sent) {
-				send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH, VALVE_OFF);
-				autosequence.post_gse_fuel_vent_close_sent = 1;
-			};
-			/*
+			// Fuel vent handled by GSE controller
 			autosequence.post_gse_fuel_vent_command_enable = 1;
 			autosequence.post_gse_fuel_vent_signal = VALVE_OFF;
-			*/
 		}
 		if (autosequence.T_state >= autosequence.post_purge_off_time_ms) {
 			// Purge low
 			set_valve_channel(PURGE_VALVE_CH, VALVE_OFF);
 
-			// Stop valve commands to the GSE
-			//send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH, VALVE_OFF);
+			// Stop valve commands to the GSE controller
 			autosequence.post_gse_fuel_vent_command_enable = 0;
+			autosequence.post_gse_fuel_vent_signal = VALVE_OFF;
 
 			// Reset all control variables whenever exiting the autosequence
 			init_autosequence_control_variables();
@@ -608,5 +588,17 @@ void execute_autosequence() {
 	else if (STATE == Abort) {
 		// Actuations should've been handled already during state transition.
 		// Wait for the operator to go back to Manual.
+
+		// To catch any additional bugs in the state transition,
+		// Constantly actuate the proper valves during the Abort state.
+		enter_abort_state();
+	}
+
+	// To catch bugs related to the Manual transition not
+	// shutting down the GSE controller fuel vent valve,
+	// constantly refresh those control variables
+	if (STATE != Post && STATE != Manual) {
+		autosequence.post_gse_fuel_vent_command_enable = 0;
+		autosequence.post_gse_fuel_vent_signal = 0;
 	}
 }

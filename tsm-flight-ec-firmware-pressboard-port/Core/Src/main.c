@@ -30,7 +30,6 @@
 #include "tank_pressure_control.h"
 #include "nonvolatile_memory.h"
 #include "hardware.h"
-#include "board_commands.h"
 #include <string.h>
 
 //#include "L6470.h"
@@ -394,35 +393,10 @@ int main(void)
 	  if (periodic_flag_100ms) {
 		  periodic_flag_100ms = 0;
 
-		  // Sending fuel tank vent commands in Post state
-		  // Alternate between telem and commands
-		  if ((STATE == Post || STATE == Abort)
-				  && autosequence.post_gse_fuel_vent_command_enable) {
-
-			  // count up and rollover every 5
-			  // Effect triggers every 5th loop
-			  autosequence.post_gse_fuel_vent_telem_count++;
-			  autosequence.post_gse_fuel_vent_telem_count %= 5;
-
-			  // Command
-			  if (autosequence.post_gse_fuel_vent_telem_count == 0) {
-				  send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH,
-						  autosequence.post_gse_fuel_vent_signal);
-			  }
-			  // Telem
-			  else {
-				  if (!telem_disabled) {
-					  send_telem_packet(SERVER_ADDR);
-					  HAL_GPIO_TogglePin(LED_TELEM_PORT, LED_TELEM_PIN);
-				  }
-			  }
-		  }
-		  // Normal telem
-		  else {
-			  if (!telem_disabled) {
-				  send_telem_packet(SERVER_ADDR);
-				  HAL_GPIO_TogglePin(LED_TELEM_PORT, LED_TELEM_PIN);
-			  }
+		  // Send telemetry
+		  if (!telem_disabled) {
+			  send_telem_packet(SERVER_ADDR);
+			  HAL_GPIO_TogglePin(LED_TELEM_PORT, LED_TELEM_PIN);
 		  }
 	  }
 
