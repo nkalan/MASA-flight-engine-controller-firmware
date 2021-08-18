@@ -39,5 +39,8 @@ void send_gse_set_vlv_cmd(uint32_t vlv_num, uint8_t vlv_state) {
 
 	uint16_t packed_sz = stuff_packet(cmd_packet, cobs_cmd_packet, VLV_CMD_SZ);
 
-	HAL_UART_Transmit(&COM_UART, cobs_cmd_packet, packed_sz, HAL_MAX_DELAY);
+	// Transmit multiple times to ensure success
+	for (uint8_t i = 0; i < 1; i++) {
+		HAL_UART_Transmit(&COM_UART, cobs_cmd_packet, packed_sz, HAL_MAX_DELAY);
+	}
 }

@@ -41,11 +41,14 @@ typedef struct {
 	uint32_t post_purge_off_time_ms;
 
 	// Flag for sending commands to GSE in periodic loop
-	uint8_t gse_fuel_vent_signal;
-	uint8_t gse_fuel_vent_command_enable;
+	// UNUSED
+	uint8_t post_gse_fuel_vent_signal;
+	uint8_t post_gse_fuel_vent_command_enable;
+	uint8_t post_gse_fuel_vent_telem_count;
 
-	uint8_t gse_fuel_vent_high_signal_sent;
-	uint8_t gse_fuel_vent_low_signal_sent;
+	// Flags for sending fuel vent commands only once
+	uint8_t post_gse_fuel_vent_open_sent;
+	uint8_t post_gse_fuel_vent_close_sent;
 
 	// Time in current state; 0 if it doens't care
 	uint32_t T_state;

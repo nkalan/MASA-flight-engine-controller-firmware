@@ -25,13 +25,12 @@
 
 #include "constants.h"
 #include "autosequence.h"
-//#include "sensors.h"
 #include "globals.h"  // included for STATE
 #include "serial_data.h"
 #include "tank_pressure_control.h"
 #include "nonvolatile_memory.h"
 #include "hardware.h"
-
+#include "board_commands.h"
 #include <string.h>
 
 //#include "L6470.h"
@@ -280,6 +279,7 @@ int main(void)
   HAL_UART_Receive_DMA(&COM_UART, DMA_RX_Buffer, DMA_RX_BUFFER_SIZE);
 
   // Read variables from flash: this must be called very early in initialization!
+  HAL_Delay(100);  // Small delay to ensure flash boots up completely
   init_flash(&flash, &SPI_MEM, FLASH_CS_GPIO_Port, FLASH_CS_Pin);
   read_nonvolatile_variables();
 
@@ -365,11 +365,6 @@ int main(void)
 			  }
 		  }
 
-		  // log flash data
-		  if (LOGGING_ACTIVE) {
-			  save_flash_packet();
-		  }
-
 		  // Ignitor break detection
 		  if (STATE == Ignition && autosequence.T_state
 				  >= autosequence.ignition_ignitor_on_delay_ms) {
@@ -387,17 +382,47 @@ int main(void)
 			  update_hard_start_detector();
 		  }
 
-	  }
+		  // log flash data
+		  if (LOGGING_ACTIVE) {
+			  save_flash_packet();
+		  }
 
+	  }
 
 
 	  // Check periodic interrupt flags and call appropriate functions if needed
 	  if (periodic_flag_100ms) {
 		  periodic_flag_100ms = 0;
 
-		  if (!telem_disabled) {
-			  send_telem_packet(SERVER_ADDR);
-			  HAL_GPIO_TogglePin(LED_TELEM_PORT, LED_TELEM_PIN);
+		  // Sending fuel tank vent commands in Post state
+		  // Alternate between telem and commands
+		  if ((STATE == Post || STATE == Abort)
+				  && autosequence.post_gse_fuel_vent_command_enable) {
+
+			  // count up and rollover every 5
+			  // Effect triggers every 5th loop
+			  autosequence.post_gse_fuel_vent_telem_count++;
+			  autosequence.post_gse_fuel_vent_telem_count %= 5;
+
+			  // Command
+			  if (autosequence.post_gse_fuel_vent_telem_count == 0) {
+				  send_gse_set_vlv_cmd(GSE_FUEL_TANK_VENT_VALVE_CH,
+						  autosequence.post_gse_fuel_vent_signal);
+			  }
+			  // Telem
+			  else {
+				  if (!telem_disabled) {
+					  send_telem_packet(SERVER_ADDR);
+					  HAL_GPIO_TogglePin(LED_TELEM_PORT, LED_TELEM_PIN);
+				  }
+			  }
+		  }
+		  // Normal telem
+		  else {
+			  if (!telem_disabled) {
+				  send_telem_packet(SERVER_ADDR);
+				  HAL_GPIO_TogglePin(LED_TELEM_PORT, LED_TELEM_PIN);
+			  }
 		  }
 	  }
 

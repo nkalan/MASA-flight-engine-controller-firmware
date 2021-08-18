@@ -14,7 +14,10 @@
 /* Calibration Constants */
 // TODO: update cals, these are taken from the EC
 #define ibatt_cal   0.01611721  // checked
-#define ebatt_cal   0.00324707  // checked
+//#define ebatt_cal   0.00324707  // checked
+//#define ebatt_cal   0.0032470703125  // calculated, not measured
+#define ebatt_slope   (0.0038)  // measured
+#define ebatt_offset  (-0.5689) // measured
 //#define ebatt_offset	1.28 	//measured offset TODO: delete later
 #define ibus_cal    0.01418500
 #define ept_cal     0.000806
