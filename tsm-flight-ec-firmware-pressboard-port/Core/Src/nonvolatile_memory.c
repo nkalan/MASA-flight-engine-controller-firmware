@@ -90,6 +90,8 @@ uint8_t nonvolatile_memory_buffer[NVM_BUFFER_SZ];
 
 
 uint8_t read_nonvolatile_variables() {
+	__disable_irq();  // Trying to stop a bug that corrupts NVM
+
 	// Read nonvolatile memory buffer from flash
 	read_reserved_flash_page(&flash, NVM_FLASH_PAGE_NUM, nonvolatile_memory_buffer,
 			NVM_BUFFER_SZ);
@@ -196,12 +198,15 @@ uint8_t read_nonvolatile_variables() {
 	// Autosequence automatic abort enable
 	autosequence.enable_auto_aborts = nonvolatile_memory_buffer[NVM_AUTO_ABORT_ADDR];
 
+	__enable_irq();  // Trying to stop a bug that corrupts NVM
+
 	// Successful read
 	return 1;
 }
 
 
 uint8_t save_nonvolatile_variables() {
+	__disable_irq();  // Trying to stop a bug that corrupts NVM
 
 	// First byte should always be 0; see read_nonvolatile_variables();
 	nonvolatile_memory_buffer[NVM_PARITY_BIT_ADDR] = 0;
@@ -319,5 +324,6 @@ uint8_t save_nonvolatile_variables() {
 	// Ensure they got saved
 	read_nonvolatile_variables();
 
+	__enable_irq();  // Trying to stop a bug that corrupts NVM
 	return 1;
 }

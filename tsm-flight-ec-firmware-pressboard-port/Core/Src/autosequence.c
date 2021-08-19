@@ -597,7 +597,7 @@ void execute_autosequence() {
 	// To catch bugs related to the Manual transition not
 	// shutting down the GSE controller fuel vent valve,
 	// constantly refresh those control variables
-	if (STATE != Post && STATE != Manual) {
+	if (STATE != Post && STATE != Abort) {
 		autosequence.post_gse_fuel_vent_command_enable = 0;
 		autosequence.post_gse_fuel_vent_signal = 0;
 	}
