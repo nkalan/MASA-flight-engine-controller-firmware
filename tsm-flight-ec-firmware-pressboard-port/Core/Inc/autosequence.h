@@ -40,12 +40,10 @@ typedef struct {
 	uint32_t post_vent_off_time_ms;
 	uint32_t post_purge_off_time_ms;
 
-	// Flag for sending commands to GSE in periodic loop
-	uint8_t gse_fuel_vent_signal;
-	uint8_t gse_fuel_vent_command_enable;
-
-	uint8_t gse_fuel_vent_high_signal_sent;
-	uint8_t gse_fuel_vent_low_signal_sent;
+	// Flag for GSE controller to read, to trigger fuel vent valve
+	// 2021 RRS daisy chain configuration only
+	uint8_t post_gse_fuel_vent_signal;
+	uint8_t post_gse_fuel_vent_command_enable;
 
 	// Time in current state; 0 if it doens't care
 	uint32_t T_state;
