@@ -36,15 +36,16 @@ void init_autosequence_constants() {
 	autosequence.post_purge_off_time_ms = 10000;
 
 	// Detection thresholds
-	autosequence.ignition_ignitor_current_lower_bound = 3;  // TODO: fix this
+	autosequence.ignition_ignitor_current_lower_bound = 0.3;  // TODO: fix this
 	autosequence.ignition_ignitor_current_lower_bound_pass_min_detections = 30;  // 150ms
 
-	autosequence.hotfire_chamber_pres_lower_bound = 140.64; // Nominal * 0.5
-	autosequence.hotfire_chamber_pres_lower_bound_pass_min_detections = 10;  // 50ms
-	autosequence.hotfire_chamber_pres_lower_bound_abort_start_time_ms = 1000;  // Wait 1s
+	// Nominal chamber pressure is 280psi
+	autosequence.hotfire_chamber_pres_lower_bound = 70;                          // Nominal*0.25
+	autosequence.hotfire_chamber_pres_lower_bound_pass_min_detections = 20;      // 100ms
+	autosequence.hotfire_chamber_pres_lower_bound_abort_start_time_ms = 2000;    // Wait 2s into state before counting
 
-	autosequence.hotfire_chamber_pres_upper_bound = 421.9;  // Nominal * 1.5
-	autosequence.hotfire_chamber_pres_upper_bound_pass_min_detections = 3;  // 15ms
+	autosequence.hotfire_chamber_pres_upper_bound = 500;                         // Nominal * 1.8
+	autosequence.hotfire_chamber_pres_upper_bound_pass_min_detections = 20;      // 100ms
 }
 
 
