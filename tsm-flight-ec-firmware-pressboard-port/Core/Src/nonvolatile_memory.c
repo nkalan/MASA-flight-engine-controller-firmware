@@ -302,8 +302,8 @@ uint8_t save_nonvolatile_variables() {
 		nonvolatile_memory_buffer[NVM_PT_SLOPE_ADDR + 4*i + 2] = ((int32_t) (pt_cal_slope[i] * 10000.0F)) >> 16;
 		nonvolatile_memory_buffer[NVM_PT_SLOPE_ADDR + 4*i + 3] = ((int32_t) (pt_cal_slope[i] * 10000.0F)) >> 24;
 
-		nonvolatile_memory_buffer[NVM_PT_OFFSET_ADDR + 2*i + 0] = ((uint16_t) (pt_cal_offset[i])) >> 0;
-		nonvolatile_memory_buffer[NVM_PT_OFFSET_ADDR + 2*i + 1] = ((uint16_t) (pt_cal_offset[i])) >> 8;
+		nonvolatile_memory_buffer[NVM_PT_OFFSET_ADDR + 2*i + 0] = ((int16_t) (pt_cal_offset[i])) >> 0;
+		nonvolatile_memory_buffer[NVM_PT_OFFSET_ADDR + 2*i + 1] = ((int16_t) (pt_cal_offset[i])) >> 8;
 	}
 
 	// Autosequence automatic abort enable

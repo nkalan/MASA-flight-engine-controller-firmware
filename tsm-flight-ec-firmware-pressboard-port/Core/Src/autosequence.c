@@ -30,6 +30,7 @@ Autosequence_Info autosequence;
 void init_autosequence_constants() {
 	// Hardcoded timings
 	autosequence.startup_motor_start_delay_ms = 500;
+	autosequence.hotfire_purge_off_time_ms = 50;
 	autosequence.post_vent_on_time_ms = 1000;
 	autosequence.post_vent_off_time_ms = 6000;
 	autosequence.post_purge_off_time_ms = 10000;
