@@ -1,0 +1,8 @@
+MAX11131.c:64:6:init_adc	24	static,ignoring_inline_asm
+MAX11131.c:109:6:read_adc	40	static,ignoring_inline_asm
+MAX11131.c:169:6:set_read_adc_range	32	static,ignoring_inline_asm
+MAX11131.c:214:6:configure_read_adc_all	24	static
+MAX11131.c:223:20:write_adc_reg	32	static
+MAX11131.c:229:20:package_cmd	16	static
+MAX11131.c:234:20:set_adc	16	static
+MAX11131.c:238:6:cycle_cnvst	16	static,ignoring_inline_asm

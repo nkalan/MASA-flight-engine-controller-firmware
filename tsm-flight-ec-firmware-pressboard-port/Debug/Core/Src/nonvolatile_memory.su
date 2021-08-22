@@ -1,0 +1,2 @@
+nonvolatile_memory.c:89:9:read_nonvolatile_variables	16	static,ignoring_inline_asm
+nonvolatile_memory.c:205:9:save_nonvolatile_variables	24	static,ignoring_inline_asm

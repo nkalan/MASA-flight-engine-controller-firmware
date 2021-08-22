@@ -1,0 +1,2 @@
+calibrations.c:60:7:pot_counts_to_deg	24	static
+calibrations.c:69:7:pt_counts_to_psi	32	static

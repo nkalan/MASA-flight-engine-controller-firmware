@@ -46,16 +46,15 @@
 #define POT_CAL_SLOPE  ((EPOT_DMAX - EPOT_DMIN)*(EPOT_RES_POT+2*EPOT_RES_LEAD)/(EPOT_MAX_COUNTS*(EPOT_RES_POT - 2.0*EPOT_RES_POT_MIN)))
 #define POT_CAL_OFFSET (((EPOT_MAX_COUNTS*(EPOT_RES_POT_MIN + EPOT_RES_LEAD))/(EPOT_RES_POT + 2.0*EPOT_RES_LEAD)))
 
-#define PT_3WIRE_5V_VDIV_GAIN   (0.6511627907)   // R1=3k,   R2=5.6k
-#define PT_3WIRE_12V_VDIV_GAIN  (0.2608695652)   // R1=6.8k, R2=2.4k
+#define PT_3WIRE_5V_VDIV_GAIN         (0.6511627907)  // R1=3k,   R2=5.6k
+#define PT_3WIRE_12_KULITE_VDIV_GAIN  (0.5)           // R1=3.3k, R2=3.3k
 
 
 float pt_ambients[NUM_PTS] = { 0 };
 float pot_ambients[NUM_POTS] = { 0 };
 
-float pt_cal_lower_voltage[NUM_PTS] = { 0 };
-float pt_cal_upper_voltage[NUM_PTS] = { 0 };
-float pt_cal_upper_pressure[NUM_PTS] = { 0 };
+float pt_cal_slope[NUM_PTS] = { 0 };
+float pt_cal_offset[NUM_PTS] = { 0 };
 
 
 float pot_counts_to_deg(uint8_t pot_num, uint16_t counts) {
@@ -72,17 +71,21 @@ float pt_counts_to_psi(uint8_t pt_num, uint16_t pt_counts) {
 	if (pt_num < NUM_PTS) {
 		// Convert adc counts to ducer volts
 		float pt_volts;
-		if (pt_num == 5) {  // Channel 5 is 12V
-			pt_volts = pt_counts*ADC_COUNTS_TO_VOLTS/PT_3WIRE_12V_VDIV_GAIN;
+		if (pt_num == 5) {  // Channel 5 is 12V with 0.5 gain
+			pt_volts = pt_counts*ADC_COUNTS_TO_VOLTS/PT_3WIRE_12_KULITE_VDIV_GAIN;
 		}
-		else {
+		else {  // Channel 0-4 are 5V with ~0.65 gain
 			pt_volts = pt_counts*ADC_COUNTS_TO_VOLTS/PT_3WIRE_5V_VDIV_GAIN;
 		}
 
-		// Convert ducer volts to psi
-		if ( pt_cal_upper_voltage[pt_num] - pt_cal_lower_voltage[pt_num] != 0) {  // protect from divide by 0
-			return ((pt_volts - pt_cal_lower_voltage[pt_num]) * pt_cal_upper_pressure[pt_num]
-				 / (pt_cal_upper_voltage[pt_num] - pt_cal_lower_voltage[pt_num]));
+		// Convert from ducer volts to pressure
+		float epsilon = 0.00001;
+		if (-epsilon < pt_cal_slope[pt_num] && pt_cal_slope[pt_num] < epsilon) {
+			return -1;
+		}
+		else {  // Avoid divide by zero
+			// Calibrations are in mV
+			return (pt_volts - (pt_cal_offset[pt_num]/1000.0)) / (pt_cal_slope[pt_num]/1000.0) - pt_ambients[pt_num];
 		}
 	}
 	return -1;

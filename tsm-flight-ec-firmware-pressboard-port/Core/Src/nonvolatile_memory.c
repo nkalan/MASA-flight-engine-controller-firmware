@@ -32,9 +32,8 @@
 #define NVM_FILM_COOLING_ON_TIME_NUM_BYTES    (2)
 #define NVM_PID_DELAY_NUM_BYTES               (2)  // No longer than 65.535s
 #define NVM_INIT_POS_DEG_CORR_FAC_NUM_BYTES   (4)
-#define NVM_PT_UPPER_VOLTAGE_NUM_BYTES        (NUM_PTS*2)
-#define NVM_PT_LOWER_VOLTAGE_NUM_BYTES        (NUM_PTS*2)
-#define NVM_PT_PRESSURE_RANGE_NUM_BYTES       (NUM_PTS*2)
+#define NVM_PT_SLOPE_NUM_BYTES                (NUM_PTS*4)
+#define NVM_PT_OFFSET_NUM_BYTES               (NUM_PTS*2)
 #define NVM_AUTO_ABORT_NUM_BYTES              (1)
 
 // Define variable addresses based on their lengths and order
@@ -54,10 +53,9 @@
 #define NVM_FILM_COOLING_ON_TIME_ADDR    (NVM_FUEL_MPV_OPENING_DELAY_ADDR + NVM_FUEL_MPV_OPENING_DELAY_NUM_BYTES)
 #define NVM_PID_DELAY_ADDR               (NVM_FILM_COOLING_ON_TIME_ADDR + NVM_FILM_COOLING_ON_TIME_NUM_BYTES)
 #define NVM_INIT_POS_DEG_CORR_FAC_ADDR   (NVM_PID_DELAY_ADDR + NVM_PID_DELAY_NUM_BYTES)
-#define NVM_PT_UPPER_VOLTAGE_ADDR        (NVM_INIT_POS_DEG_CORR_FAC_ADDR + NVM_INIT_POS_DEG_CORR_FAC_NUM_BYTES)
-#define NVM_PT_LOWER_VOLTAGE_ADDR        (NVM_PT_UPPER_VOLTAGE_ADDR + NVM_PT_UPPER_VOLTAGE_NUM_BYTES)
-#define NVM_PT_PRESSURE_RANGE_ADDR       (NVM_PT_LOWER_VOLTAGE_ADDR + NVM_PT_LOWER_VOLTAGE_NUM_BYTES)
-#define NVM_AUTO_ABORT_ADDR              (NVM_PT_PRESSURE_RANGE_ADDR + NVM_PT_PRESSURE_RANGE_NUM_BYTES)
+#define NVM_PT_SLOPE_ADDR                (NVM_INIT_POS_DEG_CORR_FAC_ADDR + NVM_INIT_POS_DEG_CORR_FAC_NUM_BYTES)
+#define NVM_PT_OFFSET_ADDR               (NVM_PT_SLOPE_ADDR + NVM_PT_SLOPE_NUM_BYTES)
+#define NVM_AUTO_ABORT_ADDR              (NVM_PT_OFFSET_ADDR + NVM_PT_OFFSET_NUM_BYTES)
 
 // Total size of variables
 #define NVM_BUFFER_SZ    (NVM_PARITY_BIT_NUM_BYTES \
@@ -70,14 +68,13 @@
 		+ NVM_TANK_ENABLE_NUM_BYTES \
 		+ NVM_TEST_DURATION_NUM_BYTES \
 		+ NVM_IGNITOR_ON_DELAY_NUM_BYTES \
-		+ NVM_IGNITOR_HIGH_DURATION_ADDR \
+		+ NVM_IGNITOR_HIGH_DURATION_NUM_BYTES \
 		+ NVM_FUEL_MPV_OPENING_DELAY_NUM_BYTES \
-		+ NVM_FILM_COOLING_ON_TIME_ADDR \
+		+ NVM_FILM_COOLING_ON_TIME_NUM_BYTES \
 		+ NVM_PID_DELAY_NUM_BYTES \
-		+ NVM_INIT_POS_DEG_CORR_FAC_ADDR \
-		+ NVM_PT_UPPER_VOLTAGE_NUM_BYTES \
-		+ NVM_PT_LOWER_VOLTAGE_NUM_BYTES \
-		+ NVM_PT_PRESSURE_RANGE_NUM_BYTES \
+		+ NVM_INIT_POS_DEG_CORR_FAC_NUM_BYTES \
+		+ NVM_PT_SLOPE_NUM_BYTES \
+		+ NVM_PT_OFFSET_NUM_BYTES \
 		+ NVM_AUTO_ABORT_NUM_BYTES)
 
 
@@ -187,12 +184,12 @@ uint8_t read_nonvolatile_variables() {
 
 	// Pressure transducer calibrations
 	for (uint8_t i = 0; i < NUM_PTS; i++) {
-		pt_cal_lower_voltage[i] = ((nonvolatile_memory_buffer[NVM_PT_LOWER_VOLTAGE_ADDR + 2*i + 0] << 0) |
-				(nonvolatile_memory_buffer[NVM_PT_LOWER_VOLTAGE_ADDR + 2*i + 1] << 8)) / 10.0F;
-		pt_cal_upper_voltage[i] = ((nonvolatile_memory_buffer[NVM_PT_UPPER_VOLTAGE_ADDR + 2*i + 0] << 0) |
-				(nonvolatile_memory_buffer[NVM_PT_UPPER_VOLTAGE_ADDR + 2*i + 1] << 8)) / 10.0F;
-		pt_cal_upper_pressure[i] = ((nonvolatile_memory_buffer[NVM_PT_PRESSURE_RANGE_ADDR + 2*i + 0] << 0) |
-				(nonvolatile_memory_buffer[NVM_PT_PRESSURE_RANGE_ADDR + 2*i + 1] << 8));
+		pt_cal_slope[i] = ((nonvolatile_memory_buffer[NVM_PT_SLOPE_ADDR + 4*i + 0] << 0) |
+				(nonvolatile_memory_buffer[NVM_PT_SLOPE_ADDR + 4*i + 1] << 8) |
+				(nonvolatile_memory_buffer[NVM_PT_SLOPE_ADDR + 4*i + 2] << 16) |
+				(nonvolatile_memory_buffer[NVM_PT_SLOPE_ADDR + 4*i + 3] << 24)) / 10000.0F;
+		pt_cal_offset[i] = ((nonvolatile_memory_buffer[NVM_PT_OFFSET_ADDR + 2*i + 0] << 0) |
+				(nonvolatile_memory_buffer[NVM_PT_OFFSET_ADDR + 2*i + 1] << 8));
 	}
 
 	// Autosequence automatic abort enable
@@ -300,17 +297,13 @@ uint8_t save_nonvolatile_variables() {
 
 	// Pressure transducer calibrations
 	for (uint8_t i = 0; i < NUM_PTS; i++) {
-		// Lower output voltage
-		nonvolatile_memory_buffer[NVM_PT_LOWER_VOLTAGE_ADDR + 2*i + 0] = ((uint16_t) (pt_cal_lower_voltage[i] * 10.0F)) >> 0;
-		nonvolatile_memory_buffer[NVM_PT_LOWER_VOLTAGE_ADDR + 2*i + 1] = ((uint16_t) (pt_cal_lower_voltage[i] * 10.0F)) >> 8;
+		nonvolatile_memory_buffer[NVM_PT_SLOPE_ADDR + 4*i + 0] = ((int32_t) (pt_cal_slope[i] * 10000.0F)) >> 0;
+		nonvolatile_memory_buffer[NVM_PT_SLOPE_ADDR + 4*i + 1] = ((int32_t) (pt_cal_slope[i] * 10000.0F)) >> 8;
+		nonvolatile_memory_buffer[NVM_PT_SLOPE_ADDR + 4*i + 2] = ((int32_t) (pt_cal_slope[i] * 10000.0F)) >> 16;
+		nonvolatile_memory_buffer[NVM_PT_SLOPE_ADDR + 4*i + 3] = ((int32_t) (pt_cal_slope[i] * 10000.0F)) >> 24;
 
-		// Upper output voltage
-		nonvolatile_memory_buffer[NVM_PT_UPPER_VOLTAGE_ADDR + 2*i + 0] = ((uint16_t) (pt_cal_upper_voltage[i] * 10.0F)) >> 0;
-		nonvolatile_memory_buffer[NVM_PT_UPPER_VOLTAGE_ADDR + 2*i + 1] = ((uint16_t) (pt_cal_upper_voltage[i] * 10.0F)) >> 8;
-
-		// Pressure range
-		nonvolatile_memory_buffer[NVM_PT_PRESSURE_RANGE_ADDR + 2*i + 0] = ((uint16_t) (pt_cal_upper_pressure[i])) >> 0;
-		nonvolatile_memory_buffer[NVM_PT_PRESSURE_RANGE_ADDR + 2*i + 1] = ((uint16_t) (pt_cal_upper_pressure[i])) >> 8;
+		nonvolatile_memory_buffer[NVM_PT_OFFSET_ADDR + 2*i + 0] = ((uint16_t) (pt_cal_offset[i])) >> 0;
+		nonvolatile_memory_buffer[NVM_PT_OFFSET_ADDR + 2*i + 1] = ((uint16_t) (pt_cal_offset[i])) >> 8;
 	}
 
 	// Autosequence automatic abort enable
