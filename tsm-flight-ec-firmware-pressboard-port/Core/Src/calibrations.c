@@ -85,7 +85,7 @@ float pt_counts_to_psi(uint8_t pt_num, uint16_t pt_counts) {
 		}
 		else {  // Avoid divide by zero
 			// Calibrations are in mV
-			return (pt_volts - (pt_cal_offset[pt_num]/1000.0)) / (pt_cal_slope[pt_num]/1000.0) - pt_ambients[pt_num];
+			return (pt_volts - (pt_cal_offset[pt_num]/1000.0)) / (pt_cal_slope[pt_num]/1000.0);
 		}
 	}
 	return -1;
