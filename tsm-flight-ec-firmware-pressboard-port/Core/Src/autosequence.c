@@ -75,7 +75,7 @@ void init_tank_pressure_control_configuration() {
 
 	// Motor info
 	tanks[LOX_TANK_NUM].motor_num = LOX_TANK_NUM;
-	tanks[LOX_TANK_NUM].motor_num = FUEL_TANK_NUM;
+	tanks[FUEL_TANK_NUM].motor_num = FUEL_TANK_NUM;
 
 	// Bang bang thresholds
 	tanks[LOX_TANK_NUM].bang_bang_low_pres_diff = 10;
