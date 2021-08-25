@@ -96,8 +96,10 @@ void tank_PID_pressure_control(TPC_Info* tank) {
 
 	// Actuate motor to new position
 	//actuate_tank_motor_pos(tank, motor_pos + motor_delta);  Not yet lol
-    targetPos[tank->motor_num] = curPos[tank->motor_num] + motor_delta;
-    curDir[tank->motor_num] = (curPos[tank->motor_num] < targetPos[tank->motor_num]) ? 1 : -1;
+	if (tank->tank_enable) {
+		targetPos[tank->motor_num] = curPos[tank->motor_num] + motor_delta;
+		curDir[tank->motor_num] = (curPos[tank->motor_num] < targetPos[tank->motor_num]) ? 1 : -1;
+	}
 
 	// Log data
     mtr_set[tank->motor_num] = targetPos[tank->motor_num];
