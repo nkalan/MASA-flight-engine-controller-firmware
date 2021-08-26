@@ -15,9 +15,8 @@
 extern float pt_ambients[NUM_PTS];
 extern float pot_ambients[NUM_POTS];
 
-extern float pt_cal_lower_voltage[NUM_PTS];
-extern float pt_cal_upper_voltage[NUM_PTS];
-extern float pt_cal_upper_pressure[NUM_PTS];
+extern float pt_cal_slope[NUM_PTS];
+extern float pt_cal_offset[NUM_PTS];
 
 // TODO: add all other
 

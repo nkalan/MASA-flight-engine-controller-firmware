@@ -223,7 +223,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  // Used to decide which telemetry packet to send
+  static uint8_t telem_calibration_packet_counter = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -393,11 +394,19 @@ int main(void)
 	  if (periodic_flag_100ms) {
 		  periodic_flag_100ms = 0;
 
-		  // Send telemetry
-		  if (!telem_disabled) {
+		  // Every 2 seconds, send a calibration packet instead
+		  // of a telemetry packet (once every 20 packets)
+		  if (telem_calibration_packet_counter == 0) {
+			  send_calibration_data();
+			  HAL_GPIO_TogglePin(LED_TELEM_PORT, LED_TELEM_PIN);
+		  }
+		  else {
 			  send_telem_packet(SERVER_ADDR);
 			  HAL_GPIO_TogglePin(LED_TELEM_PORT, LED_TELEM_PIN);
 		  }
+		  // Increment up counter
+		  telem_calibration_packet_counter++;
+		  telem_calibration_packet_counter %= 20;
 	  }
 
 	  // Refresh watchdog timer to keep the board running

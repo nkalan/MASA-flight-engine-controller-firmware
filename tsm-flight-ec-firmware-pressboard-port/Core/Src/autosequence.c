@@ -30,20 +30,22 @@ Autosequence_Info autosequence;
 void init_autosequence_constants() {
 	// Hardcoded timings
 	autosequence.startup_motor_start_delay_ms = 500;
+	autosequence.hotfire_purge_off_time_ms = 50;
 	autosequence.post_vent_on_time_ms = 1000;
 	autosequence.post_vent_off_time_ms = 6000;
 	autosequence.post_purge_off_time_ms = 10000;
 
 	// Detection thresholds
-	autosequence.ignition_ignitor_current_lower_bound = 3;  // TODO: fix this
+	autosequence.ignition_ignitor_current_lower_bound = 0.3;  // TODO: fix this
 	autosequence.ignition_ignitor_current_lower_bound_pass_min_detections = 30;  // 150ms
 
-	autosequence.hotfire_chamber_pres_lower_bound = 140.64; // Nominal * 0.5
-	autosequence.hotfire_chamber_pres_lower_bound_pass_min_detections = 10;  // 50ms
-	autosequence.hotfire_chamber_pres_lower_bound_abort_start_time_ms = 1000;  // Wait 1s
+	// Nominal chamber pressure is 280psi
+	autosequence.hotfire_chamber_pres_lower_bound = 70;                          // Nominal*0.25
+	autosequence.hotfire_chamber_pres_lower_bound_pass_min_detections = 20;      // 100ms
+	autosequence.hotfire_chamber_pres_lower_bound_abort_start_time_ms = 2000;    // Wait 2s into state before counting
 
-	autosequence.hotfire_chamber_pres_upper_bound = 421.9;  // Nominal * 1.5
-	autosequence.hotfire_chamber_pres_upper_bound_pass_min_detections = 3;  // 15ms
+	autosequence.hotfire_chamber_pres_upper_bound = 500;                         // Nominal * 1.8
+	autosequence.hotfire_chamber_pres_upper_bound_pass_min_detections = 20;      // 100ms
 }
 
 
@@ -73,7 +75,7 @@ void init_tank_pressure_control_configuration() {
 
 	// Motor info
 	tanks[LOX_TANK_NUM].motor_num = LOX_TANK_NUM;
-	tanks[LOX_TANK_NUM].motor_num = FUEL_TANK_NUM;
+	tanks[FUEL_TANK_NUM].motor_num = FUEL_TANK_NUM;
 
 	// Bang bang thresholds
 	tanks[LOX_TANK_NUM].bang_bang_low_pres_diff = 10;
