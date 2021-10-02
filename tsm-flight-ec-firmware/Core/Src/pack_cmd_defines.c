@@ -40,7 +40,7 @@ set_pt_lower_voltage,
 set_pt_upper_voltage,
 set_pt_upper_pressure,
 refresh_calibrations,
-send_gse_cmd
+start_simulation //FIX MEEEEEEEEEEEEEE. Like for real. This used to be send_gse_cmd
 };
 
 int16_t command_map[COMMAND_MAP_SZ] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, 1, 2, 3, -1, 4, -1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, -1, 15, 16, 17, 18, 19, -1, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37};

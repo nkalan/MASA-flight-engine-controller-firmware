@@ -1,4 +1,3 @@
-board_commands.h:19:6:send_gse_set_vlv_cmd	56	static
 telem.c:30:6:set_vlv	24	static
 telem.c:41:6:set_kp	40	static
 telem.c:55:6:set_ki	40	static
@@ -36,4 +35,3 @@ telem.c:436:6:set_pt_lower_voltage	24	static
 telem.c:450:6:set_pt_upper_voltage	24	static
 telem.c:464:6:set_pt_upper_pressure	24	static
 telem.c:478:6:refresh_calibrations	16	static
-telem.c:487:6:send_gse_cmd	24	static

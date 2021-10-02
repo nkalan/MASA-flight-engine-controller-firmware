@@ -12,7 +12,7 @@
 #include "tank_pressure_control.h"
 #include "nonvolatile_memory.h"
 #include "calibrations.h"
-#include "board_commands.h"
+//#include "board_commands.h"
 
 #include "W25N01GV.h"
 #include "L6470.h"
@@ -484,14 +484,14 @@ void refresh_calibrations(uint8_t* data, uint8_t* status){
 
 }
 
-void send_gse_cmd(uint8_t* data, uint8_t* status){
-
-	uint32_t vlv_num = (data[3]<<24|data[2]<<16|data[1]<<8|data[0])/1;
-	uint8_t state = (data[4])/1;
-	
-	// USER CODE BEGIN - MODIFICATIONS OUTSIDE THIS SECTION WILL BE DELETED
-	send_gse_set_vlv_cmd(vlv_num, state);
-	// USER CODE END - MODIFICATIONS OUTSIDE THIS SECTION WILL BE DELETED
-
-}
+//void send_gse_cmd(uint8_t* data, uint8_t* status){
+//
+//	uint32_t vlv_num = (data[3]<<24|data[2]<<16|data[1]<<8|data[0])/1;
+//	uint8_t state = (data[4])/1;
+//
+//	// USER CODE BEGIN - MODIFICATIONS OUTSIDE THIS SECTION WILL BE DELETED
+//	send_gse_set_vlv_cmd(vlv_num, state);
+//	// USER CODE END - MODIFICATIONS OUTSIDE THIS SECTION WILL BE DELETED
+//
+//}
 
