@@ -151,6 +151,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 }
 
+float var;
+
 /* USER CODE END 0 */
 
 /**
@@ -227,13 +229,14 @@ int main(void)
   init_autosequence_timings();
 
 
-  // Motor stress test
+  // This is done to set each of the pins or spi comm structs for the motor:
   motor.hspi = &SPI_MOTOR;
   motor.cs_base = MTR0_CS_GPIO_Port;
   motor.cs_pin = MTR0_CS_Pin;
   motor.busy_base = MTR0_BUSY_GPIO_Port;
   motor.busy_pin = MTR0_BUSY_Pin;
 
+  L6470_set_motor_max_speed(&motor, 50);
   L6470_init_motor(&motor, L6470_FULL_STEP_MODE, 1.8);
 
   /* USER CODE END 2 */
@@ -242,6 +245,27 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+	  // Verify motor Connections:
+	  // Need to move motor to a specific position, i.e. 90 degrees
+	  L6470_goto_motor_pos(&motor, 90);
+	  L6470_get_status(&motor);
+	  HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, 1);
+	  // Now have the motor wait:
+	  HAL_Delay(2000);	// Wait 5 seconds for the motor to turn and stop and wait
+	  var = L6470_get_position_deg(&motor);
+	  // Now we move back to the 0 position:
+	  L6470_goto_motor_pos(&motor, 0);
+	  L6470_get_status(&motor);
+	  HAL_GPIO_WritePin(LED_0_GPIO_Port, LED_0_Pin, 0);
+	  // Now have the motor wait:
+	  HAL_Delay(2000);	// Wait 5 seconds for the motor to turn and stop and wait
+
+
+
+
+	  /*
+
 	  // Handle autosequence first in every loop
 	  // most important, time sensitive operation
 	  // TODO: call autosequence functions
@@ -332,10 +356,13 @@ int main(void)
 		  telem_buffer_sz = 0;
 	  }
 
+*/
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+
   }
   /* USER CODE END 3 */
 }
