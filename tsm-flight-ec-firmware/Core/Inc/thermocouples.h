@@ -14,7 +14,7 @@
  *
  * See MAX31856.h README for implementation details
  */
-void init_thermocouples();
+void init_thermocouples(SPI_HandleTypeDef* SPI_bus);
 
 /**
  * Call this function in a periodic loop to read temperature
