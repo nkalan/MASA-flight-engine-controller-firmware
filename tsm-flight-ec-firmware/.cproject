@@ -155,9 +155,15 @@
                         					
                     </folderInfo>
                     					
+                    <fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.182310236.1526154692" name="sensors.c" rcbsApplicability="disable" resourcePath="Core/Src/sensors.c" toolsToInvoke="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.660638316.480159240">
+                        						
+                        <tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.660638316.480159240" name="MCU GCC Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.660638316"/>
+                        					
+                    </fileInfo>
+                    					
                     <sourceEntries>
                         						
-                        <entry excluding="firmware-libraries/L6470/dspin|firmware-libraries/L6470/dspin/inc/main.h|firmware-libraries/L6470/dspin/src/main.c|firmware-libraries/L6470/dspin/inc/clock.h|firmware-libraries/L6470/dspin/src/clock.c|firmware-libraries/L6470/dspin/src/stm32f10x_it.c|firmware-libraries/L6470/dspin/inc/pre_include.h|firmware-libraries/L6470/dspin/inc/stm32f10x_it.h|firmware-libraries/L6470/dspin/inc/stm32f10x_conf.h|firmware-libraries/MAX31855|firmware-libraries/MAX11131" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
+                        <entry excluding="Src/sensors.c|firmware-libraries/L6470/dspin|firmware-libraries/L6470/dspin/inc/main.h|firmware-libraries/L6470/dspin/src/main.c|firmware-libraries/L6470/dspin/inc/clock.h|firmware-libraries/L6470/dspin/src/clock.c|firmware-libraries/L6470/dspin/src/stm32f10x_it.c|firmware-libraries/L6470/dspin/inc/pre_include.h|firmware-libraries/L6470/dspin/inc/stm32f10x_it.h|firmware-libraries/L6470/dspin/inc/stm32f10x_conf.h|firmware-libraries/MAX31855|firmware-libraries/MAX11131" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
                         						
                         <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
                         					

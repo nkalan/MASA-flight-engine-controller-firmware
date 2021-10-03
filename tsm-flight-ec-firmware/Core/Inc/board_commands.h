@@ -16,6 +16,7 @@
 /**
  * Pack and send a valve command to the GSE controller
  */
+/*
 void send_gse_set_vlv_cmd(uint32_t vlv_num, uint8_t vlv_state) {
 	uint8_t cmd_packet[VLV_CMD_SZ];
 	uint8_t cobs_cmd_packet[VLV_CMD_SZ+2];
@@ -42,5 +43,6 @@ void send_gse_set_vlv_cmd(uint32_t vlv_num, uint8_t vlv_state) {
 
 	HAL_UART_Transmit(&COM_UART, cobs_cmd_packet, packed_sz, HAL_MAX_DELAY);
 }
+*/
 
 #endif /* INC_BOARD_COMMANDS_H_ */

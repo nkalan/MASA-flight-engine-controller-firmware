@@ -5,6 +5,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Core/Src/adcs.c \
 ../Core/Src/autosequence.c \
 ../Core/Src/board_commands.c \
 ../Core/Src/calibrations.c \
@@ -16,7 +17,6 @@ C_SRCS += \
 ../Core/Src/pack_cmd_defines.c \
 ../Core/Src/pack_telem_defines.c \
 ../Core/Src/sensor_voting.c \
-../Core/Src/sensors.c \
 ../Core/Src/serial_data.c \
 ../Core/Src/status_flags.c \
 ../Core/Src/stm32f4xx_hal_msp.c \
@@ -26,10 +26,12 @@ C_SRCS += \
 ../Core/Src/system_stm32f4xx.c \
 ../Core/Src/tank_pressure_control.c \
 ../Core/Src/telem.c \
+../Core/Src/thermocouples.c \
 ../Core/Src/threshold_detection.c \
 ../Core/Src/valves.c 
 
 OBJS += \
+./Core/Src/adcs.o \
 ./Core/Src/autosequence.o \
 ./Core/Src/board_commands.o \
 ./Core/Src/calibrations.o \
@@ -41,7 +43,6 @@ OBJS += \
 ./Core/Src/pack_cmd_defines.o \
 ./Core/Src/pack_telem_defines.o \
 ./Core/Src/sensor_voting.o \
-./Core/Src/sensors.o \
 ./Core/Src/serial_data.o \
 ./Core/Src/status_flags.o \
 ./Core/Src/stm32f4xx_hal_msp.o \
@@ -51,10 +52,12 @@ OBJS += \
 ./Core/Src/system_stm32f4xx.o \
 ./Core/Src/tank_pressure_control.o \
 ./Core/Src/telem.o \
+./Core/Src/thermocouples.o \
 ./Core/Src/threshold_detection.o \
 ./Core/Src/valves.o 
 
 C_DEPS += \
+./Core/Src/adcs.d \
 ./Core/Src/autosequence.d \
 ./Core/Src/board_commands.d \
 ./Core/Src/calibrations.d \
@@ -66,7 +69,6 @@ C_DEPS += \
 ./Core/Src/pack_cmd_defines.d \
 ./Core/Src/pack_telem_defines.d \
 ./Core/Src/sensor_voting.d \
-./Core/Src/sensors.d \
 ./Core/Src/serial_data.d \
 ./Core/Src/status_flags.d \
 ./Core/Src/stm32f4xx_hal_msp.d \
@@ -76,11 +78,14 @@ C_DEPS += \
 ./Core/Src/system_stm32f4xx.d \
 ./Core/Src/tank_pressure_control.d \
 ./Core/Src/telem.d \
+./Core/Src/thermocouples.d \
 ./Core/Src/threshold_detection.d \
 ./Core/Src/valves.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
+Core/Src/adcs.o: ../Core/Src/adcs.c Core/Src/subdir.mk
+	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F446xx -DDEBUG -c -I../Core/Inc -I../Core/firmware-libraries/MAX31856/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Core/firmware-libraries/MAX11128/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/L6470/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/adcs.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/autosequence.o: ../Core/Src/autosequence.c Core/Src/subdir.mk
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F446xx -DDEBUG -c -I../Core/Inc -I../Core/firmware-libraries/MAX31856/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Core/firmware-libraries/MAX11128/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/L6470/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/autosequence.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/board_commands.o: ../Core/Src/board_commands.c Core/Src/subdir.mk
@@ -103,8 +108,6 @@ Core/Src/pack_telem_defines.o: ../Core/Src/pack_telem_defines.c Core/Src/subdir.
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F446xx -DDEBUG -c -I../Core/Inc -I../Core/firmware-libraries/MAX31856/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Core/firmware-libraries/MAX11128/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/L6470/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/pack_telem_defines.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/sensor_voting.o: ../Core/Src/sensor_voting.c Core/Src/subdir.mk
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F446xx -DDEBUG -c -I../Core/Inc -I../Core/firmware-libraries/MAX31856/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Core/firmware-libraries/MAX11128/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/L6470/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/sensor_voting.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
-Core/Src/sensors.o: ../Core/Src/sensors.c Core/Src/subdir.mk
-	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F446xx -DDEBUG -c -I../Core/Inc -I../Core/firmware-libraries/MAX31856/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Core/firmware-libraries/MAX11128/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/L6470/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/sensors.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/serial_data.o: ../Core/Src/serial_data.c Core/Src/subdir.mk
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F446xx -DDEBUG -c -I../Core/Inc -I../Core/firmware-libraries/MAX31856/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Core/firmware-libraries/MAX11128/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/L6470/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/serial_data.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/status_flags.o: ../Core/Src/status_flags.c Core/Src/subdir.mk
@@ -123,6 +126,8 @@ Core/Src/tank_pressure_control.o: ../Core/Src/tank_pressure_control.c Core/Src/s
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F446xx -DDEBUG -c -I../Core/Inc -I../Core/firmware-libraries/MAX31856/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Core/firmware-libraries/MAX11128/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/L6470/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/tank_pressure_control.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/telem.o: ../Core/Src/telem.c Core/Src/subdir.mk
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F446xx -DDEBUG -c -I../Core/Inc -I../Core/firmware-libraries/MAX31856/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Core/firmware-libraries/MAX11128/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/L6470/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/telem.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
+Core/Src/thermocouples.o: ../Core/Src/thermocouples.c Core/Src/subdir.mk
+	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F446xx -DDEBUG -c -I../Core/Inc -I../Core/firmware-libraries/MAX31856/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Core/firmware-libraries/MAX11128/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/L6470/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/thermocouples.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/threshold_detection.o: ../Core/Src/threshold_detection.c Core/Src/subdir.mk
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F446xx -DDEBUG -c -I../Core/Inc -I../Core/firmware-libraries/MAX31856/inc -I../Core/firmware-libraries/ValveLibs/inc -I../Core/firmware-libraries/MAX11128/inc -I../Core/firmware-libraries/SerialComms/inc -I../Core/firmware-libraries/L6470/inc -I../Core/firmware-libraries/W25N01GV/inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/threshold_detection.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/valves.o: ../Core/Src/valves.c Core/Src/subdir.mk

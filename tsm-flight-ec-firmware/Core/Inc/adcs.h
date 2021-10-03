@@ -8,6 +8,8 @@
 #ifndef INC_ADCS_H_
 #define INC_ADCS_H_
 
+#include "stm32f4xx_hal.h"
+
 /**
  * Call this function once in the initialization
  * Sets pin configurations for the ADCs

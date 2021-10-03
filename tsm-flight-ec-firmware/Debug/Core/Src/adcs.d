@@ -1,5 +1,4 @@
-Core/Src/sensors.o: ../Core/Src/sensors.c ../Core/Inc/sensors.h \
- ../Core/firmware-libraries/MAX31856/inc/MAX31856.h \
+Core/Src/adcs.o: ../Core/Src/adcs.c ../Core/Inc/adcs.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -29,13 +28,10 @@ Core/Src/sensors.o: ../Core/Src/sensors.c ../Core/Inc/sensors.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
- ../Core/Inc/sensor_voting.h ../Core/Inc/status_flags.h \
- ../Core/Inc/constants.h ../Core/Inc/main.h ../Core/Inc/globals.h \
- ../Core/firmware-libraries/MAX11128/inc/MAX11128.h ../Core/Inc/main.h
+ ../Core/Inc/main.h ../Core/Inc/globals.h \
+ ../Core/firmware-libraries/MAX11128/inc/MAX11128.h
 
-../Core/Inc/sensors.h:
-
-../Core/firmware-libraries/MAX31856/inc/MAX31856.h:
+../Core/Inc/adcs.h:
 
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 
@@ -95,16 +91,8 @@ Core/Src/sensors.o: ../Core/Src/sensors.c ../Core/Inc/sensors.h \
 
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
 
-../Core/Inc/sensor_voting.h:
-
-../Core/Inc/status_flags.h:
-
-../Core/Inc/constants.h:
-
 ../Core/Inc/main.h:
 
 ../Core/Inc/globals.h:
 
 ../Core/firmware-libraries/MAX11128/inc/MAX11128.h:
-
-../Core/Inc/main.h:

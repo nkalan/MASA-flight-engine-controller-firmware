@@ -1,0 +1,4 @@
+thermocouples.c:23:6:init_thermocouples	4	static
+thermocouples.c:27:6:read_thermocouples	4	static
+thermocouples.c:40:6:tc_array_chip_select	16	static
+thermocouples.c:48:6:tc_array_chip_release	4	static
