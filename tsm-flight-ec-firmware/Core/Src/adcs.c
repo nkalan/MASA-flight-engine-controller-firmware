@@ -14,7 +14,7 @@
 #define ADC_NUM_CHANNELS       (16U)
 
 // Static global is only visible in this .c file
-static GPIO_MAX11128Pinfo adc_structs[EC_NUM_ADCS];
+static GPIO_MAX11128_Pinfo adc_structs[EC_NUM_ADCS];
 
 // Private function prototype
 void convert_adc_counts();
@@ -22,13 +22,13 @@ void convert_adc_counts();
 // Public function definitions
 
 void init_adcs() {
-
+	adc_structs[0].MAX11128_CS_ADDR = ADC0_CS_Pin;
 }
 
 // Call relevant MAX11128 functions to fill an array of
 // unsigned 16bit integers
 // There are 4 ADCs, indexed 0-3
-void read_adcs() {
+void read_adcs(SPI_HandleTypeDef * hspi) {
 	uint16_t adc_counts[EC_NUM_ADCS][ADC_NUM_CHANNELS];
 
 }

@@ -490,7 +490,7 @@ void send_gse_cmd(uint8_t* data, uint8_t* status){
 	uint8_t state = (data[4])/1;
 	
 	// USER CODE BEGIN - MODIFICATIONS OUTSIDE THIS SECTION WILL BE DELETED
-	send_gse_set_vlv_cmd(vlv_num, state);
+	//send_gse_set_vlv_cmd(vlv_num, state);
 	// USER CODE END - MODIFICATIONS OUTSIDE THIS SECTION WILL BE DELETED
 
 }

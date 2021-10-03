@@ -1,8 +1,0 @@
-sensors.c:168:6:tc_mux_chip_select	24	static
-sensors.c:189:6:tc_mux_chip_release	8	static
-sensors.c:197:6:init_thermocouples	8	static
-sensors.c:207:6:read_thermocouples	24	static
-sensors.c:214:6:init_adcs	8	static
-sensors.c:248:6:read_adc_counts	8	static
-sensors.c:256:6:convert_adc_counts	4	static
-sensors.c:261:6:resolve_redundant_sensors	8	static

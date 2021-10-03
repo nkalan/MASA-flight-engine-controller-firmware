@@ -1,0 +1,3 @@
+adcs.c:24:6:init_adcs	4	static
+adcs.c:31:6:read_adcs	144	static
+adcs.c:44:6:convert_adc_counts	16	static
