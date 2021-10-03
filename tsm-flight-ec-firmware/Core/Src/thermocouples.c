@@ -13,30 +13,27 @@
 #define EC_NUM_TCS    (12U)
 
 // static global is only visible from this file
-static MAX31856_TC_Array thermocoupleArray;
+static MAX31856_TC_Array thermocouple_Array;
 
 // CS function prototypes
 void tc_array_chip_select(uint8_t tc_num);
 void tc_array_chip_release();
 
 // Public function definitions
-void init_thermocouples(SPI_HandleTypeDef* SPI_bus) { // Need to pass hspi1 as the 'SPI_bus'
-	// Define all variables and pointers in the struct in the 'MAX31856.h' file:
-	thermocoupleArray.SPI_bus = SPI_bus;
-	thermocoupleArray.chip_select = tc_array_chip_select;
-	thermocoupleArray.chip_release = tc_array_chip_release;
-	thermocoupleArray.num_tcs = EC_NUM_TCS;
+void init_thermocouples(SPI_HandleTypeDef * SPI_bus) {
 
-	MAX31856_init_thermocouples(thermocoupleArray);
+	thermocouple_Array.SPI_bus = SPI_bus;
+	thermocouple_Array.chip_select = tc_array_chip_select;  // Function pointer to select a single TC given its index
+	thermocouple_Array.chip_release = tc_array_chip_release;  // Function pointer to release all TCs in the array
+	thermocouple_Array.num_tcs = EC_NUM_TCS;     // number of thermocouples
 
+	MAX31856_init_thermocouples(&thermocouple_Array);
 }
 
 void read_thermocouples() {
-	// Need to loop through each of the thermocouples by looping through all 12 and calling helper functions
-	for(uint8_t tc_index = 0; tc_index < thermocoupleArray.num_tcs; tc_index++){
-		tc[tc_index] = MAX31856_read_thermocouple(&thermocoupleArray, tc_index);
+	for(uint8_t tc_index= 0; i < 12; ++tc_index){
+		tc[tc_index] = MAX31856_read_thermocouple(&thermocouple_Array, tc_index);
 	}
-
 }
 
 // Private function definitions
