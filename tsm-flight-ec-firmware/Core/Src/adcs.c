@@ -16,10 +16,11 @@
 // Static global is only visible in this .c file
 static GPIO_MAX11128Pinfo adc_structs[EC_NUM_ADCS];
 
-// Private function definition
+// Private function prototype
 void convert_adc_counts();
 
-// Initialize pin configurations
+// Public function definitions
+
 void init_adcs() {
 
 }
@@ -32,10 +33,14 @@ void read_adcs() {
 
 }
 
-// Apply calibrations to the raw ADC counts and store the results in the
-// telemetry packet variables in globals.h
-// This step requires knowledge of the electrical characteristics
-// of the sensors and circuitry
+// Private function definitions
+
+/**
+ * Apply calibrations to the raw ADC counts and store the results in the
+ * telemetry packet variables in globals.h
+ * This step requires knowledge of the electrical characteristics
+ * of the sensors and circuitry
+ */
 void convert_adc_counts(uint16_t** adc_counts) {
 
 }
