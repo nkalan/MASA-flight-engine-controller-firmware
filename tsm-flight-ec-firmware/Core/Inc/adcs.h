@@ -5,8 +5,8 @@
  *      Author: natha
  */
 
-#ifndef INC_ADC_H_
-#define INC_ADC_H_
+#ifndef INC_ADCS_H_
+#define INC_ADCS_H_
 
 /**
  * Call this function once in the initialization
@@ -23,4 +23,4 @@ void init_adcs();
  */
 void read_adcs(SPI_HandleTypeDef * hspi);
 
-#endif /* INC_ADC_H_ */
+#endif /* INC_ADCS_H_ */
